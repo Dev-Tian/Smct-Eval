@@ -15,6 +15,7 @@ type Submission = {
   id: number;
   employee: any;
   evaluator: any;
+  hireDate?: string;
   category?: string;
   rating?: number;
   status: string;
@@ -1835,9 +1836,9 @@ export default function ViewResultsModal({
                         className="text-gray-900 print-value"
                         style={{ fontSize: "11px" }}
                       >
-                        {submission.employee?.date_hired
+                        {submission?.hireDate
                           ? new Date(
-                              submission.employee?.date_hired
+                              submission?.hireDate
                             ).toLocaleDateString()
                           : "Not specified"}
                       </p>
