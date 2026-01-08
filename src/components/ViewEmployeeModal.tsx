@@ -166,12 +166,26 @@ export default function ViewEmployeeModal({
   return (
     <Dialog open={isOpen} onOpenChangeAction={onCloseAction}>
       <DialogContent
-        className={`max-w-3xl max-h-[80vh] overflow-y-auto p-6 animate-popup ${
+        className={`max-w-3xl max-h-[80vh] overflow-y-auto p-6 animate-popup relative ${
           isAdminVariant
             ? "bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100"
             : "bg-gradient-to-br from-blue-50 to-indigo-50"
         }`}
       >
+        {/* Sticky Close Button - Stays at top when scrolling */}
+        <div className="sticky top-0 z-50 flex justify-end mb-4 -mt-6 -mr-6 pt-6 pr-6">
+          <Button
+            onClick={onCloseAction}
+            className={`bg-blue-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isAdminVariant ? "bg-slate-700 hover:bg-slate-800" : ""
+            }`}
+            size="sm"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Close
+          </Button>
+        </div>
+
         <DialogHeader
           className={`pb-6 ${
             isAdminVariant
@@ -565,6 +579,63 @@ export default function ViewEmployeeModal({
               </Card>
             )}
 
+            {/* Date Hired Card */}
+            {((employee as any).date_hired || (employee as any).dateHired || (employee as any).hireDate) && (
+              <Card
+                className={`${
+                  isAdminVariant
+                    ? "bg-slate-50 border-2 border-slate-300 shadow-md hover:shadow-lg"
+                    : "bg-white border border-gray-200 shadow-sm hover:shadow-md"
+                } transition-shadow`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        isAdminVariant ? "bg-slate-200" : "bg-amber-100"
+                      }`}
+                    >
+                      <Calendar
+                        className={`w-5 h-5 ${
+                          isAdminVariant ? "text-slate-700" : "text-amber-600"
+                        }`}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Label
+                        className={`text-xs font-medium uppercase tracking-wide ${
+                          isAdminVariant ? "text-slate-600" : "text-gray-500"
+                        }`}
+                      >
+                        Date Hired
+                      </Label>
+                      <p
+                        className={`text-sm font-medium mt-1 ${
+                          isAdminVariant ? "text-slate-800" : "text-black"
+                        }`}
+                      >
+                        {(() => {
+                          const dateHired = (employee as any).date_hired || (employee as any).dateHired || (employee as any).hireDate;
+                          if (!dateHired) return "Not Assigned";
+                          try {
+                            const date = new Date(dateHired);
+                            if (isNaN(date.getTime())) return "Not Assigned";
+                            return date.toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            });
+                          } catch {
+                            return "Not Assigned";
+                          }
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Created Date Card */}
             {employee.created_at && (
               <Card
@@ -593,7 +664,7 @@ export default function ViewEmployeeModal({
                           isAdminVariant ? "text-slate-600" : "text-gray-500"
                         }`}
                       >
-                        Created Date
+                        Date hired
                       </Label>
                       <p
                         className={`text-sm font-medium mt-1 ${
@@ -708,22 +779,6 @@ export default function ViewEmployeeModal({
               </CardContent>
             </Card>
           )}
-          {/* Action Buttons */}
-          <div
-            className={`flex justify-end gap-3 pt-4 ${
-              isAdminVariant
-                ? "border-t-2 border-slate-300"
-                : "border-t border-gray-200"
-            }`}
-          >
-            <Button
-              onClick={onCloseAction}
-              className="bg-blue-600 hover:bg-red-700 text-white"
-            >
-              <X className="w-4 h-4 mr-2 " />
-              Close
-            </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
