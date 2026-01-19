@@ -394,6 +394,39 @@ export const apiService = {
     return response.data;
   },
 
+  // Get branch rank and file employees
+  getBranchRankNFile: async (
+  ): Promise<any> => {
+    const response = await api.post("/BranchRankNFile", {
+    });
+    return response.data;
+  },
+
+  // Get branch basic employees
+  getBranchBasic: async (
+  ): Promise<any> => {
+    const response = await api.post("/BranchBasic", {    
+    });
+    return response.data;
+  },
+
+  // Get head office basic employees
+  postHoBasic: async (
+    employeeId: number | string,
+    submission: EvaluationPayload
+  ): Promise<any> => {
+    const response = await api.post(`HoBasic/${employeeId}`, submission);
+    return response.data;
+  },
+  // Get head office rank and file employees
+  postHoRankNFile: async (
+    employeeId: number | string,
+    submission: EvaluationPayload
+  ): Promise<any> => {
+    const response = await api.post(`HoRankNFile/${employeeId}`, submission);
+    return response.data;
+  },
+
   // Get evaluations by authenticated evaluator
   getEvalAuthEvaluator: async (
     search: string,

@@ -27,13 +27,13 @@ import Step6 from "./Step6";
 import Step7 from "./Step7";
 import OverallAssessment from "./OverallAssessment";
 import WelcomeStep from "./WelcomeStep";
-import { EvaluationPayload } from "./types";
+import { EvaluationPayload, EvaluationStepConfig } from "./types";
 import { storeEvaluationResult } from "@/lib/evaluationStorage";
 import { apiService } from "@/lib/apiService";
 import { createEvaluationNotification } from "@/lib/notificationUtils";
 import { User, useAuth } from "../../contexts/UserContext";
 
-const steps = [
+const defaultSteps: EvaluationStepConfig[] = [
   { id: 1, title: "Employee Information / Job Knowledge", component: Step1 },
   { id: 2, title: "Quality of Work", component: Step2 },
   { id: 3, title: "Adaptability", component: Step3 },
@@ -48,16 +48,75 @@ interface EvaluationFormProps {
   employee?: User | null;
   onCloseAction?: () => void;
   onCancelAction?: () => void;
+  steps?: EvaluationStepConfig[]; // Optional: custom step configuration
+  evaluationType?: 'rankNfile' | 'basic' | 'default'; // Optional: evaluation type
 }
 
 export default function EvaluationForm({
   employee,
   onCloseAction,
   onCancelAction,
+  steps: customSteps,
+  evaluationType = 'default',
 }: EvaluationFormProps) {
-  const [currentStep, setCurrentStep] = useState(0); // 0 = welcome step, 1-8 = actual steps
+  const [currentStep, setCurrentStep] = useState(0); // 0 = welcome step, 1-N = actual steps
   const [welcomeAnimationKey, setWelcomeAnimationKey] = useState(0);
   const { user } = useAuth();
+  
+  // Use custom steps if provided, otherwise use default steps
+  const baseSteps = customSteps || defaultSteps;
+  
+  // Check if evaluator's branch is HO (Head Office)
+  const isEvaluatorHO = () => {
+    if (!user?.branches) return false;
+    
+    // Handle branches as array
+    if (Array.isArray(user.branches)) {
+      const branch = user.branches[0];
+      if (branch) {
+        const branchName = branch.branch_name?.toUpperCase() || "";
+        const branchCode = branch.branch_code?.toUpperCase() || "";
+        return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+      }
+    }
+    
+    // Handle branches as object
+    if (typeof user.branches === 'object') {
+      const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
+      const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
+      return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+    }
+    
+    return false;
+  };
+
+  const isHO = isEvaluatorHO();
+  
+  // Filter steps based on HO status and evaluation type
+  // For default evaluation type, remove Step 7 for HO evaluators
+  // For custom steps, use them as-is
+  const filteredSteps = (() => {
+    if (customSteps) {
+      // Use custom steps as-is (already configured for specific evaluation type)
+      return customSteps;
+    }
+    // Default behavior: remove Step 7 for HO evaluators
+    return isHO ? baseSteps.filter(step => step.id !== 7) : baseSteps;
+  })();
+  
+  // Helper to get step by ID
+  const getStepById = (id: number) => filteredSteps.find(step => step.id === id);
+  
+  // Helper to get step index by ID
+  const getStepIndexById = (id: number) => filteredSteps.findIndex(step => step.id === id);
+  
+  // Helper to get current step ID from current step index
+  const getCurrentStepId = () => {
+    if (currentStep === 0) return 0;
+    const stepIndex = currentStep - 1;
+    return filteredSteps[stepIndex]?.id || currentStep;
+  };
+  
   const [form, setForm] = useState<EvaluationPayload>({
     hireDate: "",
     rating: 0,
@@ -125,6 +184,18 @@ export default function EvaluationForm({
     customerServiceExplanation3: "",
     customerServiceExplanation4: "",
     customerServiceExplanation5: "",
+    managerialSkillsScore1: 0,
+    managerialSkillsScore2: 0,
+    managerialSkillsScore3: 0,
+    managerialSkillsScore4: 0,
+    managerialSkillsScore5: 0,
+    managerialSkillsScore6: 0,
+    managerialSkillsExplanation1: "",
+    managerialSkillsExplanation2: "",
+    managerialSkillsExplanation3: "",
+    managerialSkillsExplanation4: "",
+    managerialSkillsExplanation5: "",
+    managerialSkillsExplanation6: "",
     created_at: "",
   });
   const [isCancelling, setIsCancelling] = useState(false);
@@ -243,6 +314,32 @@ export default function EvaluationForm({
           hasValidCoverageDates
         );
       case 2: // Quality of Work
+        // Check if evaluator is HO
+        const isEvaluatorHO = () => {
+          if (!user?.branches) return false;
+          
+          // Handle branches as array
+          if (Array.isArray(user.branches)) {
+            const branch = user.branches[0];
+            if (branch) {
+              const branchName = branch.branch_name?.toUpperCase() || "";
+              const branchCode = branch.branch_code?.toUpperCase() || "";
+              return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+            }
+          }
+          
+          // Handle branches as object
+          if (typeof user.branches === 'object') {
+            const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
+            const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
+            return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+          }
+          
+          return false;
+        };
+        
+        const isHO = isEvaluatorHO();
+        
         return (
           form.qualityOfWorkScore1 &&
           form.qualityOfWorkScore1 !== 0 &&
@@ -252,8 +349,8 @@ export default function EvaluationForm({
           form.qualityOfWorkScore3 !== 0 &&
           form.qualityOfWorkScore4 &&
           form.qualityOfWorkScore4 !== 0 &&
-          form.qualityOfWorkScore5 &&
-          form.qualityOfWorkScore5 !== 0
+          // qualityOfWorkScore5 is only required if not HO
+          (isHO || (form.qualityOfWorkScore5 && form.qualityOfWorkScore5 !== 0))
         );
       case 3: // Adaptability
         return (
@@ -296,6 +393,38 @@ export default function EvaluationForm({
           form.ethicalScore4 !== 0
         );
       case 7: // Customer Service
+        // Check if evaluator is HO - Step 7 is not applicable for HO
+        const isEvaluatorHO_Step7 = () => {
+          if (!user?.branches) return false;
+          
+          // Handle branches as array
+          if (Array.isArray(user.branches)) {
+            const branch = user.branches[0];
+            if (branch) {
+              const branchName = branch.branch_name?.toUpperCase() || "";
+              const branchCode = branch.branch_code?.toUpperCase() || "";
+              return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+            }
+          }
+          
+          // Handle branches as object
+          if (typeof user.branches === 'object') {
+            const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
+            const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
+            return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+          }
+          
+          return false;
+        };
+        
+        const isHO_Step7 = isEvaluatorHO_Step7();
+        
+        // Step 7 is always valid for HO evaluators (not applicable)
+        if (isHO_Step7) {
+          return true;
+        }
+        
+        // For non-HO evaluators, require all customer service scores
         return (
           form.customerServiceScore1 &&
           form.customerServiceScore1 !== 0 &&
@@ -421,12 +550,14 @@ export default function EvaluationForm({
   };
 
   const nextStep = () => {
-    if (currentStep < steps.length) {
+    // Move to next step in filtered steps array
+    if (currentStep < filteredSteps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
+    // Move to previous step
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -444,15 +575,6 @@ export default function EvaluationForm({
     }
   };
 
-  // const handleApprove = () => {
-  //   // Mark the evaluation as approved by the evaluator
-  //   setIsEvaluatorApproved(true);
-
-  //   // Show success message
-  //   alert(
-  //     "Evaluation approved by evaluator! The evaluation is now ready for employee review."
-  //   );
-  // };
 
   const handleSuccessDialogClose = () => {
     setShowSuccessDialog(false);
@@ -478,29 +600,19 @@ export default function EvaluationForm({
     }
   };
 
-  // Helper function to calculate overall rating
-  // const calculateOverallRating = (data: EvaluationPayload): string => {
-  //   const scores: number[] = [];
 
-  //   // Collect all numeric scores
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (key.includes("Score") && typeof value === "string" && value !== "") {
-  //       const numValue = parseFloat(value);
-  //       if (!isNaN(numValue)) {
-  //         scores.push(numValue);
-  //       }
-  //     }
-  //   });
 
-  //   // Calculate average
-  //   if (scores.length === 0) return "0";
-  //   const average =
-  //     scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  //   return (Math.round(average * 10) / 10).toString(); // Round to 1 decimal place and return as string
-  // };
-
-  const CurrentStepComponent =
-    currentStep === 0 ? WelcomeStep : steps[currentStep - 1].component;
+    // Get current step info
+    const currentStepInfo = currentStep > 0 ? filteredSteps[currentStep - 1] : null;
+    const isLastStep = currentStep === filteredSteps.length;
+    const isOverallAssessmentStep = currentStepInfo?.id === 8 || (currentStep > 0 && filteredSteps[currentStep - 1]?.component === OverallAssessment);
+    
+    // Get the current step component for rendering
+    const getCurrentStepComponent = () => {
+      if (currentStep === 0) return WelcomeStep;
+      const stepIndex = currentStep - 1;
+      return filteredSteps[stepIndex]?.component || WelcomeStep;
+    };
 
   return (
     <>
@@ -593,7 +705,7 @@ export default function EvaluationForm({
                 <CardContent className="pt-6">
                   <div className="flex justify-center mb-4">
                     <div className="flex items-center">
-                      {steps.map((step, index) => (
+                      {filteredSteps.map((step, index) => (
                         <div key={step.id} className="flex items-center">
                           {/* Step Circle */}
                           <div
@@ -605,11 +717,11 @@ export default function EvaluationForm({
                                 : "bg-gray-200 text-gray-500"
                             }`}
                           >
-                            {step.id}
+                            {index === filteredSteps.length - 1 ? "End" : step.id}
                           </div>
 
                           {/* Connecting Line */}
-                          {index < steps.length - 1 && (
+                          {index < filteredSteps.length - 1 && (
                             <div className="w-16 h-1 mx-2 relative">
                               <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
                               <div
@@ -632,8 +744,10 @@ export default function EvaluationForm({
 
                   <div className="text-center">
                     <span className="text-sm font-medium text-gray-700">
-                      Step {currentStep} of {steps.length}:{" "}
-                      {steps[currentStep - 1].title}
+                      {isOverallAssessmentStep 
+                        ? `End of ${filteredSteps.length} steps: ${currentStepInfo?.title || "Overall Assessment"}`
+                        : `Step ${currentStep} of ${filteredSteps.length}: ${currentStepInfo?.title || "Welcome"}`
+                      }
                     </span>
                   </div>
                 </CardContent>
@@ -647,12 +761,13 @@ export default function EvaluationForm({
                 className="welcome-step-animate"
               >
                 <CardContent>
-                  <CurrentStepComponent
+                  <WelcomeStep
                     data={form}
                     updateDataAction={updateDataAction}
                     employee={employee}
                     onStartAction={startEvaluation}
                     onBackAction={onCloseAction}
+                    evaluationType={evaluationType}
                   />
                 </CardContent>
               </Card>
@@ -661,13 +776,13 @@ export default function EvaluationForm({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                      {currentStep}
+                      {isOverallAssessmentStep ? "End" : currentStep}
                     </span>
-                    {steps[currentStep - 1].title}
+                    {currentStepInfo?.title || "Step"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {currentStep === 8 ? (
+                  {isOverallAssessmentStep ? (
                     <OverallAssessment
                       data={form}
                       updateDataAction={updateDataAction}
@@ -676,23 +791,34 @@ export default function EvaluationForm({
                       onPreviousAction={prevStep}
                       onCloseAction={handleCloseAfterSubmission}
                     />
-                  ) : (
-                    <CurrentStepComponent
+                  ) : currentStep === 0 ? (
+                    <WelcomeStep
                       data={form}
                       updateDataAction={updateDataAction}
                       employee={employee}
                       onStartAction={startEvaluation}
-                      onNextAction={nextStep}
-                      onSubmitAction={handleSubmit}
-                      onPreviousAction={prevStep}
+                      onBackAction={onCloseAction}
+                      evaluationType={evaluationType}
                     />
-                  )}
+                  ) : (() => {
+                    const stepIndex = currentStep - 1;
+                    const step = filteredSteps[stepIndex];
+                    if (!step) return null;
+                    const StepComponent = step.component;
+                    return (
+                      <StepComponent
+                        data={form}
+                        updateDataAction={updateDataAction}
+                        employee={employee}
+                      />
+                    );
+                  })()}
                 </CardContent>
               </Card>
             )}
 
-            {/* Navigation Buttons - Only show for steps 1-7, not for Overall Assessment */}
-            {currentStep > 0 && currentStep < 8 && (
+            {/* Navigation Buttons - Only show for steps before Overall Assessment */}
+            {currentStep > 0 && !isOverallAssessmentStep && (
               <div className="flex justify-between mt-6">
                 <div className="flex gap-3">
                   <Button
@@ -720,7 +846,7 @@ export default function EvaluationForm({
                 <div className="flex flex-col gap-2">
                   <TooltipProvider>
                     {currentStep >= 1 &&
-                    currentStep <= 7 &&
+                    !isOverallAssessmentStep &&
                     !isCurrentStepComplete() ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -880,6 +1006,18 @@ export default function EvaluationForm({
                     customerServiceExplanation3: "",
                     customerServiceExplanation4: "",
                     customerServiceExplanation5: "",
+                    managerialSkillsScore1: 0,
+                    managerialSkillsScore2: 0,
+                    managerialSkillsScore3: 0,
+                    managerialSkillsScore4: 0,
+                    managerialSkillsScore5: 0,
+                    managerialSkillsScore6: 0,
+                    managerialSkillsExplanation1: "",
+                    managerialSkillsExplanation2: "",
+                    managerialSkillsExplanation3: "",
+                    managerialSkillsExplanation4: "",
+                    managerialSkillsExplanation5: "",
+                    managerialSkillsExplanation6: "",
                     created_at: "",
                   });
                 } finally {

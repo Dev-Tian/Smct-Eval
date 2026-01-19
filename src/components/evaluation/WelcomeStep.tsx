@@ -13,16 +13,80 @@ interface WelcomeStepProps {
   employee?: User | null;
   onStartAction: () => void;
   onBackAction?: () => void;
+  evaluationType?: 'rankNfile' | 'basic' | 'default'; // Optional: evaluation type to determine which steps to show
 }
 
 export default function WelcomeStep({
   employee,
   onStartAction,
   onBackAction,
+  evaluationType = 'default',
 }: WelcomeStepProps) {
   const { user } = useAuth();
   // Signature can be a PNG file (base64 data URL or file path)
   const hasSignature = user?.signature;
+  
+  // Check if evaluator's branch is HO (Head Office)
+  const isEvaluatorHO = () => {
+    if (!user?.branches) return false;
+    
+    // Handle branches as array
+    if (Array.isArray(user.branches)) {
+      const branch = user.branches[0];
+      if (branch) {
+        const branchName = branch.branch_name?.toUpperCase() || "";
+        const branchCode = branch.branch_code?.toUpperCase() || "";
+        return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+      }
+    }
+    
+    // Handle branches as object
+    if (typeof user.branches === 'object') {
+      const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
+      const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
+      return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+    }
+    
+    return false;
+  };
+
+  const isHO = isEvaluatorHO();
+  
+  // Show Step7 (Customer Service) if:
+  // - Not HO evaluator (default behavior), OR
+  // - RankNfile evaluation type (RankNfileHo includes Step7)
+  const showStep7 = !isHO || evaluationType === 'rankNfile';
+  
+  // Define steps based on evaluation type
+  const getEvaluationSteps = () => {
+    const steps = [
+      { id: 1, title: "Employee Information/Job Knowledge" },
+      { id: 2, title: "Quality of Work" },
+      { id: 3, title: "Adaptability" },
+      { id: 4, title: "Teamwork" },
+      { id: 5, title: "Reliability" },
+      { id: 6, title: "Ethical & Professional Behavior" },
+    ];
+    
+    // For BasicHo (HO users picking basic): Step 7 is Managerial Skills
+    if (evaluationType === 'basic' && isHO) {
+      steps.push({ id: 7, title: "Managerial Skills" });
+    }
+    // For other cases: Step 7 is Customer Service (if applicable)
+    else if (showStep7) {
+      steps.push({ id: 7, title: "Customer Service" });
+    }
+    
+    // Add Overall Assessment/End step
+    if (evaluationType === 'basic' || evaluationType === 'default') {
+      steps.push({ id: steps.length + 1, title: "Overall Assessment" });
+    }
+    
+    return steps;
+  };
+  
+  const evaluationSteps = getEvaluationSteps();
+  
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -31,8 +95,9 @@ export default function WelcomeStep({
           Welcome to Performance Evaluation
         </h3>
         <p className="text-gray-600 mb-6">
-          This comprehensive evaluation will help assess performance across
-          multiple dimensions.
+          {evaluationType === 'basic' && isHO
+            ? "This comprehensive evaluation for Head Office includes managerial skills assessment and will help evaluate performance across multiple dimensions."
+            : "This comprehensive evaluation will help assess performance across multiple dimensions."}
         </p>
       </div>
 
@@ -97,74 +162,57 @@ export default function WelcomeStep({
             Evaluation Overview
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* First Column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  1
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">
-                    Employee Information/Job Knowledge{" "}
-                  </h5>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  2
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">
-                    {" "}
-                    Quality of Work{" "}
-                  </h5>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  3
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">Adaptability</h5>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  4
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">Teamwork</h5>
-                </div>
-              </div>
+              {evaluationSteps
+                .filter((_, index) => index < Math.ceil(evaluationSteps.length / 2))
+                .map((step) => {
+                  const isLastStep = step.title === "Overall Assessment";
+                  return (
+                    <div key={step.id} className="flex items-center gap-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          isLastStep
+                            ? "bg-green-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }`}
+                      >
+                        {isLastStep ? "End" : step.id}
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900">
+                          {step.title}
+                        </h5>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
+            {/* Second Column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  5
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">Reliability</h5>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  6
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">
-                    Ethical & Professional Behavior
-                  </h5>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  7
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">
-                    Customer Service
-                  </h5>
-                </div>
-              </div>
+              {evaluationSteps
+                .filter((_, index) => index >= Math.ceil(evaluationSteps.length / 2))
+                .map((step) => {
+                  const isLastStep = step.title === "Overall Assessment";
+                  return (
+                    <div key={step.id} className="flex items-center gap-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          isLastStep
+                            ? "bg-green-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }`}
+                      >
+                        {isLastStep ? "End" : step.id}
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900">
+                          {step.title}
+                        </h5>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </CardContent>
