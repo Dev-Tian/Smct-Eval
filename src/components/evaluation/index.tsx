@@ -76,7 +76,14 @@ export default function EvaluationForm({
       if (branch) {
         const branchName = branch.branch_name?.toUpperCase() || "";
         const branchCode = branch.branch_code?.toUpperCase() || "";
-        return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+        return (
+          branchName === "HO" || 
+          branchCode === "HO" || 
+          branchName.includes("HEAD OFFICE") ||
+          branchCode.includes("HEAD OFFICE") ||
+          branchName === "HEAD OFFICE" ||
+          branchCode === "HEAD OFFICE"
+        );
       }
     }
     
@@ -84,7 +91,14 @@ export default function EvaluationForm({
     if (typeof user.branches === 'object') {
       const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
       const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
-      return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+      return (
+        branchName === "HO" || 
+        branchCode === "HO" || 
+        branchName.includes("HEAD OFFICE") ||
+        branchCode.includes("HEAD OFFICE") ||
+        branchName === "HEAD OFFICE" ||
+        branchCode === "HEAD OFFICE"
+      );
     }
     
     return false;
@@ -324,7 +338,14 @@ export default function EvaluationForm({
             if (branch) {
               const branchName = branch.branch_name?.toUpperCase() || "";
               const branchCode = branch.branch_code?.toUpperCase() || "";
-              return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+              return (
+                branchName === "HO" || 
+                branchCode === "HO" || 
+                branchName.includes("HEAD OFFICE") ||
+                branchCode.includes("HEAD OFFICE") ||
+                branchName === "HEAD OFFICE" ||
+                branchCode === "HEAD OFFICE"
+              );
             }
           }
           
@@ -332,7 +353,14 @@ export default function EvaluationForm({
           if (typeof user.branches === 'object') {
             const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
             const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
-            return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+            return (
+              branchName === "HO" || 
+              branchCode === "HO" || 
+              branchName.includes("HEAD OFFICE") ||
+              branchCode.includes("HEAD OFFICE") ||
+              branchName === "HEAD OFFICE" ||
+              branchCode === "HEAD OFFICE"
+            );
           }
           
           return false;
@@ -403,7 +431,14 @@ export default function EvaluationForm({
             if (branch) {
               const branchName = branch.branch_name?.toUpperCase() || "";
               const branchCode = branch.branch_code?.toUpperCase() || "";
-              return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+              return (
+                branchName === "HO" || 
+                branchCode === "HO" || 
+                branchName.includes("HEAD OFFICE") ||
+                branchCode.includes("HEAD OFFICE") ||
+                branchName === "HEAD OFFICE" ||
+                branchCode === "HEAD OFFICE"
+              );
             }
           }
           
@@ -411,7 +446,14 @@ export default function EvaluationForm({
           if (typeof user.branches === 'object') {
             const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
             const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
-            return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+            return (
+              branchName === "HO" || 
+              branchCode === "HO" || 
+              branchName.includes("HEAD OFFICE") ||
+              branchCode.includes("HEAD OFFICE") ||
+              branchName === "HEAD OFFICE" ||
+              branchCode === "HEAD OFFICE"
+            );
           }
           
           return false;
@@ -589,7 +631,17 @@ export default function EvaluationForm({
     try {
       const empID = employee?.id;
       if (empID) {
-        const response = await apiService.createSubmission(empID, form);
+        // Use appropriate API endpoint based on evaluation type
+        if (evaluationType === 'rankNfile') {
+          // RankNfile HO evaluation - use HoRankNFile endpoint
+          const response = await apiService.postHoRankNFile(empID, form);
+        } else if (evaluationType === 'basic') {
+          // Basic HO evaluation - use HoBasic endpoint
+          const response = await apiService.postHoBasic(empID, form);
+        } else {
+          // Default evaluation - use standard createSubmission endpoint
+          const response = await apiService.createSubmission(empID, form);
+        }
       }
       setShowSuccessDialog(true);
     } catch (clientError) {
@@ -605,7 +657,9 @@ export default function EvaluationForm({
     // Get current step info
     const currentStepInfo = currentStep > 0 ? filteredSteps[currentStep - 1] : null;
     const isLastStep = currentStep === filteredSteps.length;
-    const isOverallAssessmentStep = currentStepInfo?.id === 8 || (currentStep > 0 && filteredSteps[currentStep - 1]?.component === OverallAssessment);
+    // Check if current step is Overall Assessment (any variant)
+    const isOverallAssessmentStep = isLastStep || 
+      (currentStep > 0 && filteredSteps[currentStep - 1]?.title === "Overall Assessment");
     
     // Get the current step component for rendering
     const getCurrentStepComponent = () => {
@@ -782,16 +836,7 @@ export default function EvaluationForm({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {isOverallAssessmentStep ? (
-                    <OverallAssessment
-                      data={form}
-                      updateDataAction={updateDataAction}
-                      employee={employee}
-                      onSubmitAction={handleSubmit}
-                      onPreviousAction={prevStep}
-                      onCloseAction={handleCloseAfterSubmission}
-                    />
-                  ) : currentStep === 0 ? (
+                  {currentStep === 0 ? (
                     <WelcomeStep
                       data={form}
                       updateDataAction={updateDataAction}
@@ -805,13 +850,32 @@ export default function EvaluationForm({
                     const step = filteredSteps[stepIndex];
                     if (!step) return null;
                     const StepComponent = step.component;
-                    return (
-                      <StepComponent
-                        data={form}
-                        updateDataAction={updateDataAction}
-                        employee={employee}
-                      />
-                    );
+                    
+                    // For Overall Assessment steps, pass additional props
+                    if (isOverallAssessmentStep) {
+                      return (
+                        <StepComponent
+                          data={form}
+                          updateDataAction={updateDataAction}
+                          employee={employee}
+                          onSubmitAction={handleSubmit}
+                          onPreviousAction={prevStep}
+                          onCloseAction={handleCloseAfterSubmission}
+                        />
+                      );
+                    }
+                    
+                    // For regular steps - pass evaluationType if StepComponent accepts it
+                    const stepProps: any = {
+                      data: form,
+                      updateDataAction: updateDataAction,
+                      employee: employee,
+                    };
+                    // Pass evaluationType to Step2 (and potentially other steps that need it)
+                    if (step.id === 2) {
+                      stepProps.evaluationType = evaluationType;
+                    }
+                    return <StepComponent {...stepProps} />;
                   })()}
                 </CardContent>
               </Card>

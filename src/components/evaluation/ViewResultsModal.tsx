@@ -42,6 +42,7 @@ type Submission = {
   reliabilities: any;
   ethicals: any;
   customer_services: any;
+  managerial_skills?: any; // For Basic HO evaluations
 };
 
 interface ApprovalData {
@@ -1213,57 +1214,107 @@ export default function ViewResultsModal({
 
   if (!submission) return null;
 
+  // Determine evaluation type based on submission data
+  const hasCustomerService = submission.customer_services && 
+    Array.isArray(submission.customer_services) && 
+    submission.customer_services.length > 0;
+  const hasManagerialSkills = submission.managerial_skills && 
+    Array.isArray(submission.managerial_skills) && 
+    submission.managerial_skills.length > 0;
+  
+  let evaluationType: 'rankNfile' | 'basic' | 'default' = 'default';
+  if (!hasCustomerService && hasManagerialSkills) {
+    evaluationType = 'basic'; // Basic HO - has Managerial Skills, no Customer Service
+  } else if (!hasCustomerService && !hasManagerialSkills) {
+    evaluationType = 'rankNfile'; // RankNfile HO - no Customer Service, no Managerial Skills
+  } else {
+    evaluationType = 'default'; // Default - has Customer Service
+  }
+
   // Use stored rating from backend if available to match evaluation records table
   const finalRatingRaw =
     submission.rating !== undefined && submission.rating !== null
       ? Number(submission.rating)
       : (() => {
           const job_knowledgeScore = calculateScore(
-            submission.job_knowledge.map((item: any) =>
+            (submission.job_knowledge || []).map((item: any) =>
               String(item.score)
             )
           );
           const quality_of_workScore = calculateScore(
-            submission.quality_of_works.map((item: any) =>
+            (submission.quality_of_works || []).map((item: any) =>
               String(item.score)
             )
           );
           const adaptabilityScore = calculateScore(
-            submission.adaptability.map((item: any) =>
+            (submission.adaptability || []).map((item: any) =>
               String(item.score)
             )
           );
           const teamworkScore = calculateScore(
-            submission.teamworks.map((item: any) =>
+            (submission.teamworks || []).map((item: any) =>
               String(item.score)
             )
           );
           const reliabilityScore = calculateScore(
-            submission.reliabilities.map((item: any) =>
+            (submission.reliabilities || []).map((item: any) =>
               String(item.score)
             )
           );
           const ethicalScore = calculateScore(
-            submission.ethicals.map((item: any) =>
-              String(item.score)
-            )
-          );
-          const customer_serviceScore = calculateScore(
-            submission.customer_services.map((item: any) =>
+            (submission.ethicals || []).map((item: any) =>
               String(item.score)
             )
           );
 
-          const overallWeightedScore =
-            job_knowledgeScore * 0.2 +
-            quality_of_workScore * 0.2 +
-            adaptabilityScore * 0.1 +
-            teamworkScore * 0.1 +
-            reliabilityScore * 0.05 +
-            ethicalScore * 0.05 +
-            customer_serviceScore * 0.3;
-
-          return overallWeightedScore;
+          // Calculate overall weighted score based on evaluation type
+          if (evaluationType === 'rankNfile') {
+            // RankNfile HO: 25%, 25%, 15%, 15%, 10%, 10% (no Customer Service)
+            return (
+              job_knowledgeScore * 0.25 +
+              quality_of_workScore * 0.25 +
+              adaptabilityScore * 0.15 +
+              teamworkScore * 0.15 +
+              reliabilityScore * 0.1 +
+              ethicalScore * 0.1
+            );
+          } else if (evaluationType === 'basic') {
+            // Basic HO: 25%, 25%, 15%, 15%, 10%, 10% + Managerial Skills 30%
+            const managerial_skillsScore = submission.managerial_skills
+              ? calculateScore(
+                  (submission.managerial_skills || []).map((item: any) =>
+                    String(item.score)
+                  )
+                )
+              : 0;
+            return (
+              job_knowledgeScore * 0.25 +
+              quality_of_workScore * 0.25 +
+              adaptabilityScore * 0.15 +
+              teamworkScore * 0.15 +
+              reliabilityScore * 0.1 +
+              ethicalScore * 0.1 +
+              managerial_skillsScore * 0.3
+            );
+          } else {
+            // Default: 20%, 20%, 10%, 10%, 5%, 5%, 30% (with Customer Service)
+            const customer_serviceScore = submission.customer_services
+              ? calculateScore(
+                  (submission.customer_services || []).map((item: any) =>
+                    String(item.score)
+                  )
+                )
+              : 0;
+            return (
+              job_knowledgeScore * 0.2 +
+              quality_of_workScore * 0.2 +
+              adaptabilityScore * 0.1 +
+              teamworkScore * 0.1 +
+              reliabilityScore * 0.05 +
+              ethicalScore * 0.05 +
+              customer_serviceScore * 0.3
+            );
+          }
         })();
 
   const finalRating = Number.isFinite(finalRatingRaw)
@@ -1670,9 +1721,23 @@ export default function ViewResultsModal({
               {/* Title */}
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Performance Review Form (HEAD OFFICE)
-                  <br />
-                  Rank and File I & II
+                  {evaluationType === 'rankNfile' ? (
+                    <>
+                      Performance Review Form (HEAD OFFICE)
+                      <br />
+                      Rank and File I & II
+                    </>
+                  ) : evaluationType === 'basic' ? (
+                    <>
+                      Performance Review Form (HEAD OFFICE)
+                      <br />
+                      Basic
+                    </>
+                  ) : (
+                    <>
+                      Performance Review Form
+                    </>
+                  )}
                 </h1>
               </div>
 
@@ -2029,7 +2094,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.job_knowledge.map(
+                          {(submission.job_knowledge || []).map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2113,7 +2178,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.quality_of_works.map(
+                          {(submission.quality_of_works || []).map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4 | 5;
                               score: number;
@@ -2196,7 +2261,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.adaptability.map(
+                          {(submission.adaptability || []).map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2278,7 +2343,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.teamworks.map(
+                          {(submission.teamworks || []).map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2359,7 +2424,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.reliabilities.map(
+                          {(submission.reliabilities || []).map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4;
                               score: number;
@@ -2442,7 +2507,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.ethicals.map(
+                          {(submission.ethicals || []).map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4;
                               score: number;
@@ -2487,8 +2552,86 @@ export default function ViewResultsModal({
                 </Card>
               )}
 
-              {/* Step 7: Customer Service */}
-              {submission.customer_services && (
+              {/* Step 7: Managerial Skills - Only for Basic HO evaluations */}
+              {evaluationType === 'basic' && submission.managerial_skills && (
+                <Card className="shadow-md hide-in-print">
+                  <CardHeader className="bg-teal-50 border-b border-teal-200">
+                    <CardTitle className="text-xl font-semibold text-teal-900">
+                      VII. MANAGERIAL SKILLS
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <p className="text-sm text-gray-600 mb-4">
+                      Leadership abilities. Decision-making skills. Team management and development.
+                    </p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900"></th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                              Behavioral Indicators
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                              Example
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-24">
+                              Score
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-32">
+                              Rating
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                              Comments
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(submission.managerial_skills || []).map(
+                            (item: {
+                              question_number: 1 | 2 | 3 | 4 | 5 | 6;
+                              score: number;
+                              explanation: string;
+                            }) => {
+                              return (
+                                <tr key={item.question_number}>
+                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                                    Question {item.question_number}
+                                  </td>
+                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                                    Managerial Skills Indicator {item.question_number}
+                                  </td>
+                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                                    Example for Managerial Skills {item.question_number}
+                                  </td>
+                                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                                    {item.score}
+                                  </td>
+                                  <td className="border border-gray-300 px-4 py-3 text-center">
+                                    <div
+                                      className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
+                                        item.score
+                                      )}`}
+                                    >
+                                      {rating(item.score)}
+                                    </div>
+                                  </td>
+                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                                    {item.explanation || ""}
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 7: Customer Service - Only show for default evaluations */}
+              {evaluationType === 'default' && submission.customer_services && (
                 <Card className="shadow-md hide-in-print">
                   <CardHeader className="bg-teal-50 border-b border-teal-200">
                     <CardTitle className="text-xl font-semibold text-teal-900">
@@ -2523,7 +2666,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {submission.customer_services.map(
+                          {(submission.customer_services || []).map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4 | 5;
                               score: number;
@@ -2611,9 +2754,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.job_knowledge.map(
+                                            (submission.job_knowledge || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2622,9 +2765,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.job_knowledge.map(
+                                          (submission.job_knowledge || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2633,9 +2776,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.job_knowledge.map(
+                                          (submission.job_knowledge || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2646,29 +2789,39 @@ export default function ViewResultsModal({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {Math.round(
                                     calculateScore(
-                                      submission.job_knowledge.map(
+                                      (submission.job_knowledge || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
                                     ) * 10
                                   ) / 10}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  20%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '25%' : '20%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {Math.round(
-                                    calculateScore(
-                                      submission.job_knowledge.map(
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.job_knowledge || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
-                                    ) *
-                                      0.2 *
-                                      10
-                                  ) / 10}
+                                    ) * 0.25).toFixed(2)
+                                  ) : (
+                                    Math.round(
+                                      calculateScore(
+                                        (submission.job_knowledge || []).map(
+                                          (item: any) => {
+                                            return String(item.score || 0);
+                                          }
+                                        )
+                                      ) *
+                                        0.2 *
+                                        10
+                                    ) / 10
+                                  )}
                                 </td>
                               </tr>
 
@@ -2683,9 +2836,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.quality_of_works.map(
+                                            (submission.quality_of_works || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2694,9 +2847,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.quality_of_works.map(
+                                          (submission.quality_of_works || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2705,9 +2858,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.quality_of_works.map(
+                                          (submission.quality_of_works || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2717,26 +2870,34 @@ export default function ViewResultsModal({
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.quality_of_works.map(
+                                    (submission.quality_of_works || []).map(
                                       (item: any) => {
-                                        return item.score;
+                                        return String(item.score || 0);
                                       }
                                     )
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  20%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '25%' : '20%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.quality_of_works.map(
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.quality_of_works || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
-                                    ) * 0.2
-                                  ).toFixed(2)}
+                                    ) * 0.25).toFixed(2)
+                                  ) : (
+                                    (calculateScore(
+                                      (submission.quality_of_works || []).map(
+                                        (item: any) => {
+                                          return String(item.score || 0);
+                                        }
+                                      )
+                                    ) * 0.2).toFixed(2)
+                                  )}
                                 </td>
                               </tr>
 
@@ -2751,9 +2912,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.adaptability.map(
+                                            (submission.adaptability || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2762,9 +2923,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.adaptability.map(
+                                          (submission.adaptability || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2773,9 +2934,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.adaptability.map(
+                                          (submission.adaptability || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2785,24 +2946,32 @@ export default function ViewResultsModal({
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.adaptability.map((item: any) => {
-                                      return item.score;
+                                    (submission.adaptability || []).map((item: any) => {
+                                      return String(item.score || 0);
                                     })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  10%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '15%' : '10%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.adaptability.map(
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.adaptability || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
-                                    ) * 0.1
-                                  ).toFixed(2)}
+                                    ) * 0.15).toFixed(2)
+                                  ) : (
+                                    (calculateScore(
+                                      (submission.adaptability || []).map(
+                                        (item: any) => {
+                                          return String(item.score || 0);
+                                        }
+                                      )
+                                    ) * 0.1).toFixed(2)
+                                  )}
                                 </td>
                               </tr>
 
@@ -2817,9 +2986,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.teamworks.map(
+                                            (submission.teamworks || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2828,9 +2997,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.teamworks.map(
+                                          (submission.teamworks || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2839,9 +3008,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.teamworks.map(
+                                          (submission.teamworks || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2851,22 +3020,28 @@ export default function ViewResultsModal({
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.teamworks.map((item: any) => {
-                                      return item.score;
+                                    (submission.teamworks || []).map((item: any) => {
+                                      return String(item.score || 0);
                                     })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  10%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '15%' : '10%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.teamworks.map((item: any) => {
-                                        return item.score;
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.teamworks || []).map((item: any) => {
+                                        return String(item.score || 0);
                                       })
-                                    ) * 0.1
-                                  ).toFixed(2)}
+                                    ) * 0.15).toFixed(2)
+                                  ) : (
+                                    (calculateScore(
+                                      (submission.teamworks || []).map((item: any) => {
+                                        return String(item.score || 0);
+                                      })
+                                    ) * 0.1).toFixed(2)
+                                  )}
                                 </td>
                               </tr>
 
@@ -2881,9 +3056,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.reliabilities.map(
+                                            (submission.reliabilities || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2892,9 +3067,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.reliabilities.map(
+                                          (submission.reliabilities || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2903,9 +3078,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.reliabilities.map(
+                                          (submission.reliabilities || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2915,26 +3090,34 @@ export default function ViewResultsModal({
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.reliabilities.map(
+                                    (submission.reliabilities || []).map(
                                       (item: any) => {
-                                        return item.score;
+                                        return String(item.score || 0);
                                       }
                                     )
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  5%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '10%' : '5%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.reliabilities.map(
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.reliabilities || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
-                                    ) * 0.05
-                                  ).toFixed(2)}
+                                    ) * 0.1).toFixed(2)
+                                  ) : (
+                                    (calculateScore(
+                                      (submission.reliabilities || []).map(
+                                        (item: any) => {
+                                          return String(item.score || 0);
+                                        }
+                                      )
+                                    ) * 0.05).toFixed(2)
+                                  )}
                                 </td>
                               </tr>
 
@@ -2949,9 +3132,9 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.ethicals.map(
+                                            (submission.ethicals || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
@@ -2960,9 +3143,9 @@ export default function ViewResultsModal({
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.ethicals.map(
+                                          (submission.ethicals || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2971,9 +3154,9 @@ export default function ViewResultsModal({
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.ethicals.map(
+                                          (submission.ethicals || []).map(
                                             (item: any) => {
-                                              return item.score;
+                                              return String(item.score || 0);
                                             }
                                           )
                                         )
@@ -2983,101 +3166,177 @@ export default function ViewResultsModal({
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.ethicals.map((item: any) => {
-                                      return item.score;
+                                    (submission.ethicals || []).map((item: any) => {
+                                      return String(item.score || 0);
                                     })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  5%
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '10%' : '5%'}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.ethicals.map((item: any) => {
-                                        return item.score;
+                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
+                                    (calculateScore(
+                                      (submission.ethicals || []).map((item: any) => {
+                                        return String(item.score || 0);
                                       })
-                                    ) * 0.05
-                                  ).toFixed(2)}
+                                    ) * 0.1).toFixed(2)
+                                  ) : (
+                                    (calculateScore(
+                                      (submission.ethicals || []).map((item: any) => {
+                                        return String(item.score || 0);
+                                      })
+                                    ) * 0.05).toFixed(2)
+                                  )}
                                 </td>
                               </tr>
 
-                              {/* Customer Service */}
-                              <tr>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
-                                  Customer Service
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center">
-                                  <div className="flex items-center justify-center space-x-1">
-                                    <span
-                                      className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
-                                        getRatingLabel(
+                              {/* Managerial Skills - Only for Basic HO */}
+                              {evaluationType === 'basic' && submission.managerial_skills && (
+                                <tr>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
+                                    Managerial Skills
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center">
+                                    <div className="flex items-center justify-center space-x-1">
+                                      <span
+                                        className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
+                                          getRatingLabel(
+                                            calculateScore(
+                                              (submission.managerial_skills || []).map(
+                                                (item: any) => {
+                                                  return String(item.score || 0);
+                                                }
+                                              )
+                                            )
+                                          )
+                                        )}`}
+                                      >
+                                        {getRatingLabel(
                                           calculateScore(
-                                            submission.customer_services.map(
+                                            (submission.managerial_skills || []).map(
                                               (item: any) => {
-                                                return item.score;
+                                                return String(item.score || 0);
                                               }
                                             )
                                           )
-                                        )
-                                      )}`}
-                                    >
-                                      {getRatingLabel(
-                                        calculateScore(
-                                          submission.customer_services.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            }
+                                        )}
+                                      </span>
+                                      <span className="print-rating-text">
+                                        {getRatingLabel(
+                                          calculateScore(
+                                            (submission.managerial_skills || []).map(
+                                              (item: any) => {
+                                                return String(item.score || 0);
+                                              }
+                                            )
                                           )
-                                        )
-                                      )}
-                                    </span>
-                                    <span className="print-rating-text">
-                                      {getRatingLabel(
-                                        calculateScore(
-                                          submission.customer_services.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            }
+                                        )}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    {calculateScore(
+                                      (submission.managerial_skills || []).map((item: any) => {
+                                        return String(item.score || 0);
+                                      })
+                                    ).toFixed(2)}
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    30%
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    {(
+                                      calculateScore(
+                                        (submission.managerial_skills || []).map((item: any) => {
+                                          return String(item.score || 0);
+                                        })
+                                      ) * 0.3
+                                    ).toFixed(2)}
+                                  </td>
+                                </tr>
+                              )}
+
+                              {/* Customer Service - Only for Default evaluations */}
+                              {evaluationType === 'default' && submission.customer_services && (
+                                <tr>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
+                                    Customer Service
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center">
+                                    <div className="flex items-center justify-center space-x-1">
+                                      <span
+                                        className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
+                                          getRatingLabel(
+                                            calculateScore(
+                                              (submission.customer_services || []).map(
+                                                (item: any) => {
+                                                  return String(item.score || 0);
+                                                }
+                                              )
+                                            )
                                           )
-                                        )
-                                      )}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {calculateScore(
-                                    submission.customer_services.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      }
-                                    )
-                                  ).toFixed(2)}
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  30%
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {(
-                                    calculateScore(
-                                      submission.customer_services.map(
+                                        )}`}
+                                      >
+                                        {getRatingLabel(
+                                          calculateScore(
+                                            (submission.customer_services || []).map(
+                                              (item: any) => {
+                                                return String(item.score || 0);
+                                              }
+                                            )
+                                          )
+                                        )}
+                                      </span>
+                                      <span className="print-rating-text">
+                                        {getRatingLabel(
+                                          calculateScore(
+                                            (submission.customer_services || []).map(
+                                              (item: any) => {
+                                                return String(item.score || 0);
+                                              }
+                                            )
+                                          )
+                                        )}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    {calculateScore(
+                                      (submission.customer_services || []).map(
                                         (item: any) => {
-                                          return item.score;
+                                          return String(item.score || 0);
                                         }
                                       )
-                                    ) * 0.3
-                                  ).toFixed(2)}
-                                </td>
-                              </tr>
+                                    ).toFixed(2)}
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    30%
+                                  </td>
+                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                    {(
+                                      calculateScore(
+                                        (submission.customer_services || []).map(
+                                          (item: any) => {
+                                            return String(item.score || 0);
+                                          }
+                                        )
+                                      ) * 0.3
+                                    ).toFixed(2)}
+                                  </td>
+                                </tr>
+                              )}
 
                               {/* Overall Performance Rating */}
                               <tr className="bg-gray-100">
-                                <td
-                                  colSpan={4}
-                                  className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700"
-                                >
+                                <td className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700">
                                   Overall Performance Rating
                                 </td>
+                                <td
+                                  colSpan={2}
+                                  className="border-2 border-gray-400 px-4 py-3 text-center"
+                                ></td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center"></td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-lg">
                                   {finalRatingRounded.toFixed(2)}
                                 </td>
@@ -3241,7 +3500,7 @@ export default function ViewResultsModal({
                                   <Button
                                     onClick={handleApproveEvaluation}
                                     disabled={!submission.id || isApproving}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-sm font-medium disabled:bg-gray-400 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-sm"
                                   >
                                     {isApproving ? (
                                       <>
