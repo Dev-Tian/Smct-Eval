@@ -29,77 +29,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EvaluationForm from "@/components/evaluation";
 import ManagerEvaluationForm from "@/components/evaluation/ManagerEvaluationForm";
 import BranchEvaluationForm from "@/components/evaluation/BranchEvaluationForm";
-import RankNfileHo from "@/components/evaluation/RankNfileHo";
 import BasicHo from "@/components/evaluation/BasicHo";
 import EvaluationsPagination from "@/components/paginationComponent";
 import ViewEmployeeModal from "@/components/ViewEmployeeModal";
+import RnF_B_EvaluationForm from "@/components/evaluation2/indexes/RnF_B";
+import RnF_HO_EvaluationForm from "@/components/evaluation2/indexes/RnF_HO";
 
 export default function EmployeesTab() {
   const { user } = useAuth();
-  
-  // Check if evaluator's branch is HO (Head Office)
-  const isEvaluatorHO = () => {
-    if (!user?.branches) return false;
-    
-    // Handle branches as array
-    if (Array.isArray(user.branches)) {
-      const branch = user.branches[0];
-      if (branch) {
-        const branchName = branch.branch_name?.toUpperCase() || "";
-        const branchCode = branch.branch_code?.toUpperCase() || "";
-        return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
-      }
-    }
-    
-    // Handle branches as object
-    if (typeof user.branches === 'object') {
-      const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
-      const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
-      return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
-    }
-    
-    return false;
-  };
 
-  const isHO = isEvaluatorHO();
-  
-  // Check if employee being evaluated is Area Manager with HO branch
-  const isEmployeeAreaManagerWithHO = (employee: User | null): boolean => {
-    if (!employee) return false;
-    
-    // Check position - look for "Area Manager" in various possible fields
-    const positionName = (
-      employee.positions?.label || 
-      employee.positions?.name || 
-      (employee as any).position ||
-      ""
-    ).toLowerCase().trim();
-    
-    const isAreaManager = positionName === "area manager" || positionName.includes("area manager");
-    
-    if (!isAreaManager) return false;
-    
-    // Check branch - look for "HO" in various possible fields
-    let branchName = "";
-    if (employee.branches) {
-      if (Array.isArray(employee.branches)) {
-        branchName = (employee.branches[0]?.branch_name || employee.branches[0]?.name || "").toUpperCase();
-      } else if (typeof employee.branches === 'object') {
-        branchName = ((employee.branches as any)?.branch_name || (employee.branches as any)?.name || "").toUpperCase();
-      }
-    } else if ((employee as any).branch) {
-      branchName = String((employee as any).branch).toUpperCase();
-    }
-    
-    const isHOBranch = 
-      branchName === "HO" || 
-      branchName === "HEAD OFFICE" ||
-      branchName.includes("HEAD OFFICE") ||
-      branchName.includes("HO");
-    
-    return isAreaManager && isHOBranch;
-  };
-  
   //refreshing state
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Add refresh trigger
@@ -150,7 +88,7 @@ export default function EmployeesTab() {
           "", // no search filter
           1000, // high limit to get all employees
           1, // first page
-          undefined // no position filter
+          undefined, // no position filter
         );
 
         if (!res) {
@@ -166,14 +104,27 @@ export default function EmployeesTab() {
         }
 
         // Extract unique positions from employees
-        const uniquePositionsMap = new Map<number | string, { value: number | string; label: string }>();
-        
+        const uniquePositionsMap = new Map<
+          number | string,
+          { value: number | string; label: string }
+        >();
+
         employeesData.forEach((employee: any) => {
           if (employee.positions) {
-            const positionId = employee.positions.id || employee.positions.value || employee.position_id;
-            const positionLabel = employee.positions.label || employee.positions.name || employee.position;
-            
-            if (positionId && positionLabel && !uniquePositionsMap.has(positionId)) {
+            const positionId =
+              employee.positions.id ||
+              employee.positions.value ||
+              employee.position_id;
+            const positionLabel =
+              employee.positions.label ||
+              employee.positions.name ||
+              employee.position;
+
+            if (
+              positionId &&
+              positionLabel &&
+              !uniquePositionsMap.has(positionId)
+            ) {
               uniquePositionsMap.set(positionId, {
                 value: positionId,
                 label: positionLabel,
@@ -183,8 +134,8 @@ export default function EmployeesTab() {
         });
 
         // Convert Map to Array and sort by label
-        const uniquePositions = Array.from(uniquePositionsMap.values()).sort((a, b) => 
-          a.label.localeCompare(b.label)
+        const uniquePositions = Array.from(uniquePositionsMap.values()).sort(
+          (a, b) => a.label.localeCompare(b.label),
         );
 
         setPositions(uniquePositions);
@@ -204,7 +155,7 @@ export default function EmployeesTab() {
           debouncedSearch,
           itemsPerPage,
           currentPage,
-          Number(positionFilter) || undefined
+          Number(positionFilter) || undefined,
         );
 
         // Add safety checks to prevent "Cannot read properties of undefined" error
@@ -575,8 +526,8 @@ export default function EmployeesTab() {
                               isNew
                                 ? "bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100 hover:shadow-md transition-all duration-200 "
                                 : isRecentlyAdded
-                                ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100 hover:shadow-md transition-all duration-200 "
-                                : "hover:bg-blue-100 hover:shadow-md transition-all duration-200"
+                                  ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100 hover:shadow-md transition-all duration-200 "
+                                  : "hover:bg-blue-100 hover:shadow-md transition-all duration-200"
                             }
                           >
                             <TableCell className="font-medium">
@@ -733,8 +684,10 @@ export default function EmployeesTab() {
         <DialogContent className="max-w-7xl max-h-[101vh] overflow-hidden p-0 evaluation-container">
           {selectedEmployeeForEvaluation && evaluationType === "employee" && (
             <>
-              {isHO && !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
-                <RankNfileHo
+              {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
+              selectedEmployeeForEvaluation.branches[0]?.name ===
+                "HEAD OFFICE" ? (
+                <RnF_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -743,7 +696,7 @@ export default function EmployeesTab() {
                   }}
                 />
               ) : (
-                <BranchEvaluationForm
+                <RnF_B_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -756,7 +709,9 @@ export default function EmployeesTab() {
           )}
           {selectedEmployeeForEvaluation && evaluationType === "manager" && (
             <>
-              {isHO && !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
+              {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
+              selectedEmployeeForEvaluation.branches[0]?.name ===
+                "HEAD OFFICE" ? (
                 <BasicHo
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {

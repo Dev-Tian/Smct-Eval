@@ -53,6 +53,8 @@ import ManagerEvaluationForm from "@/components/evaluation/ManagerEvaluationForm
 import BranchEvaluationForm from "@/components/evaluation/BranchEvaluationForm";
 import RankNfileHo from "@/components/evaluation/RankNfileHo";
 import BasicHo from "@/components/evaluation/BasicHo";
+import RnF_HO_EvaluationForm from "@/components/evaluation2/indexes/RnF_HO";
+import RnF_B_EvaluationForm from "@/components/evaluation2/indexes/RnF_B";
 
 interface Employee {
   id: number;
@@ -82,70 +84,91 @@ interface RoleType {
 
 export default function UserManagementTab() {
   const { user } = useAuth();
-  
+
   // Check if evaluator's branch is HO (Head Office)
   const isEvaluatorHO = () => {
     if (!user?.branches) return false;
-    
+
     // Handle branches as array
     if (Array.isArray(user.branches)) {
       const branch = user.branches[0];
       if (branch) {
         const branchName = branch.branch_name?.toUpperCase() || "";
         const branchCode = branch.branch_code?.toUpperCase() || "";
-        return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+        return (
+          branchName === "HO" ||
+          branchCode === "HO" ||
+          branchName.includes("HEAD OFFICE")
+        );
       }
     }
-    
+
     // Handle branches as object
-    if (typeof user.branches === 'object') {
-      const branchName = (user.branches as any)?.branch_name?.toUpperCase() || "";
-      const branchCode = (user.branches as any)?.branch_code?.toUpperCase() || "";
-      return branchName === "HO" || branchCode === "HO" || branchName.includes("HEAD OFFICE");
+    if (typeof user.branches === "object") {
+      const branchName =
+        (user.branches as any)?.branch_name?.toUpperCase() || "";
+      const branchCode =
+        (user.branches as any)?.branch_code?.toUpperCase() || "";
+      return (
+        branchName === "HO" ||
+        branchCode === "HO" ||
+        branchName.includes("HEAD OFFICE")
+      );
     }
-    
+
     return false;
   };
 
   const isHO = isEvaluatorHO();
-  
+
   // Check if employee being evaluated is Area Manager with HO branch
   const isEmployeeAreaManagerWithHO = (employee: User | null): boolean => {
     if (!employee) return false;
-    
+
     // Check position - look for "Area Manager" in various possible fields
     const positionName = (
-      employee.positions?.label || 
-      employee.positions?.name || 
+      employee.positions?.label ||
+      employee.positions?.name ||
       (employee as any).position ||
       ""
-    ).toLowerCase().trim();
-    
-    const isAreaManager = positionName === "area manager" || positionName.includes("area manager");
-    
+    )
+      .toLowerCase()
+      .trim();
+
+    const isAreaManager =
+      positionName === "area manager" || positionName.includes("area manager");
+
     if (!isAreaManager) return false;
-    
+
     // Check branch - look for "HO" in various possible fields
     let branchName = "";
     if (employee.branches) {
       if (Array.isArray(employee.branches)) {
-        branchName = (employee.branches[0]?.branch_name || employee.branches[0]?.name || "").toUpperCase();
-      } else if (typeof employee.branches === 'object') {
-        branchName = ((employee.branches as any)?.branch_name || (employee.branches as any)?.name || "").toUpperCase();
+        branchName = (
+          employee.branches[0]?.branch_name ||
+          employee.branches[0]?.name ||
+          ""
+        ).toUpperCase();
+      } else if (typeof employee.branches === "object") {
+        branchName = (
+          (employee.branches as any)?.branch_name ||
+          (employee.branches as any)?.name ||
+          ""
+        ).toUpperCase();
       }
     } else if ((employee as any).branch) {
       branchName = String((employee as any).branch).toUpperCase();
     }
-    
-    const isHOBranch = 
-      branchName === "HO" || 
+
+    const isHOBranch =
+      branchName === "HO" ||
       branchName === "HEAD OFFICE" ||
       branchName.includes("HEAD OFFICE") ||
       branchName.includes("HO");
-    
+
     return isAreaManager && isHOBranch;
   };
-  
+
   const [pendingRegistrations, setPendingRegistrations] = useState<User[]>([]);
 
   const [activeRegistrations, setActiveRegistrations] = useState<User[]>([]);
@@ -212,14 +235,14 @@ export default function UserManagementTab() {
 
   const loadPendingUsers = async (
     searchValue: string,
-    statusFilter: string
+    statusFilter: string,
   ) => {
     try {
       const response = await apiService.getPendingRegistrations(
         searchValue,
         statusFilter,
         currentPagePending,
-        itemsPerPage
+        itemsPerPage,
       );
 
       setPendingRegistrations(response.data);
@@ -252,7 +275,7 @@ export default function UserManagementTab() {
         searchValue,
         roleFilter,
         currentPageActive,
-        itemsPerPage
+        itemsPerPage,
       );
 
       setActiveRegistrations(response.data);
@@ -361,7 +384,7 @@ export default function UserManagementTab() {
       if (tab === "new") {
         await loadPendingUsers(
           debouncedPendingSearchTerm,
-          debouncedStatusFilter
+          debouncedStatusFilter,
         );
       }
     };
@@ -387,7 +410,7 @@ export default function UserManagementTab() {
       console.error("❌ Error refreshing user data:", error);
       toastMessages.generic.error(
         "Refresh Failed",
-        "Failed to refresh user data. Please try again."
+        "Failed to refresh user data. Please try again.",
       );
     } finally {
       setRefresh(false);
@@ -469,7 +492,7 @@ export default function UserManagementTab() {
         Object.keys(error.response.data.errors).forEach((field) => {
           toastMessages.generic.error(
             "Update Failed",
-            error.response.data.errors[field][0]
+            error.response.data.errors[field][0],
           );
         });
       }
@@ -500,7 +523,7 @@ export default function UserManagementTab() {
       setDeletingUserId(null);
       toastMessages.generic.error(
         "Error",
-        "Failed to delete user. Please try again."
+        "Failed to delete user. Please try again.",
       );
     } finally {
       setEmployeeToDelete(null);
@@ -509,7 +532,7 @@ export default function UserManagementTab() {
 
   const handleApproveRegistration = async (
     registrationId: number,
-    registrationName: string
+    registrationName: string,
   ) => {
     try {
       await apiService.approveRegistration(registrationId);
@@ -519,14 +542,14 @@ export default function UserManagementTab() {
       console.error("Error approving registration:", error);
       toastMessages.generic.error(
         "Approval Error",
-        "An error occurred while approving the registration. Please try again."
+        "An error occurred while approving the registration. Please try again.",
       );
     }
   };
 
   const handleRejectRegistration = async (
     registrationId: number,
-    registrationName: string
+    registrationName: string,
   ) => {
     try {
       await apiService.rejectRegistration(registrationId);
@@ -536,7 +559,7 @@ export default function UserManagementTab() {
       console.error("Error rejecting registration:", error);
       toastMessages.generic.error(
         "Rejection Error",
-        "An error occurred while rejecting the registration. Please try again."
+        "An error occurred while rejecting the registration. Please try again.",
       );
     }
   };
@@ -551,7 +574,7 @@ export default function UserManagementTab() {
       // Remove dash from employee_id before sending (keep only numbers)
       formDataToUpload.append(
         "employee_id",
-        newUser.employee_id.replace(/-/g, "")
+        newUser.employee_id.replace(/-/g, ""),
       );
       formDataToUpload.append("email", newUser.email);
       formDataToUpload.append("contact", newUser.contact);
@@ -576,7 +599,8 @@ export default function UserManagementTab() {
       console.error("Error response:", error.response?.data);
       toastMessages.generic.error(
         "Add Failed",
-        error.response?.data?.message || "Failed to add user. Please try again."
+        error.response?.data?.message ||
+          "Failed to add user. Please try again.",
       );
       throw error;
     }
@@ -840,8 +864,8 @@ export default function UserManagementTab() {
                     <Badge
                       variant="outline"
                       className="bg-green-700 text-white hover:bg-green-700 border-green-300"
-                      >
-                      ✨ New Added 
+                    >
+                      ✨ New Added
                     </Badge>
                     <Badge
                       variant="outline"
@@ -966,10 +990,10 @@ export default function UserManagementTab() {
                               isDeleting
                                 ? "animate-slide-out-right bg-red-100 border-l-4 border-l-red-600"
                                 : isNew
-                                ? "bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100"
-                                : isRecentlyAdded
-                                ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
-                                : "hover:bg-gray-50"
+                                  ? "bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100"
+                                  : isRecentlyAdded
+                                    ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
+                                    : "hover:bg-gray-50"
                             }
                           >
                             {isDeleting ? (
@@ -1032,7 +1056,7 @@ export default function UserManagementTab() {
                                     className={getRoleColor(
                                       employee.roles &&
                                         Array.isArray(employee.roles) &&
-                                        employee.roles[0]?.name
+                                        employee.roles[0]?.name,
                                     )}
                                   >
                                     {(employee.roles &&
@@ -1062,7 +1086,7 @@ export default function UserManagementTab() {
                                       onClick={() => {
                                         setIsEvaluationTypeModalOpen(true);
                                         setSelectedEmployeeForEvaluation(
-                                          employee
+                                          employee,
                                         );
                                       }}
                                       title="Evaluate employee performance"
@@ -1372,10 +1396,10 @@ export default function UserManagementTab() {
                                 isRejected
                                   ? "bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100"
                                   : isNew
-                                  ? "bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100"
-                                  : isRecent
-                                  ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
-                                  : "hover:bg-gray-50"
+                                    ? "bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100"
+                                    : isRecent
+                                      ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
+                                      : "hover:bg-gray-50"
                               }
                             >
                               <TableCell className="px-6 py-3 font-medium">
@@ -1403,7 +1427,7 @@ export default function UserManagementTab() {
                               </TableCell>
                               <TableCell className="px-6 py-3">
                                 {new Date(
-                                  account.created_at
+                                  account.created_at,
                                 ).toLocaleDateString()}
                               </TableCell>
                               <TableCell className="px-6 py-3">
@@ -1430,7 +1454,7 @@ export default function UserManagementTab() {
                                         onClick={() =>
                                           handleApproveRegistration(
                                             Number(account.id),
-                                            account.fname
+                                            account.fname,
                                           )
                                         }
                                       >
@@ -1443,7 +1467,7 @@ export default function UserManagementTab() {
                                         onClick={() =>
                                           handleRejectRegistration(
                                             Number(account.id),
-                                            account.fname
+                                            account.fname,
                                           )
                                         }
                                       >
@@ -1459,7 +1483,7 @@ export default function UserManagementTab() {
                                       onClick={() =>
                                         handleApproveRegistration(
                                           Number(account.id),
-                                          account.fname
+                                          account.fname,
                                         )
                                       }
                                     >
@@ -1708,8 +1732,10 @@ export default function UserManagementTab() {
         <DialogContent className="max-w-7xl max-h-[101vh] overflow-hidden p-0 evaluation-container">
           {selectedEmployeeForEvaluation && evaluationType === "employee" && (
             <>
-              {isHO && !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
-                <RankNfileHo
+              {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
+              selectedEmployeeForEvaluation.branches[0]?.name ===
+                "HEAD OFFICE" ? (
+                <RnF_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -1718,7 +1744,7 @@ export default function UserManagementTab() {
                   }}
                 />
               ) : (
-                <BranchEvaluationForm
+                <RnF_B_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -1731,7 +1757,8 @@ export default function UserManagementTab() {
           )}
           {selectedEmployeeForEvaluation && evaluationType === "manager" && (
             <>
-              {isHO && !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
+              {isHO &&
+              !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
                 <BasicHo
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {

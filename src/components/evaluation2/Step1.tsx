@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { format } from "date-fns";
-import { EvaluationPayload } from "./types";
 import {
   getQuarterlyReviewStatus,
   getCurrentYear,
@@ -21,12 +20,17 @@ import {
 import { User, useAuth } from "@/contexts/UserContext";
 import { Item } from "@radix-ui/react-select";
 import apiService from "@/lib/apiService";
+import { EvaluationPayload } from "./types";
 
 interface Step1Props {
   data: EvaluationPayload;
   updateDataAction: (updates: Partial<EvaluationPayload>) => void;
   employee?: User | null;
-  evaluationType?: "rankNfile" | "basic" | "default";
+  evaluationType?:
+    | "rankNfileBranch"
+    | "rankNfileHo"
+    | "basicHo"
+    | "basicBranch";
 }
 
 // Score Dropdown Component
@@ -108,7 +112,7 @@ export default function Step1({
   data,
   updateDataAction,
   employee,
-  evaluationType = "default",
+  evaluationType,
 }: Step1Props) {
   const [probitionary3, setProbitionary3] = useState(false);
   const [probitionary5, setProbitionary5] = useState(false);
@@ -129,29 +133,6 @@ export default function Step1({
       false
     );
   };
-
-  // Auto-populate Date Hired from employee data
-  useEffect(() => {
-    if (employee && !data.hireDate) {
-      const dateHired =
-        (employee as any).date_hired ||
-        (employee as any).dateHired ||
-        (employee as any).hireDate;
-      if (dateHired) {
-        try {
-          // Convert to YYYY-MM-DD format for date input
-          const date = new Date(dateHired);
-          if (!isNaN(date.getTime())) {
-            const formattedDate = date.toISOString().split("T")[0];
-            updateDataAction({ hireDate: formattedDate });
-          }
-        } catch (error) {
-          console.error("Error parsing date_hired:", error);
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [employee?.id]);
 
   // Check for existing quarterly reviews when employee changes
   useEffect(() => {
@@ -205,22 +186,11 @@ export default function Step1({
         return;
       }
 
-      // Check if coverageFrom is before date hired
-      if (data.hireDate) {
-        const hireDate = new Date(data.hireDate);
-        if (!isNaN(hireDate.getTime()) && fromDate < hireDate) {
-          setCoverageError(
-            "Performance Coverage cannot start before Date Hired",
-          );
-          return;
-        }
-      }
-
       setCoverageError("");
     } else {
       setCoverageError("");
     }
-  }, [data.coverageFrom, data.coverageTo, data.hireDate]);
+  }, [data.coverageFrom, data.coverageTo]);
 
   // Calculate average score for Job Knowledge
   const calculateAverageScore = () => {
@@ -265,9 +235,12 @@ export default function Step1({
           Performance Review Form
         </h2>
         <h3 className="text-lg font-semibold text-gray-700 mb-6">
-          {evaluationType === "basic"
-            ? "Basic Evaluation"
-            : "Rank and File I & II"}
+          {evaluationType === "rankNfileBranch"
+            ? "Branch Rank and File I & II"
+            : ""}
+          {evaluationType === "rankNfileHo" ? "HO Rank and File I & II" : ""}
+          {evaluationType === "basicHo" ? "HO Basic" : ""}
+          {evaluationType === "basicBranch" ? "Branch Basic" : ""}
         </h3>
       </div>
 
@@ -786,7 +759,7 @@ export default function Step1({
             <Input
               id="hireDate"
               type="date"
-              value={data.hireDate || ""}
+              value={employee?.date_hired || ""}
               readOnly
               className="bg-gray-100 border-gray-300 cursor-not-allowed"
             />
@@ -855,11 +828,13 @@ export default function Step1({
                     }
 
                     // Validate: From date should not be before Date Hired
-                    if (data.hireDate && fromDate) {
+                    if (employee?.date_hired && fromDate) {
                       const hireDateStr =
-                        typeof data.hireDate === "string"
-                          ? data.hireDate
-                          : new Date(data.hireDate).toISOString().split("T")[0];
+                        typeof employee?.date_hired === "string"
+                          ? employee?.date_hired
+                          : new Date(employee?.date_hired)
+                              .toISOString()
+                              .split("T")[0];
                       if (fromDate < hireDateStr) {
                         setCoverageError(
                           "Performance Coverage cannot start before Date Hired",
@@ -871,10 +846,12 @@ export default function Step1({
                     setCoverageError("");
                   }}
                   min={
-                    data.hireDate
-                      ? typeof data.hireDate === "string"
-                        ? data.hireDate
-                        : new Date(data.hireDate).toISOString().split("T")[0]
+                    employee?.date_hired
+                      ? typeof employee?.date_hired === "string"
+                        ? employee?.date_hired
+                        : new Date(employee?.date_hired)
+                            .toISOString()
+                            .split("T")[0]
                       : undefined
                   }
                   max={

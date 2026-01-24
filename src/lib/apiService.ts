@@ -1,5 +1,5 @@
 import { api, sanctum } from "./api";
-import { EvaluationPayload } from "../components/evaluation/types";
+import { EvaluationPayload } from "../components/evaluation2/types";
 // Helper function to get CSRF cookie from Sanctum
 export const sanctum_csrf = async () => {
   try {
@@ -66,7 +66,7 @@ export const apiService = {
 
   updateEmployee: async (
     formData: FormData,
-    id: string | number
+    id: string | number,
   ): Promise<any> => {
     const response = await api.post(`/updateUser/${id}`, formData);
     return response.data;
@@ -91,7 +91,7 @@ export const apiService = {
     searchTerm: string,
     status: string | number,
     page: number,
-    perPage: number
+    perPage: number,
   ): Promise<any | null> => {
     const response = await api.get("/getPendingRegistrations", {
       params: {
@@ -110,7 +110,7 @@ export const apiService = {
     page: number,
     perPage: number,
     branch?: string,
-    department?: string
+    department?: string,
   ): Promise<any | null> => {
     const response = await api.get("/getAllActiveUsers", {
       params: {
@@ -155,7 +155,7 @@ export const apiService = {
     perPage?: number,
     status?: string,
     quarter?: string,
-    year?: string
+    year?: string,
   ): Promise<any> => {
     const response = await api.get(`/allEvaluations`, {
       params: {
@@ -193,7 +193,7 @@ export const apiService = {
 
   createSubmission: async (
     employeeId: number | string,
-    submission: EvaluationPayload
+    submission: EvaluationPayload,
   ): Promise<any> => {
     const response = await api.post(`/submit/${employeeId}`, submission);
     return response.data;
@@ -205,7 +205,7 @@ export const apiService = {
   },
 
   deleteSubmission: async (
-    id: number
+    id: number,
   ): Promise<{ success: boolean; message: string }> => {
     const delete_eval = await api.post(`/deleteEval/${id}`);
     return delete_eval.data;
@@ -217,7 +217,7 @@ export const apiService = {
   },
 
   markNotificationAsRead: async (
-    notificationId: string | number
+    notificationId: string | number,
   ): Promise<void> => {
     await api.post(`/isReadNotification/${notificationId}`);
   },
@@ -227,7 +227,7 @@ export const apiService = {
   },
 
   deleteNotification: async (
-    notificationId: string | number
+    notificationId: string | number,
   ): Promise<void> => {
     await api.post(`/deleteNotification/${notificationId}`);
   },
@@ -281,7 +281,7 @@ export const apiService = {
     search?: string,
     per_page?: number,
     page?: number,
-    position_filter?: number
+    position_filter?: number,
   ): Promise<any> => {
     const response = await api.get("/getAllEmployeeByAuth", {
       params: {
@@ -318,7 +318,7 @@ export const apiService = {
   // Update branches for specific user
   updateUserBranch: async (
     userId: string | number,
-    formData: FormData
+    formData: FormData,
   ): Promise<any> => {
     const response = await api.post(`/updateUserBranch/${userId}`, formData);
     return response.data;
@@ -334,7 +334,7 @@ export const apiService = {
   getTotalEmployeesBranch: async (
     searchValue: string,
     currentPage: number,
-    itemsPerPage: number
+    itemsPerPage: number,
   ): Promise<any> => {
     const response = await api.get("/getTotalEmployeesBranch", {
       params: {
@@ -362,7 +362,7 @@ export const apiService = {
   getTotalEmployeesDepartments: async (
     searchValue: string,
     currentPage: number,
-    itemsPerPage: number
+    itemsPerPage: number,
   ): Promise<any> => {
     const response = await api.get("/getTotalEmployeesDepartments", {
       params: {
@@ -395,25 +395,21 @@ export const apiService = {
   },
 
   // Get branch rank and file employees
-  getBranchRankNFile: async (
-  ): Promise<any> => {
-    const response = await api.post("/BranchRankNFile", {
-    });
+  getBranchRankNFile: async (): Promise<any> => {
+    const response = await api.post("/BranchRankNFile", {});
     return response.data;
   },
 
   // Get branch basic employees
-  getBranchBasic: async (
-  ): Promise<any> => {
-    const response = await api.post("/BranchBasic", {    
-    });
+  getBranchBasic: async (): Promise<any> => {
+    const response = await api.post("/BranchBasic", {});
     return response.data;
   },
 
   // Get head office basic employees
   postHoBasic: async (
     employeeId: number | string,
-    submission: EvaluationPayload
+    submission: EvaluationPayload,
   ): Promise<any> => {
     const response = await api.post(`/HoBasic/${employeeId}`, submission);
     return response.data;
@@ -421,7 +417,7 @@ export const apiService = {
   // Get head office rank and file employees
   postHoRankNFile: async (
     employeeId: number | string,
-    submission: EvaluationPayload
+    submission: EvaluationPayload,
   ): Promise<any> => {
     const response = await api.post(`/HoRankNFile/${employeeId}`, submission);
     return response.data;
@@ -430,7 +426,7 @@ export const apiService = {
   // Get branch basic employees
   postBranchBasic: async (
     employeeId: number | string,
-    submission: EvaluationPayload
+    submission: EvaluationPayload,
   ): Promise<any> => {
     const response = await api.post(`/BranchBasic/${employeeId}`, submission);
     return response.data;
@@ -439,9 +435,12 @@ export const apiService = {
   // Get branch rank and file employees
   postBranchRankNFile: async (
     employeeId: number | string,
-    submission: EvaluationPayload
+    submission: EvaluationPayload,
   ): Promise<any> => {
-    const response = await api.post(`/BranchRankNFile/${employeeId}`, submission);
+    const response = await api.post(
+      `/BranchRankNFile/${employeeId}`,
+      submission,
+    );
     return response.data;
   },
 
@@ -452,7 +451,7 @@ export const apiService = {
     per_page: number,
     status: string,
     quarter: string,
-    year: number
+    year: number,
   ): Promise<any> => {
     const response = await api.get("/getEvalAuthEvaluator", {
       params: {
@@ -473,7 +472,7 @@ export const apiService = {
     page: number,
     per_page: number,
     selectedYear?: string,
-    selectedQuarter?: string
+    selectedQuarter?: string,
   ): Promise<any> => {
     const response = await api.get("/getMyEvalAuthEmployee", {
       params: {
@@ -491,7 +490,7 @@ export const apiService = {
   evaluatorDashboard: async (
     searchTerm: string,
     currentPage: number,
-    itemsPerPage: number
+    itemsPerPage: number,
   ): Promise<any> => {
     const response = await api.get("/evaluatorDashboard", {
       params: {

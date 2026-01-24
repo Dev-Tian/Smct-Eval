@@ -38,6 +38,7 @@ export interface User {
   approvedSignatureReset: number;
   requestSignatureReset: number;
   created_at?: string;
+  date_hired?: string;
 }
 
 interface UserContextType {
@@ -120,7 +121,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     };
     loadUserAuth();
-    
+
     return () => {
       isMounted = false;
     };

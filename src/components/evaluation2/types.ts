@@ -6,7 +6,6 @@ export type ReviewTypeProbationary = "" | 3 | 5;
 
 // Main payload
 interface EvaluationPayload {
-  hireDate: string;
   rating: number | String;
   coverageFrom: string | Date;
   coverageTo: string | Date;
@@ -18,34 +17,51 @@ interface EvaluationPayload {
   priorityArea2: string;
   priorityArea3: string;
   remarks: string;
+
   jobKnowledgeScore1: number;
   jobKnowledgeScore2: number;
   jobKnowledgeScore3: number;
   jobKnowledgeComments1: string;
   jobKnowledgeComments2: string;
   jobKnowledgeComments3: string;
+
   qualityOfWorkScore1: number;
   qualityOfWorkScore2: number;
   qualityOfWorkScore3: number;
   qualityOfWorkScore4: number;
-  qualityOfWorkScore5: number;
+  qualityOfWorkScore5?: number;
+  qualityOfWorkScore6?: number;
+  qualityOfWorkScore7?: number;
+  qualityOfWorkScore8?: number;
+  qualityOfWorkScore9?: number;
+  qualityOfWorkScore10?: number;
+  qualityOfWorkScore11?: number;
   qualityOfWorkComments1: string;
   qualityOfWorkComments2: string;
   qualityOfWorkComments3: string;
   qualityOfWorkComments4: string;
-  qualityOfWorkComments5: string;
+  qualityOfWorkComments5?: string;
+  qualityOfWorkComments6?: string;
+  qualityOfWorkComments7?: string;
+  qualityOfWorkComments8?: string;
+  qualityOfWorkComments9?: string;
+  qualityOfWorkComments10?: string;
+  qualityOfWorkComments11?: string;
+
   adaptabilityScore1: number;
   adaptabilityScore2: number;
   adaptabilityScore3: number;
   adaptabilityComments1: string;
   adaptabilityComments2: string;
   adaptabilityComments3: string;
+
   teamworkScore1: number;
   teamworkScore2: number;
   teamworkScore3: number;
   teamworkComments1: string;
   teamworkComments2: string;
   teamworkComments3: string;
+
   reliabilityScore1: number;
   reliabilityScore2: number;
   reliabilityScore3: number;
@@ -54,6 +70,7 @@ interface EvaluationPayload {
   reliabilityComments2: string;
   reliabilityComments3: string;
   reliabilityComments4: string;
+
   ethicalScore1: number;
   ethicalScore2: number;
   ethicalScore3: number;
@@ -62,43 +79,29 @@ interface EvaluationPayload {
   ethicalExplanation2: string;
   ethicalExplanation3: string;
   ethicalExplanation4: string;
-  customerServiceScore1: number;
-  customerServiceScore2: number;
-  customerServiceScore3: number;
-  customerServiceScore4: number;
-  customerServiceScore5: number;
-  customerServiceExplanation1: string;
-  customerServiceExplanation2: string;
-  customerServiceExplanation3: string;
-  customerServiceExplanation4: string;
-  customerServiceExplanation5: string;
-  managerialSkillsScore1: number;
-  managerialSkillsScore2: number;
-  managerialSkillsScore3: number;
-  managerialSkillsScore4: number;
-  managerialSkillsScore5: number;
-  managerialSkillsScore6: number;
-  managerialSkillsExplanation1: string;
-  managerialSkillsExplanation2: string;
-  managerialSkillsExplanation3: string;
-  managerialSkillsExplanation4: string;
-  managerialSkillsExplanation5: string;
-  managerialSkillsExplanation6: string;
-  created_at: string;
+
+  customerServiceScore1?: number;
+  customerServiceScore2?: number;
+  customerServiceScore3?: number;
+  customerServiceScore4?: number;
+  customerServiceScore5?: number;
+  customerServiceExplanation1?: string;
+  customerServiceExplanation2?: string;
+  customerServiceExplanation3?: string;
+  customerServiceExplanation4?: string;
+  customerServiceExplanation5?: string;
+
+  managerialSkillsScore1?: number;
+  managerialSkillsScore2?: number;
+  managerialSkillsScore3?: number;
+  managerialSkillsScore4?: number;
+  managerialSkillsScore5?: number;
+  managerialSkillsScore6?: number;
+  managerialSkillsExplanation1?: string;
+  managerialSkillsExplanation2?: string;
+  managerialSkillsExplanation3?: string;
+  managerialSkillsExplanation4?: string;
+  managerialSkillsExplanation5?: string;
+  managerialSkillsExplanation6?: string;
 }
 export type { EvaluationPayload };
-
-import React from "react";
-
-// Evaluation step configuration
-export interface EvaluationStepConfig {
-  id: number;
-  title: string;
-  component: React.ComponentType<any>;
-}
-
-export interface EvaluationFormConfig {
-  steps: EvaluationStepConfig[];
-  includeOverallAssessment?: boolean;
-  evaluationType?: "rankNfile" | "basic" | "default";
-}

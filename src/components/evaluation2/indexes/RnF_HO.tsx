@@ -18,110 +18,47 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { AlertTriangle } from "lucide-react";
-import WelcomeStep from "./WelcomeStep";
-import { EvaluationPayload, EvaluationStepConfig } from "./types";
-import { storeEvaluationResult } from "@/lib/evaluationStorage";
-import { apiService } from "@/lib/apiService";
-import { createEvaluationNotification } from "@/lib/notificationUtils";
-import { User, useAuth } from "../../contexts/UserContext";
-import { branchEvaluationSteps } from "./configs";
+import WelcomeStep from "../WelcomeStep";
 
-// Default steps use branch evaluation configuration
-const defaultSteps: EvaluationStepConfig[] = branchEvaluationSteps;
+import { apiService } from "@/lib/apiService";
+import { useAuth, User } from "../../../contexts/UserContext";
+import Step1 from "../Step1";
+import Step3 from "../Step3";
+import Step4 from "../Step4";
+import Step5 from "../Step5";
+import Step6 from "../Step6";
+import Step7 from "../Step7";
+import { EvaluationPayload } from "../types";
+import Step2_HO from "../Step2_HO";
+import RnF_HO_Overall from "../overall/RnF_HO_Overall";
 
 interface EvaluationFormProps {
   employee?: User | null;
   onCloseAction?: () => void;
   onCancelAction?: () => void;
-  steps?: EvaluationStepConfig[]; // Optional: custom step configuration
-  evaluationType?: "rankNfile" | "basic" | "default"; // Optional: evaluation type
 }
 
-export default function EvaluationForm({
+export default function RnF_HO_EvaluationForm({
   employee,
   onCloseAction,
   onCancelAction,
-  steps: customSteps,
-  evaluationType = "default",
 }: EvaluationFormProps) {
   const [currentStep, setCurrentStep] = useState(0); // 0 = welcome step, 1-N = actual steps
   const [welcomeAnimationKey, setWelcomeAnimationKey] = useState(0);
-  const { user } = useAuth();
 
-  // Use custom steps if provided, otherwise use default steps
-  const baseSteps = customSteps || defaultSteps;
+  const defaultSteps = [
+    { id: 1, title: "Employee Information / Job Knowledge", component: Step1 },
+    { id: 2, title: "Quality of Work", component: Step2_HO },
+    { id: 3, title: "Adaptability", component: Step3 },
+    { id: 4, title: "Teamwork", component: Step4 },
+    { id: 5, title: "Reliability", component: Step5 },
+    { id: 6, title: "Ethical & Professional Behavior", component: Step6 },
+    { id: 7, title: "Overall Assessment", component: RnF_HO_Overall },
+  ];
 
   // Check if evaluator's branch is HO (Head Office)
-  const isEvaluatorHO = () => {
-    if (!user?.branches) return false;
-
-    // Handle branches as array
-    if (Array.isArray(user.branches)) {
-      const branch = user.branches[0];
-      if (branch) {
-        const branchName = branch.branch_name?.toUpperCase() || "";
-        const branchCode = branch.branch_code?.toUpperCase() || "";
-        return (
-          branchName === "HO" ||
-          branchCode === "HO" ||
-          branchName.includes("HEAD OFFICE") ||
-          branchCode.includes("HEAD OFFICE") ||
-          branchName === "HEAD OFFICE" ||
-          branchCode === "HEAD OFFICE"
-        );
-      }
-    }
-
-    // Handle branches as object
-    if (typeof user.branches === "object") {
-      const branchName =
-        (user.branches as any)?.branch_name?.toUpperCase() || "";
-      const branchCode =
-        (user.branches as any)?.branch_code?.toUpperCase() || "";
-      return (
-        branchName === "HO" ||
-        branchCode === "HO" ||
-        branchName.includes("HEAD OFFICE") ||
-        branchCode.includes("HEAD OFFICE") ||
-        branchName === "HEAD OFFICE" ||
-        branchCode === "HEAD OFFICE"
-      );
-    }
-
-    return false;
-  };
-
-  const isHO = isEvaluatorHO();
-
-  // Filter steps based on HO status and evaluation type
-  // For default evaluation type, remove Step 7 for HO evaluators
-  // For custom steps, use them as-is
-  const filteredSteps = (() => {
-    if (customSteps) {
-      // Use custom steps as-is (already configured for specific evaluation type)
-      return customSteps;
-    }
-    // Default behavior: remove Step 7 for HO evaluators
-    return isHO ? baseSteps.filter((step) => step.id !== 7) : baseSteps;
-  })();
-
-  // Helper to get step by ID
-  const getStepById = (id: number) =>
-    filteredSteps.find((step) => step.id === id);
-
-  // Helper to get step index by ID
-  const getStepIndexById = (id: number) =>
-    filteredSteps.findIndex((step) => step.id === id);
-
-  // Helper to get current step ID from current step index
-  const getCurrentStepId = () => {
-    if (currentStep === 0) return 0;
-    const stepIndex = currentStep - 1;
-    return filteredSteps[stepIndex]?.id || currentStep;
-  };
 
   const [form, setForm] = useState<EvaluationPayload>({
-    hireDate: "",
     rating: 0,
     coverageFrom: "",
     coverageTo: "",
@@ -143,12 +80,10 @@ export default function EvaluationForm({
     qualityOfWorkScore2: 0,
     qualityOfWorkScore3: 0,
     qualityOfWorkScore4: 0,
-    qualityOfWorkScore5: 0,
     qualityOfWorkComments1: "",
     qualityOfWorkComments2: "",
     qualityOfWorkComments3: "",
     qualityOfWorkComments4: "",
-    qualityOfWorkComments5: "",
     adaptabilityScore1: 0,
     adaptabilityScore2: 0,
     adaptabilityScore3: 0,
@@ -177,29 +112,6 @@ export default function EvaluationForm({
     ethicalExplanation2: "",
     ethicalExplanation3: "",
     ethicalExplanation4: "",
-    customerServiceScore1: 0,
-    customerServiceScore2: 0,
-    customerServiceScore3: 0,
-    customerServiceScore4: 0,
-    customerServiceScore5: 0,
-    customerServiceExplanation1: "",
-    customerServiceExplanation2: "",
-    customerServiceExplanation3: "",
-    customerServiceExplanation4: "",
-    customerServiceExplanation5: "",
-    managerialSkillsScore1: 0,
-    managerialSkillsScore2: 0,
-    managerialSkillsScore3: 0,
-    managerialSkillsScore4: 0,
-    managerialSkillsScore5: 0,
-    managerialSkillsScore6: 0,
-    managerialSkillsExplanation1: "",
-    managerialSkillsExplanation2: "",
-    managerialSkillsExplanation3: "",
-    managerialSkillsExplanation4: "",
-    managerialSkillsExplanation5: "",
-    managerialSkillsExplanation6: "",
-    created_at: "",
   });
   const [isCancelling, setIsCancelling] = useState(false);
 
@@ -291,11 +203,11 @@ export default function EvaluationForm({
             }
 
             // Check if coverageFrom is not before date hired
-            if (form.hireDate) {
+            if (employee?.date_hired) {
               const hireDateStr =
-                typeof form.hireDate === "string"
-                  ? form.hireDate
-                  : new Date(form.hireDate).toISOString().split("T")[0];
+                typeof employee?.date_hired === "string"
+                  ? employee?.date_hired
+                  : new Date(employee?.date_hired).toISOString().split("T")[0];
               if (
                 hireDateStr &&
                 hireDateStr.length === 10 &&
@@ -317,48 +229,6 @@ export default function EvaluationForm({
           hasValidCoverageDates
         );
       case 2: // Quality of Work
-        // Check if evaluator is HO
-        const isEvaluatorHO = () => {
-          if (!user?.branches) return false;
-
-          // Handle branches as array
-          if (Array.isArray(user.branches)) {
-            const branch = user.branches[0];
-            if (branch) {
-              const branchName = branch.branch_name?.toUpperCase() || "";
-              const branchCode = branch.branch_code?.toUpperCase() || "";
-              return (
-                branchName === "HO" ||
-                branchCode === "HO" ||
-                branchName.includes("HEAD OFFICE") ||
-                branchCode.includes("HEAD OFFICE") ||
-                branchName === "HEAD OFFICE" ||
-                branchCode === "HEAD OFFICE"
-              );
-            }
-          }
-
-          // Handle branches as object
-          if (typeof user.branches === "object") {
-            const branchName =
-              (user.branches as any)?.branch_name?.toUpperCase() || "";
-            const branchCode =
-              (user.branches as any)?.branch_code?.toUpperCase() || "";
-            return (
-              branchName === "HO" ||
-              branchCode === "HO" ||
-              branchName.includes("HEAD OFFICE") ||
-              branchCode.includes("HEAD OFFICE") ||
-              branchName === "HEAD OFFICE" ||
-              branchCode === "HEAD OFFICE"
-            );
-          }
-
-          return false;
-        };
-
-        const isHO = isEvaluatorHO();
-
         return (
           form.qualityOfWorkScore1 &&
           form.qualityOfWorkScore1 !== 0 &&
@@ -367,9 +237,7 @@ export default function EvaluationForm({
           form.qualityOfWorkScore3 &&
           form.qualityOfWorkScore3 !== 0 &&
           form.qualityOfWorkScore4 &&
-          form.qualityOfWorkScore4 !== 0 &&
-          // qualityOfWorkScore5 is only required if not HO
-          (isHO || (form.qualityOfWorkScore5 && form.qualityOfWorkScore5 !== 0))
+          form.qualityOfWorkScore4 !== 0
         );
       case 3: // Adaptability
         return (
@@ -411,95 +279,10 @@ export default function EvaluationForm({
           form.ethicalScore4 &&
           form.ethicalScore4 !== 0
         );
-      case 7: // Customer Service
-        // Check if evaluator is HO - Step 7 is not applicable for HO
-        const isEvaluatorHO_Step7 = () => {
-          if (!user?.branches) return false;
-
-          // Handle branches as array
-          if (Array.isArray(user.branches)) {
-            const branch = user.branches[0];
-            if (branch) {
-              const branchName = branch.branch_name?.toUpperCase() || "";
-              const branchCode = branch.branch_code?.toUpperCase() || "";
-              return (
-                branchName === "HO" ||
-                branchCode === "HO" ||
-                branchName.includes("HEAD OFFICE") ||
-                branchCode.includes("HEAD OFFICE") ||
-                branchName === "HEAD OFFICE" ||
-                branchCode === "HEAD OFFICE"
-              );
-            }
-          }
-
-          // Handle branches as object
-          if (typeof user.branches === "object") {
-            const branchName =
-              (user.branches as any)?.branch_name?.toUpperCase() || "";
-            const branchCode =
-              (user.branches as any)?.branch_code?.toUpperCase() || "";
-            return (
-              branchName === "HO" ||
-              branchCode === "HO" ||
-              branchName.includes("HEAD OFFICE") ||
-              branchCode.includes("HEAD OFFICE") ||
-              branchName === "HEAD OFFICE" ||
-              branchCode === "HEAD OFFICE"
-            );
-          }
-
-          return false;
-        };
-
-        const isHO_Step7 = isEvaluatorHO_Step7();
-
-        // Step 7 is always valid for HO evaluators (not applicable)
-        if (isHO_Step7) {
-          return true;
-        }
-
-        // For non-HO evaluators, require all customer service scores
-        return (
-          form.customerServiceScore1 &&
-          form.customerServiceScore1 !== 0 &&
-          form.customerServiceScore2 &&
-          form.customerServiceScore2 !== 0 &&
-          form.customerServiceScore3 &&
-          form.customerServiceScore3 !== 0 &&
-          form.customerServiceScore4 &&
-          form.customerServiceScore4 !== 0 &&
-          form.customerServiceScore5 &&
-          form.customerServiceScore5 !== 0
-        );
-      case 8: // Overall Assessment
+      case 7: // Overall Assessment
         return true; // No validation required for step 8
       default:
         return true; // For other steps, allow progression
-    }
-  };
-
-  // Get step name for tooltip
-  const getStepName = () => {
-    switch (currentStep) {
-      case 1:
-        return "Employee Information & Job Knowledge";
-      case 2:
-        return "Quality of Work";
-      case 3:
-        return "Adaptability";
-      case 4:
-        return "Teamwork";
-      case 5:
-        return "Reliability";
-      case 6:
-        return "Ethical & Professional Behavior";
-      case 7:
-        return "Customer Service";
-      case 8:
-        return "Overall Assessment";
-      default:
-        return "evaluation";
     }
   };
 
@@ -547,11 +330,13 @@ export default function EvaluationForm({
                 return "Performance Coverage 'From' date must be earlier than 'To' date";
               }
               // Check if coverageFrom is before date hired
-              if (form.hireDate) {
+              if (employee?.date_hired) {
                 const hireDateStr =
-                  typeof form.hireDate === "string"
-                    ? form.hireDate
-                    : new Date(form.hireDate).toISOString().split("T")[0];
+                  typeof employee?.date_hired === "string"
+                    ? employee?.date_hired
+                    : new Date(employee?.date_hired)
+                        .toISOString()
+                        .split("T")[0];
                 if (
                   hireDateStr &&
                   hireDateStr.length === 10 &&
@@ -586,7 +371,7 @@ export default function EvaluationForm({
 
   const nextStep = () => {
     // Move to next step in filtered steps array
-    if (currentStep < filteredSteps.length) {
+    if (currentStep < defaultSteps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -621,101 +406,9 @@ export default function EvaluationForm({
   // submission confirmation
   const confirmSubmit = async () => {
     try {
-      const empID = employee?.id;
-      if (empID) {
-        // Check if evaluator's branch is HO (Head Office)
-        const isEvaluatorHO = () => {
-          if (!user?.branches) return false;
-
-          // Handle branches as array
-          if (Array.isArray(user.branches)) {
-            const branch = user.branches[0];
-            if (branch) {
-              const branchName = branch.branch_name?.toUpperCase() || "";
-              const branchCode = branch.branch_code?.toUpperCase() || "";
-              return (
-                branchName === "HO" ||
-                branchCode === "HO" ||
-                branchName.includes("HEAD OFFICE") ||
-                branchCode.includes("HEAD OFFICE") ||
-                branchName === "HEAD OFFICE" ||
-                branchCode === "HEAD OFFICE"
-              );
-            }
-          }
-
-          // Handle branches as object
-          if (typeof user.branches === "object") {
-            const branchName =
-              (user.branches as any)?.branch_name?.toUpperCase() || "";
-            const branchCode =
-              (user.branches as any)?.branch_code?.toUpperCase() || "";
-            return (
-              branchName === "HO" ||
-              branchCode === "HO" ||
-              branchName.includes("HEAD OFFICE") ||
-              branchCode.includes("HEAD OFFICE") ||
-              branchName === "HEAD OFFICE" ||
-              branchCode === "HEAD OFFICE"
-            );
-          }
-
-          return false;
-        };
-
-        // Check if evaluator is Area Manager
-        const isAreaManager = () => {
-          if (!user?.positions) return false;
-
-          // Get position name from various possible fields
-          const positionName = (
-            user.positions?.label ||
-            user.positions?.name ||
-            (user as any).position ||
-            ""
-          )
-            .toLowerCase()
-            .trim();
-
-          // Check if position is Area Manager
-          return (
-            positionName === "area manager" ||
-            positionName.includes("area manager")
-          );
-        };
-
-        const isHO = isEvaluatorHO();
-        const isAreaMgr = isAreaManager();
-
-        // Use appropriate API endpoint based on branch, position, and evaluation type
-        if (isHO && isAreaMgr) {
-          // Head Office Area Manager - use Branch endpoints
-          if (evaluationType === "rankNfile") {
-            const response = await apiService.postBranchRankNFile(empID, form);
-          } else if (evaluationType === "basic") {
-            const response = await apiService.postBranchBasic(empID, form);
-          } else {
-            return console.log("Invalid evaluation type 1");
-          }
-        } else if (isHO) {
-          // Head Office evaluator (not Area Manager) - use HO endpoints
-          if (evaluationType === "rankNfile") {
-            const response = await apiService.postHoRankNFile(empID, form);
-          } else if (evaluationType === "basic") {
-            const response = await apiService.postHoBasic(empID, form);
-          } else {
-            return console.log("Invalid evaluation type 2");
-          }
-        } else {
-          // Branch evaluator (not Head Office) - use Branch endpoints
-          if (evaluationType === "rankNfile") {
-            const response = await apiService.postBranchRankNFile(empID, form);
-          } else if (evaluationType === "basic") {
-            const response = await apiService.postBranchBasic(empID, form);
-          } else {
-            return console.log("Invalid evaluation type 3");
-          }
-        }
+      if (employee) {
+        const employeeId = Number(employee.id);
+        await apiService.postHoRankNFile(employeeId, form);
       }
       setShowSuccessDialog(true);
     } catch (clientError) {
@@ -728,20 +421,13 @@ export default function EvaluationForm({
 
   // Get current step info
   const currentStepInfo =
-    currentStep > 0 ? filteredSteps[currentStep - 1] : null;
-  const isLastStep = currentStep === filteredSteps.length;
+    currentStep > 0 ? defaultSteps[currentStep - 1] : null;
+  const isLastStep = currentStep === defaultSteps.length;
   // Check if current step is Overall Assessment (any variant)
   const isOverallAssessmentStep =
     isLastStep ||
     (currentStep > 0 &&
-      filteredSteps[currentStep - 1]?.title === "Overall Assessment");
-
-  // Get the current step component for rendering
-  const getCurrentStepComponent = () => {
-    if (currentStep === 0) return WelcomeStep;
-    const stepIndex = currentStep - 1;
-    return filteredSteps[stepIndex]?.component || WelcomeStep;
-  };
+      defaultSteps[currentStep - 1]?.title === "Overall Assessment");
 
   return (
     <>
@@ -834,7 +520,7 @@ export default function EvaluationForm({
                 <CardContent className="pt-6">
                   <div className="flex justify-center mb-4">
                     <div className="flex items-center">
-                      {filteredSteps.map((step, index) => (
+                      {defaultSteps.map((step, index) => (
                         <div key={step.id} className="flex items-center">
                           {/* Step Circle */}
                           <div
@@ -846,13 +532,13 @@ export default function EvaluationForm({
                                   : "bg-gray-200 text-gray-500"
                             }`}
                           >
-                            {index === filteredSteps.length - 1
+                            {index === defaultSteps.length - 1
                               ? "End"
                               : step.id}
                           </div>
 
                           {/* Connecting Line */}
-                          {index < filteredSteps.length - 1 && (
+                          {index < defaultSteps.length - 1 && (
                             <div className="w-16 h-1 mx-2 relative">
                               <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
                               <div
@@ -876,8 +562,8 @@ export default function EvaluationForm({
                   <div className="text-center">
                     <span className="text-sm font-medium text-gray-700">
                       {isOverallAssessmentStep
-                        ? `End of ${filteredSteps.length} steps: ${currentStepInfo?.title || "Overall Assessment"}`
-                        : `Step ${currentStep} of ${filteredSteps.length}: ${currentStepInfo?.title || "Welcome"}`}
+                        ? `End of ${defaultSteps.length} steps: ${currentStepInfo?.title || "Overall Assessment"}`
+                        : `Step ${currentStep} of ${defaultSteps.length}: ${currentStepInfo?.title || "Welcome"}`}
                     </span>
                   </div>
                 </CardContent>
@@ -897,7 +583,7 @@ export default function EvaluationForm({
                     employee={employee}
                     onStartAction={startEvaluation}
                     onBackAction={onCloseAction}
-                    evaluationType={evaluationType}
+                    evaluationType="rankNfileHo"
                   />
                 </CardContent>
               </Card>
@@ -919,12 +605,12 @@ export default function EvaluationForm({
                       employee={employee}
                       onStartAction={startEvaluation}
                       onBackAction={onCloseAction}
-                      evaluationType={evaluationType}
+                      evaluationType="rankNfileHo"
                     />
                   ) : (
                     (() => {
                       const stepIndex = currentStep - 1;
-                      const step = filteredSteps[stepIndex];
+                      const step = defaultSteps[stepIndex];
                       if (!step) return null;
                       const StepComponent = step.component;
 
@@ -938,6 +624,7 @@ export default function EvaluationForm({
                             onSubmitAction={handleSubmit}
                             onPreviousAction={prevStep}
                             onCloseAction={handleCloseAfterSubmission}
+                            evaluationType="rankNfileHo"
                           />
                         );
                       }
@@ -947,11 +634,9 @@ export default function EvaluationForm({
                         data: form,
                         updateDataAction: updateDataAction,
                         employee: employee,
+                        evaluationType: "rankNfileHo",
                       };
-                      // Pass evaluationType to Step1 and Step2 (and potentially other steps that need it)
-                      if (step.id === 1 || step.id === 2) {
-                        stepProps.evaluationType = evaluationType;
-                      }
+
                       return <StepComponent {...stepProps} />;
                     })()
                   )}
@@ -1082,7 +767,6 @@ export default function EvaluationForm({
                   }
 
                   setForm({
-                    hireDate: "",
                     rating: 0,
                     coverageFrom: "",
                     coverageTo: "",
@@ -1104,12 +788,10 @@ export default function EvaluationForm({
                     qualityOfWorkScore2: 0,
                     qualityOfWorkScore3: 0,
                     qualityOfWorkScore4: 0,
-                    qualityOfWorkScore5: 0,
                     qualityOfWorkComments1: "",
                     qualityOfWorkComments2: "",
                     qualityOfWorkComments3: "",
                     qualityOfWorkComments4: "",
-                    qualityOfWorkComments5: "",
                     adaptabilityScore1: 0,
                     adaptabilityScore2: 0,
                     adaptabilityScore3: 0,
@@ -1138,29 +820,6 @@ export default function EvaluationForm({
                     ethicalExplanation2: "",
                     ethicalExplanation3: "",
                     ethicalExplanation4: "",
-                    customerServiceScore1: 0,
-                    customerServiceScore2: 0,
-                    customerServiceScore3: 0,
-                    customerServiceScore4: 0,
-                    customerServiceScore5: 0,
-                    customerServiceExplanation1: "",
-                    customerServiceExplanation2: "",
-                    customerServiceExplanation3: "",
-                    customerServiceExplanation4: "",
-                    customerServiceExplanation5: "",
-                    managerialSkillsScore1: 0,
-                    managerialSkillsScore2: 0,
-                    managerialSkillsScore3: 0,
-                    managerialSkillsScore4: 0,
-                    managerialSkillsScore5: 0,
-                    managerialSkillsScore6: 0,
-                    managerialSkillsExplanation1: "",
-                    managerialSkillsExplanation2: "",
-                    managerialSkillsExplanation3: "",
-                    managerialSkillsExplanation4: "",
-                    managerialSkillsExplanation5: "",
-                    managerialSkillsExplanation6: "",
-                    created_at: "",
                   });
                 } finally {
                   setIsCancelling(false);
