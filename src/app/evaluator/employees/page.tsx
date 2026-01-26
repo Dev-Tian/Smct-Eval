@@ -26,14 +26,12 @@ import { User, useAuth } from "../../../contexts/UserContext";
 import apiService from "@/lib/apiService";
 import EvaluationTypeModal from "@/components/EvaluationTypeModal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import EvaluationForm from "@/components/evaluation";
-import ManagerEvaluationForm from "@/components/evaluation/ManagerEvaluationForm";
-import BranchEvaluationForm from "@/components/evaluation/BranchEvaluationForm";
-import BasicHo from "@/components/evaluation/BasicHo";
 import EvaluationsPagination from "@/components/paginationComponent";
 import ViewEmployeeModal from "@/components/ViewEmployeeModal";
 import RnF_B_EvaluationForm from "@/components/evaluation2/indexes/RnF_B";
 import RnF_HO_EvaluationForm from "@/components/evaluation2/indexes/RnF_HO";
+import Basic_HO_EvaluationForm from "@/components/evaluation2/indexes/Basic_HO";
+import Basic_B_EvaluationForm from "@/components/evaluation2/indexes/Basic_B";
 
 export default function EmployeesTab() {
   const { user } = useAuth();
@@ -712,7 +710,7 @@ export default function EmployeesTab() {
               {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
               selectedEmployeeForEvaluation.branches[0]?.name ===
                 "HEAD OFFICE" ? (
-                <BasicHo
+                <Basic_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -721,7 +719,7 @@ export default function EmployeesTab() {
                   }}
                 />
               ) : (
-                <BranchEvaluationForm
+                <Basic_B_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);

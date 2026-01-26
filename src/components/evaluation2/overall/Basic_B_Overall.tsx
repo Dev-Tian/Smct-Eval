@@ -19,7 +19,7 @@ import {
   Send,
   User,
 } from "lucide-react";
-import { EvaluationPayload } from "./types";
+
 import { format } from "date-fns";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -27,7 +27,8 @@ import {
   getCurrentYear,
 } from "@/lib/quarterlyReviewUtils";
 import { useAuth, User as UserType } from "@/contexts/UserContext";
-import { CONFIG } from "../../../config/config";
+import { CONFIG } from "../../../../config/config";
+import { EvaluationPayload } from "../types";
 
 interface OverallAssessmentProps {
   data: EvaluationPayload;
@@ -68,7 +69,7 @@ const getRatingColor = (rating: string) => {
   }
 };
 
-export default function OverallAssessmentRankNfile({
+export default function Basic_B_Overall({
   data,
   updateDataAction,
   employee,
@@ -96,15 +97,20 @@ export default function OverallAssessmentRankNfile({
   const [isLoadingQuarters, setIsLoadingQuarters] = useState(false);
   const [isSubmittingEvaluation, setIsSubmittingEvaluation] = useState(false);
 
-  // Rating will be updated after overallWeightedScore is calculated below
+  useEffect(() => {
+    const load = async () => {
+      updateDataAction({ rating: overallWeightedScore });
+    };
+    load();
+  }, []);
   const handleSubmitEvaluation = async () => {
     // Validate evaluator has a signature
     if (!user?.signature) {
       error(
-        "Please add your signature to your profile before submitting the evaluation."
+        "Please add your signature to your profile before submitting the evaluation.",
       );
       setSubmissionError(
-        "Please add your signature to your profile before submitting the evaluation."
+        "Please add your signature to your profile before submitting the evaluation.",
       );
       return;
     }
@@ -117,243 +123,6 @@ export default function OverallAssessmentRankNfile({
       onSubmitAction();
     } else {
       console.log("❌ onSubmitAction not provided");
-    }
-  };
-
-  const handlePrint = () => {
-    const printContent = document.createElement("div");
-    printContent.innerHTML = `
-            <style>
-                @media print {
-                    body { margin: 0; padding: 10px; font-family: Arial, sans-serif; font-size: 10px; }
-                    .print-header { text-align: center; margin-bottom: 15px; border-bottom: 1px solid #000; padding-bottom: 10px; }
-                    .print-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-                    .print-subtitle { font-size: 12px; color: #666; }
-                    .print-section { margin-bottom: 12px; page-break-inside: avoid; }
-                    .print-section-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
-                    .print-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 8px; }
-                    .print-field { margin-bottom: 5px; }
-                    .print-label { font-weight: bold; color: #666; font-size: 9px; }
-                    .print-value { font-size: 10px; margin-top: 1px; }
-                    .print-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; page-break-inside: avoid; }
-                    .print-table th, .print-table td { border: 1px solid #000; padding: 4px 6px; text-align: left; font-size: 9px; }
-                    .print-table th { background-color: #f0f0f0; font-weight: bold; }
-                    .print-results { text-align: center; margin: 8px 0; }
-                    .print-percentage { font-size: 20px; font-weight: bold; }
-                    .print-status { display: inline-block; padding: 5px 10px; border-radius: 3px; color: white; font-weight: bold; font-size: 12px; }
-                    .print-status.pass { background-color: #16a34a; }
-                    .print-status.fail { background-color: #dc2626; }
-                    .print-priority { background-color: #fefce8; border: 1px solid #e5e7eb; padding: 5px; margin-bottom: 5px; border-radius: 3px; font-size: 9px; }
-                    .print-remarks { background-color: #fefce8; border: 1px solid #e5e7eb; padding: 8px; border-radius: 3px; font-size: 9px; }
-                    .print-signature { background-color: #fefce8; border: 1px solid #e5e7eb; padding: 5px; margin-bottom: 5px; border-radius: 3px; min-height: 25px; font-size: 9px; }
-                    .print-signature-label { text-align: center; font-size: 8px; color: #666; margin-top: 2px; }
-                    .print-signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-                    .print-checkbox { margin-right: 4px; }
-                    .print-step { page-break-before: auto; margin-bottom: 8px; }
-                    .print-step:first-child { page-break-before: auto; }
-                    .print-description { font-size: 9px; margin-bottom: 8px; color: #666; }
-                    .print-compact-table { font-size: 8px; }
-                    .print-compact-table th, .print-compact-table td { padding: 2px 4px; }
-                    .print-summary { margin-top: 10px; }
-                    .no-print { display: none !important; }
-                }
-            </style>
-            
-            <div class="print-header">
-                <div class="print-title">COMPLETE PERFORMANCE EVALUATION REPORT</div>
-                <div class="print-subtitle">Employee Performance Evaluation - Steps 1-6 (RankNfile HO - No Customer Service)</div>
-            </div>
-
-            <!-- STEP 1 & 2: Review Type & Employee Information -->
-            <div class="print-section">
-                <div class="print-section-title">STEP 1: REVIEW TYPE & STEP 2: EMPLOYEE INFORMATION</div>
-                <div class="print-grid">
-                    <div class="print-field">
-                        <div class="print-label">Review Type:</div>
-                        <div class="print-value">
-                            ${
-                              data.reviewTypeProbationary === 3
-                                ? "✓ 3m"
-                                : "☐ 3m"
-                            } | ${
-      data.reviewTypeProbationary === 5 ? "✓ 5m" : "☐ 5m"
-    } | 
-                            ${
-                              data.reviewTypeRegular === "Q1" ? "✓ Q1" : "☐ Q1"
-                            } | ${
-      data.reviewTypeRegular === "Q2" ? "✓ Q2" : "☐ Q2"
-    } | 
-                            ${
-                              data.reviewTypeRegular === "Q3" ? "✓ Q3" : "☐ Q3"
-                            } | ${
-      data.reviewTypeRegular === "Q4" ? "✓ Q4" : "☐ Q4"
-    }
-                            ${data.reviewTypeOthersImprovement ? " | ✓ PI" : ""}
-                            ${
-                              data.reviewTypeOthersCustom
-                                ? ` | ${data.reviewTypeOthersCustom}`
-                                : ""
-                            }
-                        </div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Employee:</div>
-                        <div class="print-value">${
-                          employee?.fname + " " + employee?.lname ||
-                          "Not specified"
-                        } (${employee?.emp_id || "ID: N/A"})</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Position:</div>
-                        <div class="print-value">${
-                          employee?.positions.label || "Not specified"
-                        } - ${
-      employee?.departments?.department_name || "Dept: N/A"
-    }</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Branch & Supervisor:</div>
-                        <div class="print-value">${
-                          employee?.branches[0]?.branch_name || "Branch: N/A"
-                        } | ${
-      user?.fname + " " + user?.lname || "Sup: N/A"
-    }</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Hire Date & Coverage:</div>
-                        <div class="print-value">${
-                          data.hireDate || "Hire: N/A"
-                        } | ${
-      data.coverageFrom && data.coverageTo
-        ? `${format(new Date(data.coverageFrom), "MMM dd, yyyy")} - ${format(
-            new Date(data.coverageTo),
-            "MMM dd, yyyy"
-          )}`
-        : "Coverage: N/A"
-    }</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- COMPACT EVALUATION SUMMARY -->
-            <div class="print-section print-summary">
-                <div class="print-section-title">EVALUATION SUMMARY</div>
-                <div class="print-grid">
-                    <div class="print-field">
-                        <div class="print-label">Job Knowledge:</div>
-                        <div class="print-value">${jobKnowledgeScore.toFixed(
-                          2
-                        )} (${getRatingLabel(jobKnowledgeScore)}) - 25%</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Quality of Work:</div>
-                        <div class="print-value">${qualityOfWorkScore.toFixed(
-                          2
-                        )} (${getRatingLabel(qualityOfWorkScore)}) - 25%</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Adaptability:</div>
-                        <div class="print-value">${adaptabilityScore.toFixed(
-                          2
-                        )} (${getRatingLabel(adaptabilityScore)}) - 15%</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Teamwork:</div>
-                        <div class="print-value">${teamworkScore.toFixed(
-                          2
-                        )} (${getRatingLabel(teamworkScore)}) - 15%</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Reliability:</div>
-                        <div class="print-value">${reliabilityScore.toFixed(
-                          2
-                        )} (${getRatingLabel(reliabilityScore)}) - 10%</div>
-                    </div>
-                    <div class="print-field">
-                        <div class="print-label">Ethical Behavior:</div>
-                        <div class="print-value">${ethicalScore.toFixed(
-                          2
-                        )} (${getRatingLabel(ethicalScore)}) - 10%</div>
-                    </div>
-                    <!-- Customer Service is not included in RankNfile HO evaluation -->
-                </div>
-                
-                <div class="print-results">
-                    <div class="print-percentage">${overallPercentage}%</div>
-                    <div style="margin-bottom: 8px;">Performance Score</div>
-                    <div class="print-status ${isPass ? "pass" : "fail"}">${
-      isPass ? "PASS" : "FAIL"
-    }</div>
-                </div>
-            </div>
-
-            <!-- FINAL SECTIONS -->
-            <div class="print-section">
-                <div class="print-section-title">PRIORITY AREAS, REMARKS & ACKNOWLEDGEMENT</div>
-                
-                ${
-                  data.priorityArea1 || data.priorityArea2 || data.priorityArea3
-                    ? `
-                <div style="margin-bottom: 8px;">
-                    <strong>Priority Areas:</strong><br>
-                    ${data.priorityArea1 ? `1. ${data.priorityArea1}<br>` : ""}
-                    ${data.priorityArea2 ? `2. ${data.priorityArea2}<br>` : ""}
-                    ${data.priorityArea3 ? `3. ${data.priorityArea3}` : ""}
-                </div>
-                `
-                    : ""
-                }
-                
-                ${
-                  data.remarks
-                    ? `
-                <div style="margin-bottom: 8px;">
-                    <strong>Remarks:</strong> ${data.remarks}
-                </div>
-                `
-                    : ""
-                }
-                
-                <div style="margin-bottom: 8px;">
-                    <strong>Acknowledgement:</strong> I hereby acknowledge that the Evaluator has explained to me, to the best of their ability, 
-                    and in a manner I fully understand, my performance and respective rating on this performance evaluation.
-                </div>
-                
-                <div class="print-signature-grid">
-                    <div>
-                        <div class="print-signature">${
-                          employee?.signature ||
-                          "Employee signature not provided"
-                        }</div>
-                        <div class="print-signature-label">Employee's Name & Signature</div>
-                        <div style="margin-top: 5px; font-size: 8px;">
-                            <strong>Date:</strong> Not Approved Yet
-                        </div>
-                    </div>
-                    <div>
-                        <div class="print-signature">${
-                          user?.signature || "Evaluator signature not provided"
-                        }</div>
-                        <div class="print-signature-label">Evaluator's Name & Signature</div>
-                        <div style="margin-top: 5px; font-size: 8px;">
-                            <strong>Date:</strong> ${
-                              new Date().toISOString().split("T")[0]
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(printContent.innerHTML);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    } else {
-      alert("Please allow popups to print the evaluation.");
     }
   };
 
@@ -380,16 +149,21 @@ export default function OverallAssessmentRankNfile({
   };
 
   const calculateQualityOfWorkScore = () => {
-    // Exclude qualityOfWorkScore5 (Job Targets) for HO users
     const scores = [
       data.qualityOfWorkScore1,
       data.qualityOfWorkScore2,
       data.qualityOfWorkScore3,
       data.qualityOfWorkScore4,
-      // qualityOfWorkScore5 (Job Targets) excluded for HO users
+      data.qualityOfWorkScore5,
+      data.qualityOfWorkScore6,
+      data.qualityOfWorkScore7,
+      data.qualityOfWorkScore8,
+      data.qualityOfWorkScore9,
+      data.qualityOfWorkScore10,
+      data.qualityOfWorkScore11,
     ]
       .filter((score) => score && score !== 0)
-      .map((score) => parseFloat(String(score)));
+      .map((score) => parseInt(String(score)));
 
     if (scores.length === 0) return "0.00";
     return (
@@ -459,7 +233,40 @@ export default function OverallAssessmentRankNfile({
     ).toFixed(2);
   };
 
-  // Customer Service is not included in RankNfile HO evaluation
+  const calculateCustomerServiceScore = () => {
+    const scores = [
+      data.customerServiceScore1,
+      data.customerServiceScore2,
+      data.customerServiceScore3,
+      data.customerServiceScore4,
+      data.customerServiceScore5,
+    ]
+      .filter((score) => score && score !== 0)
+      .map((score) => parseFloat(String(score)));
+
+    if (scores.length === 0) return "0.00";
+    return (
+      scores.reduce((sum, score) => sum + score, 0) / scores.length
+    ).toFixed(2);
+  };
+
+  const calculateManagerialScore = () => {
+    const scores = [
+      data.managerialSkillsScore1,
+      data.managerialSkillsScore2,
+      data.managerialSkillsScore3,
+      data.managerialSkillsScore4,
+      data.managerialSkillsScore5,
+      data.managerialSkillsScore6,
+    ]
+      .filter((score) => score && score !== 0)
+      .map((score) => parseFloat(String(score)));
+
+    if (scores.length === 0) return "0.00";
+    return (
+      scores.reduce((sum, score) => sum + score, 0) / scores.length
+    ).toFixed(2);
+  };
 
   const getRatingLabel = (score: number) => {
     if (score >= 4.5) return "Outstanding";
@@ -475,39 +282,38 @@ export default function OverallAssessmentRankNfile({
   const teamworkScore = parseFloat(calculateTeamworkScore());
   const reliabilityScore = parseFloat(calculateReliabilityScore());
   const ethicalScore = parseFloat(calculateEthicalScore());
+  const customerServiceScore = parseFloat(calculateCustomerServiceScore());
+  const managerialScore = parseFloat(calculateManagerialScore());
 
-  // Calculate weighted scores (Customer Service excluded - total weight = 100%)
-  const jobKnowledgeWeighted = (jobKnowledgeScore * 0.25).toFixed(2);
+  // Calculate weighted scores
+  const jobKnowledgeWeighted = (jobKnowledgeScore * 0.15).toFixed(2);
   const qualityOfWorkWeighted = (qualityOfWorkScore * 0.25).toFixed(2);
-  const adaptabilityWeighted = (adaptabilityScore * 0.15).toFixed(2);
-  const teamworkWeighted = (teamworkScore * 0.15).toFixed(2);
+  const adaptabilityWeighted = (adaptabilityScore * 0.03).toFixed(2);
+  const teamworkWeighted = (teamworkScore * 0.1).toFixed(2);
   const reliabilityWeighted = (reliabilityScore * 0.1).toFixed(2);
-  const ethicalWeighted = (ethicalScore * 0.1).toFixed(2);
+  const ethicalWeighted = (ethicalScore * 0.02).toFixed(2);
+  const customerServiceWeighted = (customerServiceScore * 0.15).toFixed(2);
+  const managerialWeighted = (managerialScore * 0.2).toFixed(2);
 
-  // Calculate overall weighted score (without Customer Service)
+  // Calculate overall weighted score
   const overallWeightedScore = (
     parseFloat(jobKnowledgeWeighted) +
     parseFloat(qualityOfWorkWeighted) +
     parseFloat(adaptabilityWeighted) +
     parseFloat(teamworkWeighted) +
     parseFloat(reliabilityWeighted) +
-    parseFloat(ethicalWeighted)
+    parseFloat(ethicalWeighted) +
+    parseFloat(customerServiceWeighted) +
+    parseFloat(managerialWeighted)
   ).toFixed(2);
 
-  // Calculate percentage: total weight is 100% (5.0 out of 5)
   const overallPercentage = (
-    (parseFloat(overallWeightedScore) / 5.0) *
+    (parseFloat(overallWeightedScore) / 5) *
     100
   ).toFixed(2);
-  // Pass threshold: 3.0 out of 5.0
   const isPass = parseFloat(overallWeightedScore) >= 3.0;
 
-  // Update rating in data after calculation
-  useEffect(() => {
-    updateDataAction({ rating: overallWeightedScore });
-  }, [overallWeightedScore]);
-
-  // Calculate completion status - no validation required for step 7
+  // Calculate completion status - no validation required for step 8
   const isComplete = true;
 
   // Auto-save function with indicator
@@ -761,19 +567,9 @@ export default function OverallAssessmentRankNfile({
                 />
               </div>
               <div>
-                <Label className="font-medium">Employee ID:</Label>
+                <Label className="font-medium">Employee Number:</Label>
                 <Input
-                  value={
-                    employee?.emp_id
-                      ? (() => {
-                          const idString = employee.emp_id.toString();
-                          if (idString.length > 4) {
-                            return `${idString.slice(0, 4)}-${idString.slice(4)}`;
-                          }
-                          return idString;
-                        })()
-                      : ""
-                  }
+                  value={employee?.emp_id || ""}
                   readOnly
                   className="mt-1 bg-gray-50"
                   disabled
@@ -813,7 +609,7 @@ export default function OverallAssessmentRankNfile({
               <div>
                 <Label className="font-medium">Date Hired:</Label>
                 <Input
-                  value={data.hireDate || ""}
+                  value={employee?.date_hired || ""}
                   readOnly
                   className="mt-1 bg-gray-50"
                   disabled
@@ -836,10 +632,10 @@ export default function OverallAssessmentRankNfile({
                     data.coverageFrom && data.coverageTo
                       ? `${format(
                           new Date(data.coverageFrom),
-                          "MMM dd, yyyy"
+                          "MMM dd, yyyy",
                         )} - ${format(
                           new Date(data.coverageTo),
-                          "MMM dd, yyyy"
+                          "MMM dd, yyyy",
                         )}`
                       : ""
                   }
@@ -905,27 +701,27 @@ export default function OverallAssessmentRankNfile({
                         data.jobKnowledgeScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.jobKnowledgeScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.jobKnowledgeScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.jobKnowledgeScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.jobKnowledgeScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.jobKnowledgeScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.jobKnowledgeScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.jobKnowledgeScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.jobKnowledgeScore1 === 5
                         ? "Outstanding"
                         : data.jobKnowledgeScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.jobKnowledgeScore1 === 3
-                        ? "Meets Expectations"
-                        : data.jobKnowledgeScore1 === 2
-                        ? "Needs Improvement"
-                        : data.jobKnowledgeScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.jobKnowledgeScore1 === 3
+                            ? "Meets Expectations"
+                            : data.jobKnowledgeScore1 === 2
+                              ? "Needs Improvement"
+                              : data.jobKnowledgeScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -949,27 +745,27 @@ export default function OverallAssessmentRankNfile({
                         data.jobKnowledgeScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.jobKnowledgeScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.jobKnowledgeScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.jobKnowledgeScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.jobKnowledgeScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.jobKnowledgeScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.jobKnowledgeScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.jobKnowledgeScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.jobKnowledgeScore2 === 5
                         ? "Outstanding"
                         : data.jobKnowledgeScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.jobKnowledgeScore2 === 3
-                        ? "Meets Expectations"
-                        : data.jobKnowledgeScore2 === 2
-                        ? "Needs Improvement"
-                        : data.jobKnowledgeScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.jobKnowledgeScore2 === 3
+                            ? "Meets Expectations"
+                            : data.jobKnowledgeScore2 === 2
+                              ? "Needs Improvement"
+                              : data.jobKnowledgeScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -993,27 +789,27 @@ export default function OverallAssessmentRankNfile({
                         data.jobKnowledgeScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.jobKnowledgeScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.jobKnowledgeScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.jobKnowledgeScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.jobKnowledgeScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.jobKnowledgeScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.jobKnowledgeScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.jobKnowledgeScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.jobKnowledgeScore3 === 5
                         ? "Outstanding"
                         : data.jobKnowledgeScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.jobKnowledgeScore3 === 3
-                        ? "Meets Expectations"
-                        : data.jobKnowledgeScore3 === 2
-                        ? "Needs Improvement"
-                        : data.jobKnowledgeScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.jobKnowledgeScore3 === 3
+                            ? "Meets Expectations"
+                            : data.jobKnowledgeScore3 === 2
+                              ? "Needs Improvement"
+                              : data.jobKnowledgeScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1085,27 +881,27 @@ export default function OverallAssessmentRankNfile({
                         data.qualityOfWorkScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.qualityOfWorkScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.qualityOfWorkScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.qualityOfWorkScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.qualityOfWorkScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.qualityOfWorkScore1 === 5
                         ? "Outstanding"
                         : data.qualityOfWorkScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.qualityOfWorkScore1 === 3
-                        ? "Meets Expectations"
-                        : data.qualityOfWorkScore1 === 2
-                        ? "Needs Improvement"
-                        : data.qualityOfWorkScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore1 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore1 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1129,27 +925,27 @@ export default function OverallAssessmentRankNfile({
                         data.qualityOfWorkScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.qualityOfWorkScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.qualityOfWorkScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.qualityOfWorkScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.qualityOfWorkScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.qualityOfWorkScore2 === 5
                         ? "Outstanding"
                         : data.qualityOfWorkScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.qualityOfWorkScore2 === 3
-                        ? "Meets Expectations"
-                        : data.qualityOfWorkScore2 === 2
-                        ? "Needs Improvement"
-                        : data.qualityOfWorkScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore2 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore2 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1173,27 +969,27 @@ export default function OverallAssessmentRankNfile({
                         data.qualityOfWorkScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.qualityOfWorkScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.qualityOfWorkScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.qualityOfWorkScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.qualityOfWorkScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.qualityOfWorkScore3 === 5
                         ? "Outstanding"
                         : data.qualityOfWorkScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.qualityOfWorkScore3 === 3
-                        ? "Meets Expectations"
-                        : data.qualityOfWorkScore3 === 2
-                        ? "Needs Improvement"
-                        : data.qualityOfWorkScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore3 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore3 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1217,34 +1013,341 @@ export default function OverallAssessmentRankNfile({
                         data.qualityOfWorkScore4 === 5
                           ? "bg-green-100 text-green-800"
                           : data.qualityOfWorkScore4 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.qualityOfWorkScore4 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.qualityOfWorkScore4 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.qualityOfWorkScore4 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore4 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore4 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore4 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.qualityOfWorkScore4 === 5
                         ? "Outstanding"
                         : data.qualityOfWorkScore4 === 4
-                        ? "Exceeds Expectation"
-                        : data.qualityOfWorkScore4 === 3
-                        ? "Meets Expectations"
-                        : data.qualityOfWorkScore4 === 2
-                        ? "Needs Improvement"
-                        : data.qualityOfWorkScore4 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore4 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore4 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore4 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
                     {data.qualityOfWorkComments4 || ""}
                   </td>
                 </tr>
-                {/* Attention to Detail (qualityOfWorkScore5/Job Targets) excluded for HO users */}
+                {/* 6 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Sales Target for MOTORCYCLES
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for motorcycles
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore5 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore5 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore5 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore5 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore5 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore5 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore5 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore5 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore5 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore5 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore5 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments5 || ""}
+                  </td>
+                </tr>
+                {/* 6 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Sales Target for APPLIANCES
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for appliances
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore6 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore6 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore6 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore6 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore6 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore6 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore6 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore6 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore6 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore6 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore6 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments6 || ""}
+                  </td>
+                </tr>
+                {/* 7 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Sales Target for CARS
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for cars
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore7 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore7 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore7 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore7 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore7 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore7 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore7 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore7 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore7 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore7 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore7 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments7 || ""}
+                  </td>
+                </tr>
+                {/* 8 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Sales Target for TRI-WHEELERS ( for 3S Shops only )
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for tri-wheelers
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore8 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore8 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore8 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore8 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore8 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore8 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore8 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore8 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore8 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore8 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore8 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments8 || ""}
+                  </td>
+                </tr>
+                {/* 9 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Collection Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch collection targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore9 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore9 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore9 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore9 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore9 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore9 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore9 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore9 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore9 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore9 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore9 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments9 || ""}
+                  </td>
+                </tr>
+                {/* 10 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Spare Parts And Lubricants Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch spare parts and lubricants targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore10 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore10 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore10 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore10 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore10 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore10 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore10 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore10 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore10 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore10 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore10 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments10 || ""}
+                  </td>
+                </tr>
+                {/* 11 */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Shop Income Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch shop income targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.qualityOfWorkScore11 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.qualityOfWorkScore11 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore11 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore11 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore11 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore11 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore11 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore11 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore11 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore11 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore11 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.qualityOfWorkComments11 || ""}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1308,27 +1411,27 @@ export default function OverallAssessmentRankNfile({
                         data.adaptabilityScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.adaptabilityScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.adaptabilityScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.adaptabilityScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.adaptabilityScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.adaptabilityScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.adaptabilityScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.adaptabilityScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.adaptabilityScore1 === 5
                         ? "Outstanding"
                         : data.adaptabilityScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.adaptabilityScore1 === 3
-                        ? "Meets Expectations"
-                        : data.adaptabilityScore1 === 2
-                        ? "Needs Improvement"
-                        : data.adaptabilityScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.adaptabilityScore1 === 3
+                            ? "Meets Expectations"
+                            : data.adaptabilityScore1 === 2
+                              ? "Needs Improvement"
+                              : data.adaptabilityScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1352,27 +1455,27 @@ export default function OverallAssessmentRankNfile({
                         data.adaptabilityScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.adaptabilityScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.adaptabilityScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.adaptabilityScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.adaptabilityScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.adaptabilityScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.adaptabilityScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.adaptabilityScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.adaptabilityScore2 === 5
                         ? "Outstanding"
                         : data.adaptabilityScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.adaptabilityScore2 === 3
-                        ? "Meets Expectations"
-                        : data.adaptabilityScore2 === 2
-                        ? "Needs Improvement"
-                        : data.adaptabilityScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.adaptabilityScore2 === 3
+                            ? "Meets Expectations"
+                            : data.adaptabilityScore2 === 2
+                              ? "Needs Improvement"
+                              : data.adaptabilityScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1396,27 +1499,27 @@ export default function OverallAssessmentRankNfile({
                         data.adaptabilityScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.adaptabilityScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.adaptabilityScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.adaptabilityScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.adaptabilityScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.adaptabilityScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.adaptabilityScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.adaptabilityScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.adaptabilityScore3 === 5
                         ? "Outstanding"
                         : data.adaptabilityScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.adaptabilityScore3 === 3
-                        ? "Meets Expectations"
-                        : data.adaptabilityScore3 === 2
-                        ? "Needs Improvement"
-                        : data.adaptabilityScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.adaptabilityScore3 === 3
+                            ? "Meets Expectations"
+                            : data.adaptabilityScore3 === 2
+                              ? "Needs Improvement"
+                              : data.adaptabilityScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1485,27 +1588,27 @@ export default function OverallAssessmentRankNfile({
                         data.teamworkScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.teamworkScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.teamworkScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.teamworkScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.teamworkScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.teamworkScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.teamworkScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.teamworkScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.teamworkScore1 === 5
                         ? "Outstanding"
                         : data.teamworkScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.teamworkScore1 === 3
-                        ? "Meets Expectations"
-                        : data.teamworkScore1 === 2
-                        ? "Needs Improvement"
-                        : data.teamworkScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.teamworkScore1 === 3
+                            ? "Meets Expectations"
+                            : data.teamworkScore1 === 2
+                              ? "Needs Improvement"
+                              : data.teamworkScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1530,27 +1633,27 @@ export default function OverallAssessmentRankNfile({
                         data.teamworkScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.teamworkScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.teamworkScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.teamworkScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.teamworkScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.teamworkScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.teamworkScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.teamworkScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.teamworkScore2 === 5
                         ? "Outstanding"
                         : data.teamworkScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.teamworkScore2 === 3
-                        ? "Meets Expectations"
-                        : data.teamworkScore2 === 2
-                        ? "Needs Improvement"
-                        : data.teamworkScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.teamworkScore2 === 3
+                            ? "Meets Expectations"
+                            : data.teamworkScore2 === 2
+                              ? "Needs Improvement"
+                              : data.teamworkScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1575,27 +1678,27 @@ export default function OverallAssessmentRankNfile({
                         data.teamworkScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.teamworkScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.teamworkScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.teamworkScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.teamworkScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.teamworkScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.teamworkScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.teamworkScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.teamworkScore3 === 5
                         ? "Outstanding"
                         : data.teamworkScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.teamworkScore3 === 3
-                        ? "Meets Expectations"
-                        : data.teamworkScore3 === 2
-                        ? "Needs Improvement"
-                        : data.teamworkScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.teamworkScore3 === 3
+                            ? "Meets Expectations"
+                            : data.teamworkScore3 === 2
+                              ? "Needs Improvement"
+                              : data.teamworkScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1665,27 +1768,27 @@ export default function OverallAssessmentRankNfile({
                         data.reliabilityScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.reliabilityScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.reliabilityScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.reliabilityScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.reliabilityScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.reliabilityScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.reliabilityScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.reliabilityScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.reliabilityScore1 === 5
                         ? "Outstanding"
                         : data.reliabilityScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.reliabilityScore1 === 3
-                        ? "Meets Expectations"
-                        : data.reliabilityScore1 === 2
-                        ? "Needs Improvement"
-                        : data.reliabilityScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.reliabilityScore1 === 3
+                            ? "Meets Expectations"
+                            : data.reliabilityScore1 === 2
+                              ? "Needs Improvement"
+                              : data.reliabilityScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1709,27 +1812,27 @@ export default function OverallAssessmentRankNfile({
                         data.reliabilityScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.reliabilityScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.reliabilityScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.reliabilityScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.reliabilityScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.reliabilityScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.reliabilityScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.reliabilityScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.reliabilityScore2 === 5
                         ? "Outstanding"
                         : data.reliabilityScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.reliabilityScore2 === 3
-                        ? "Meets Expectations"
-                        : data.reliabilityScore2 === 2
-                        ? "Needs Improvement"
-                        : data.reliabilityScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.reliabilityScore2 === 3
+                            ? "Meets Expectations"
+                            : data.reliabilityScore2 === 2
+                              ? "Needs Improvement"
+                              : data.reliabilityScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1753,27 +1856,27 @@ export default function OverallAssessmentRankNfile({
                         data.reliabilityScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.reliabilityScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.reliabilityScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.reliabilityScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.reliabilityScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.reliabilityScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.reliabilityScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.reliabilityScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.reliabilityScore3 === 5
                         ? "Outstanding"
                         : data.reliabilityScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.reliabilityScore3 === 3
-                        ? "Meets Expectations"
-                        : data.reliabilityScore3 === 2
-                        ? "Needs Improvement"
-                        : data.reliabilityScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.reliabilityScore3 === 3
+                            ? "Meets Expectations"
+                            : data.reliabilityScore3 === 2
+                              ? "Needs Improvement"
+                              : data.reliabilityScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1797,27 +1900,27 @@ export default function OverallAssessmentRankNfile({
                         data.reliabilityScore4 === 5
                           ? "bg-green-100 text-green-800"
                           : data.reliabilityScore4 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.reliabilityScore4 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.reliabilityScore4 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.reliabilityScore4 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.reliabilityScore4 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.reliabilityScore4 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.reliabilityScore4 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.reliabilityScore4 === 5
                         ? "Outstanding"
                         : data.reliabilityScore4 === 4
-                        ? "Exceeds Expectation"
-                        : data.reliabilityScore4 === 3
-                        ? "Meets Expectations"
-                        : data.reliabilityScore4 === 2
-                        ? "Needs Improvement"
-                        : data.reliabilityScore4 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.reliabilityScore4 === 3
+                            ? "Meets Expectations"
+                            : data.reliabilityScore4 === 2
+                              ? "Needs Improvement"
+                              : data.reliabilityScore4 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1887,27 +1990,27 @@ export default function OverallAssessmentRankNfile({
                         data.ethicalScore1 === 5
                           ? "bg-green-100 text-green-800"
                           : data.ethicalScore1 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.ethicalScore1 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.ethicalScore1 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.ethicalScore1 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.ethicalScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.ethicalScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.ethicalScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.ethicalScore1 === 5
                         ? "Outstanding"
                         : data.ethicalScore1 === 4
-                        ? "Exceeds Expectation"
-                        : data.ethicalScore1 === 3
-                        ? "Meets Expectations"
-                        : data.ethicalScore1 === 2
-                        ? "Needs Improvement"
-                        : data.ethicalScore1 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.ethicalScore1 === 3
+                            ? "Meets Expectations"
+                            : data.ethicalScore1 === 2
+                              ? "Needs Improvement"
+                              : data.ethicalScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1931,27 +2034,27 @@ export default function OverallAssessmentRankNfile({
                         data.ethicalScore2 === 5
                           ? "bg-green-100 text-green-800"
                           : data.ethicalScore2 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.ethicalScore2 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.ethicalScore2 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.ethicalScore2 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.ethicalScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.ethicalScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.ethicalScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.ethicalScore2 === 5
                         ? "Outstanding"
                         : data.ethicalScore2 === 4
-                        ? "Exceeds Expectation"
-                        : data.ethicalScore2 === 3
-                        ? "Meets Expectations"
-                        : data.ethicalScore2 === 2
-                        ? "Needs Improvement"
-                        : data.ethicalScore2 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.ethicalScore2 === 3
+                            ? "Meets Expectations"
+                            : data.ethicalScore2 === 2
+                              ? "Needs Improvement"
+                              : data.ethicalScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -1975,27 +2078,27 @@ export default function OverallAssessmentRankNfile({
                         data.ethicalScore3 === 5
                           ? "bg-green-100 text-green-800"
                           : data.ethicalScore3 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.ethicalScore3 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.ethicalScore3 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.ethicalScore3 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.ethicalScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.ethicalScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.ethicalScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.ethicalScore3 === 5
                         ? "Outstanding"
                         : data.ethicalScore3 === 4
-                        ? "Exceeds Expectation"
-                        : data.ethicalScore3 === 3
-                        ? "Meets Expectations"
-                        : data.ethicalScore3 === 2
-                        ? "Needs Improvement"
-                        : data.ethicalScore3 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.ethicalScore3 === 3
+                            ? "Meets Expectations"
+                            : data.ethicalScore3 === 2
+                              ? "Needs Improvement"
+                              : data.ethicalScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -2019,27 +2122,27 @@ export default function OverallAssessmentRankNfile({
                         data.ethicalScore4 === 5
                           ? "bg-green-100 text-green-800"
                           : data.ethicalScore4 === 4
-                          ? "bg-blue-100 text-blue-800"
-                          : data.ethicalScore4 === 3
-                          ? "bg-yellow-100 text-yellow-800"
-                          : data.ethicalScore4 === 2
-                          ? "bg-orange-100 text-orange-800"
-                          : data.ethicalScore4 === 1
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : data.ethicalScore4 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.ethicalScore4 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.ethicalScore4 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {data.ethicalScore4 === 5
                         ? "Outstanding"
                         : data.ethicalScore4 === 4
-                        ? "Exceeds Expectation"
-                        : data.ethicalScore4 === 3
-                        ? "Meets Expectations"
-                        : data.ethicalScore4 === 2
-                        ? "Needs Improvement"
-                        : data.ethicalScore4 === 1
-                        ? "Unsatisfactory"
-                        : "Not Rated"}
+                          ? "Exceeds Expectation"
+                          : data.ethicalScore4 === 3
+                            ? "Meets Expectations"
+                            : data.ethicalScore4 === 2
+                              ? "Needs Improvement"
+                              : data.ethicalScore4 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
@@ -2060,7 +2163,579 @@ export default function OverallAssessmentRankNfile({
         </CardContent>
       </Card>
 
-      {/* Customer Service is not included in RankNfile HO evaluation */}
+      {/* VII. CUSTOMER SERVICE */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <h4 className="font-bold text-lg text-gray-900 mb-4">
+            VII. CUSTOMER SERVICE
+          </h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Customer satisfaction. Responsiveness to customer needs.
+            Professional and positive interactions with customers.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Behavioral Indicators
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Example
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-24">
+                    Score
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-32">
+                    Rating
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Comments
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Listening & Understanding
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Listens to customers and displays understanding of customer
+                    needs and concerns
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.customerServiceScore1 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.customerServiceScore1 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.customerServiceScore1 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.customerServiceScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.customerServiceScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.customerServiceScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.customerServiceScore1 === 5
+                        ? "Outstanding"
+                        : data.customerServiceScore1 === 4
+                          ? "Exceeds Expectation"
+                          : data.customerServiceScore1 === 3
+                            ? "Meets Expectations"
+                            : data.customerServiceScore1 === 2
+                              ? "Needs Improvement"
+                              : data.customerServiceScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.customerServiceExplanation1 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Problem-Solving for Customer Satisfaction
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Proactively identifies and solves customer problems to
+                    ensure satisfaction
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.customerServiceScore2 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.customerServiceScore2 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.customerServiceScore2 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.customerServiceScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.customerServiceScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.customerServiceScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.customerServiceScore2 === 5
+                        ? "Outstanding"
+                        : data.customerServiceScore2 === 4
+                          ? "Exceeds Expectation"
+                          : data.customerServiceScore2 === 3
+                            ? "Meets Expectations"
+                            : data.customerServiceScore2 === 2
+                              ? "Needs Improvement"
+                              : data.customerServiceScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.customerServiceExplanation2 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Product Knowledge for Customer Support (L.E.A.D.E.R.)
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Possesses comprehensive product knowledge to assist
+                    customers effectively
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.customerServiceScore3 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.customerServiceScore3 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.customerServiceScore3 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.customerServiceScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.customerServiceScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.customerServiceScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.customerServiceScore3 === 5
+                        ? "Outstanding"
+                        : data.customerServiceScore3 === 4
+                          ? "Exceeds Expectation"
+                          : data.customerServiceScore3 === 3
+                            ? "Meets Expectations"
+                            : data.customerServiceScore3 === 2
+                              ? "Needs Improvement"
+                              : data.customerServiceScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.customerServiceExplanation3 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Positive and Professional Attitude (L.E.A.D.E.R.)
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Maintains a positive and professional demeanor, particularly
+                    during customer interactions
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.customerServiceScore4 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.customerServiceScore4 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.customerServiceScore4 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.customerServiceScore4 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.customerServiceScore4 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.customerServiceScore4 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.customerServiceScore4 === 5
+                        ? "Outstanding"
+                        : data.customerServiceScore4 === 4
+                          ? "Exceeds Expectation"
+                          : data.customerServiceScore4 === 3
+                            ? "Meets Expectations"
+                            : data.customerServiceScore4 === 2
+                              ? "Needs Improvement"
+                              : data.customerServiceScore4 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.customerServiceExplanation4 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Timely Resolution of Customer Issues (L.E.A.D.E.R.)
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Resolves customer issues promptly and efficiently
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.customerServiceScore5 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.customerServiceScore5 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.customerServiceScore5 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.customerServiceScore5 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.customerServiceScore5 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.customerServiceScore5 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.customerServiceScore5 === 5
+                        ? "Outstanding"
+                        : data.customerServiceScore5 === 4
+                          ? "Exceeds Expectation"
+                          : data.customerServiceScore5 === 3
+                            ? "Meets Expectations"
+                            : data.customerServiceScore5 === 2
+                              ? "Needs Improvement"
+                              : data.customerServiceScore5 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.customerServiceExplanation5 || ""}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 text-center">
+            <div className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+              <strong>
+                Average: {calculateCustomerServiceScore()} | Rating:{" "}
+                {getRatingLabel(parseFloat(calculateCustomerServiceScore()))}
+              </strong>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* VIII. MANAGERIAL SKILLS */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <h4 className="font-bold text-lg text-gray-900 mb-4">
+            VIII. MANAGERIAL SKILLS
+          </h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Leadership capabilities. Team management and development.
+            Decision-making and strategic thinking. Performance management and
+            coaching.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Behavioral Indicators
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Example
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-24">
+                    Score
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-32">
+                    Rating
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
+                    Comments
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Leadership
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Guides the team to meet goals and improve performance
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore1 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore1 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore1 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore1 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore1 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore1 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore1 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore1 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore1 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore1 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore1 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation1 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Motivation
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Keeps the team engaged and focused on achieving goals and
+                    targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore2 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore2 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore2 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore2 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore2 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore2 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore2 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore2 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore2 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore2 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore2 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation2 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Decision-Making
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Makes timely and informed decisions that benefit the
+                    department or company
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore3 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore3 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore3 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore3 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore3 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore3 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore3 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore3 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore3 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore3 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore3 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation3 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Planning & Resource Management
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Creates detailed plans and allocates resources, time, and
+                    budget efficiently
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore4 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore4 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore4 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore4 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore4 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore4 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore4 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore4 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore4 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore4 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore4 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation4 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Performance Feedback
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Regularly monitors performance and gives constructive
+                    feedback
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore5 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore5 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore5 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore5 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore5 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore5 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore5 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore5 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore5 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore5 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore5 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation5 || ""}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Conflict Resolution
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Resolves disagreements professionally and fairly
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {data.managerialSkillsScore6 || ""}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        data.managerialSkillsScore6 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.managerialSkillsScore6 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.managerialSkillsScore6 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.managerialSkillsScore6 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.managerialSkillsScore6 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.managerialSkillsScore6 === 5
+                        ? "Outstanding"
+                        : data.managerialSkillsScore6 === 4
+                          ? "Exceeds Expectation"
+                          : data.managerialSkillsScore6 === 3
+                            ? "Meets Expectations"
+                            : data.managerialSkillsScore6 === 2
+                              ? "Needs Improvement"
+                              : data.managerialSkillsScore6 === 1
+                                ? "Unsatisfactory"
+                                : "Not Rated"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
+                    {data.managerialSkillsExplanation6 || ""}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 text-center">
+            <div className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+              <strong>
+                Average: {calculateManagerialScore()} | Rating:{" "}
+                {getRatingLabel(parseFloat(calculateManagerialScore()))}
+              </strong>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Performance Assessment Table */}
       <Card>
@@ -2096,7 +2771,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(jobKnowledgeScore)
+                          getRatingLabel(jobKnowledgeScore),
                         )}`}
                       >
                         {getRatingLabel(jobKnowledgeScore)}
@@ -2108,7 +2783,7 @@ export default function OverallAssessmentRankNfile({
                     {jobKnowledgeScore.toFixed(2)}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                    25%
+                    15%
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
                     {jobKnowledgeWeighted}
@@ -2124,7 +2799,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(qualityOfWorkScore)
+                          getRatingLabel(qualityOfWorkScore),
                         )}`}
                       >
                         {getRatingLabel(qualityOfWorkScore)}
@@ -2152,7 +2827,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(adaptabilityScore)
+                          getRatingLabel(adaptabilityScore),
                         )}`}
                       >
                         {getRatingLabel(adaptabilityScore)}
@@ -2164,7 +2839,7 @@ export default function OverallAssessmentRankNfile({
                     {adaptabilityScore.toFixed(2)}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                    15%
+                    3%
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
                     {adaptabilityWeighted}
@@ -2180,7 +2855,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(teamworkScore)
+                          getRatingLabel(teamworkScore),
                         )}`}
                       >
                         {getRatingLabel(teamworkScore)}
@@ -2192,7 +2867,7 @@ export default function OverallAssessmentRankNfile({
                     {teamworkScore.toFixed(2)}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                    15%
+                    10%
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
                     {teamworkWeighted}
@@ -2208,7 +2883,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(reliabilityScore)
+                          getRatingLabel(reliabilityScore),
                         )}`}
                       >
                         {getRatingLabel(reliabilityScore)}
@@ -2236,7 +2911,7 @@ export default function OverallAssessmentRankNfile({
                     <div className="flex items-center justify-center space-x-1">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
-                          getRatingLabel(ethicalScore)
+                          getRatingLabel(ethicalScore),
                         )}`}
                       >
                         {getRatingLabel(ethicalScore)}
@@ -2248,28 +2923,76 @@ export default function OverallAssessmentRankNfile({
                     {ethicalScore.toFixed(2)}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                    10%
+                    2%
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
                     {ethicalWeighted}
                   </td>
                 </tr>
 
-                {/* Customer Service is not included in RankNfile HO evaluation */}
+                {/* Customer Service */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Customer Service
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div className="flex items-center justify-center space-x-1">
+                      <span
+                        className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
+                          getRatingLabel(customerServiceScore),
+                        )}`}
+                      >
+                        {getRatingLabel(customerServiceScore)}
+                      </span>
+                      {getRatingIcon(getRatingLabel(customerServiceScore))}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {customerServiceScore.toFixed(2)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    15%
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {customerServiceWeighted}
+                  </td>
+                </tr>
+
+                {/* Managerial Skills */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Managerial Skills
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div className="flex items-center justify-center space-x-1">
+                      <span
+                        className={`px-2 py-1 rounded text-sm font-medium ${getRatingColor(
+                          getRatingLabel(managerialScore),
+                        )}`}
+                      >
+                        {getRatingLabel(managerialScore)}
+                      </span>
+                      {getRatingIcon(getRatingLabel(managerialScore))}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {managerialScore.toFixed(2)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    20%
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
+                    {managerialWeighted}
+                  </td>
+                </tr>
 
                 {/* Overall Performance Rating */}
                 <tr className="bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700">
-                    Overall Performance Rating
-                  </td>
                   <td
-                    colSpan={2}
-                    className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-700"
+                    colSpan={4}
+                    className="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700"
                   >
-                    {/* Rating and Score columns spanned */}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-700">
-                    {/* Weight column - empty */}
+                    Overall Performance Rating
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
                     {overallWeightedScore}
@@ -2390,17 +3113,19 @@ export default function OverallAssessmentRankNfile({
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Employee Section */}
-            <div className="space-y-2">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Employee signature:
-                </Label>
+            <div className="space-y-4">
+              <div className="text-center">
+                <h4 className="text-sm font-semibold text-gray-800 mb-3">
+                  Employee Signature
+                </h4>
+
+                {/* Signature area */}
                 <div className="border border-gray-300 rounded-lg bg-white p-4 relative">
                   <div className="h-16 flex items-center justify-center relative">
                     {/* Name as background text - always show */}
                     <span className="text-md text-gray-900 font-bold">
                       {employee?.fname + " " + employee?.lname ||
-                        "Evaluator Name"}
+                        "Employee Name"}
                     </span>
                     {/* Signature overlay - automatically show when signature exists */}
 
@@ -2498,19 +3223,19 @@ export default function OverallAssessmentRankNfile({
               }
             }}
             className={`px-8 py-3 text-lg bg-green-600 hover:bg-green-700 text-white
-    flex items-center justify-center transition-all duration-200
+    flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-200
     ${
       isSubmittingEvaluation
         ? "opacity-70 cursor-not-allowed hover:scale-100"
-        : "cursor-pointer hover:scale-110"
+        : ""
     }
   `}
             size="lg"
           >
             {isSubmittingEvaluation ? (
-              <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
-                <span className="font-medium">Submitting Evaluation...</span>
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Submitting...</span>
               </div>
             ) : (
               <>

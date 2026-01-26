@@ -39,10 +39,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
-import { setQuarter } from "date-fns";
 import { useDialogAnimation } from "@/hooks/useDialogAnimation";
 import { toastMessages } from "@/lib/toastMessages";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 interface Review {
   id: number;
   employee: any;
@@ -87,7 +89,7 @@ export default function OverviewTab() {
     searchValue: string,
     status: string,
     quarter: string,
-    year: string
+    year: string,
   ) => {
     try {
       const response = await clientDataService.getSubmissions(
@@ -96,9 +98,9 @@ export default function OverviewTab() {
         itemsPerPage,
         status,
         quarter,
-        year
+        year,
       );
-      
+
       // Add safety checks to prevent "Cannot read properties of undefined" error
       if (!response) {
         console.error("API response is undefined");
@@ -133,7 +135,7 @@ export default function OverviewTab() {
           searchTerm,
           statusFilter,
           quarterFilter,
-          yearFilter
+          yearFilter,
         );
       } catch (error) {
         console.log(error);
@@ -170,7 +172,7 @@ export default function OverviewTab() {
           debouncedSearchTerm,
           debouncedStatusFilter,
           debouncedQuarterFilter,
-          debouncedYearFilter
+          debouncedYearFilter,
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -206,7 +208,7 @@ export default function OverviewTab() {
         debouncedSearchTerm,
         debouncedStatusFilter,
         debouncedQuarterFilter,
-        debouncedYearFilter
+        debouncedYearFilter,
       );
     } catch (error) {
       console.error("Error refreshing data:", error);
@@ -242,7 +244,7 @@ export default function OverviewTab() {
       await clientDataService.deleteSubmission(submission.id);
       await handleRefresh();
       toastMessages.evaluation.deleted(
-        submission.employee?.fname + " " + submission.employee?.lname
+        submission.employee?.fname + " " + submission.employee?.lname,
       );
     } catch (error) {
       console.error("Error deleting submission:", error);
@@ -256,9 +258,11 @@ export default function OverviewTab() {
     setReviewToDelete(review);
     setIsDeleteModalOpen(true);
   };
-  
+
   // Group evaluations by year with safety check to prevent "Cannot read properties of undefined (reading 'reduce')" error
-  const groupedByYear = (evaluations && Array.isArray(evaluations) ? evaluations : []).reduce((acc: any, item) => {
+  const groupedByYear = (
+    evaluations && Array.isArray(evaluations) ? evaluations : []
+  ).reduce((acc: any, item) => {
     const year = new Date(item.created_at).getFullYear();
     acc[year] = acc[year] || [];
     acc[year].push(item);
@@ -674,8 +678,8 @@ export default function OverviewTab() {
                               className={getQuarterColor(
                                 String(
                                   review.reviewTypeRegular ||
-                                    review.reviewTypeProbationary
-                                )
+                                    review.reviewTypeProbationary,
+                                ),
                               )}
                             >
                               {review.reviewTypeRegular ||
@@ -694,7 +698,7 @@ export default function OverviewTab() {
                                 day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )}
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
@@ -706,15 +710,15 @@ export default function OverviewTab() {
                                 review.status === "completed"
                                   ? "bg-green-100 text-green-800"
                                   : review.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {review.status === "completed"
                                 ? `✓ ${review.status}`
                                 : review.status === "pending"
-                                ? `⏳ ${review.status}`
-                                : review.status}
+                                  ? `⏳ ${review.status}`
+                                  : review.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
@@ -883,15 +887,57 @@ export default function OverviewTab() {
         </Dialog>
 
         {/* View Results Modal */}
-        <ViewResultsModal
-          isOpen={isViewResultsModalOpen}
-          onCloseAction={() => {
-            setIsViewResultsModalOpen(false);
-            setSelectedSubmission(null);
-          }}
-          submission={selectedSubmission}
-          showApprovalButton={false}
-        />
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchRankNFile" && (
+            <RnF_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchBasic" && (
+            <Basic_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoRankNFile" && (
+            <RnF_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoBasic" && (
+            <Basic_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
       </div>
     </div>
   );

@@ -99,7 +99,7 @@ function ScoreDropdown({
   );
 }
 
-export default function Step2_RnF_B({
+export default function Step2_Basic_B({
   data,
   updateDataAction,
   evaluationType,
@@ -117,6 +117,12 @@ export default function Step2_RnF_B({
       data.qualityOfWorkScore3,
       data.qualityOfWorkScore4,
       data.qualityOfWorkScore5,
+      data.qualityOfWorkScore6,
+      data.qualityOfWorkScore7,
+      data.qualityOfWorkScore8,
+      data.qualityOfWorkScore9,
+      data.qualityOfWorkScore10,
+      data.qualityOfWorkScore11,
     ]
       .filter((score) => score && score !== 0)
       .map((score) => parseInt(String(score)));
@@ -471,18 +477,17 @@ export default function Step2_RnF_B({
                   </td>
                 </tr>
 
-                {/* Row 5: Job Targets */}
+                {/* Row 5:  Sales Target for MOTORCYCLES */}
 
                 <tr>
                   <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
-                    Job Targets
+                    Sales Target for MOTORCYCLES
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
-                    Achieves targets set for their respective position (Sales /
-                    CCR / Mechanic / etc.)
+                    Achieves branch sales targets for motorcycles
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
-                    Consistently hits monthly targets assigned to their role.
+                    Consistently hits monthly sales targets.
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-center">
                     <ScoreDropdown
@@ -530,6 +535,403 @@ export default function Step2_RnF_B({
                       onChange={(e) =>
                         updateDataAction({
                           qualityOfWorkComments5: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 6: Sales Target for APPLIANCES */}
+
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Sales Target for APPLIANCES
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for appliances
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly sales targets.
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore6)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore6: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore6 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore6 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore6 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore6 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore6 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore6 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore6 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore6 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore6 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore6 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments6 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments6: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 7: Sales Target for CARS */}
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Sales Target for CARS
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for cars
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly sales targets.
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore7)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore7: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore7 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore7 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore7 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore7 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore7 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore7 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore7 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore7 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore7 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore7 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments7 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments7: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 8: Sales Target for TRI-WHEELERS ( for 3S Shops only ) */}
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Sales Target for TRI-WHEELERS ( for 3S Shops only )
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch sales targets for tri-wheelers
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly sales targets.
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore8)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore8: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore8 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore8 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore8 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore8 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore8 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore8 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore8 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore8 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore8 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore8 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments8 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments8: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 9: Collection Targets */}
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Collection Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch collection targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly collection targets.
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore9)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore9: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore9 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore9 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore9 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore9 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore9 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore9 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore9 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore9 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore9 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore9 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments9 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments9: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 10: Spare Parts And Lubricants Targets */}
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Spare Parts And Lubricants Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch spare parts and lubricants targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly spare parts and lubricants targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore10)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore10: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore10 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore10 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore10 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore10 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore10 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore10 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore10 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore10 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore10 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore10 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments10 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments10: e.target.value,
+                        })
+                      }
+                      placeholder="Enter comments about this competency..."
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </td>
+                </tr>
+
+                {/* Row 11: Shop Income Targets */}
+                <tr>
+                  <td className="border border-gray-300 font-bold text-center px-4 py-3 text-sm text-black">
+                    Shop Income Targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Achieves branch shop income targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
+                    Consistently hits monthly shop income targets
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <ScoreDropdown
+                      value={String(data.qualityOfWorkScore11)}
+                      onValueChange={(value) =>
+                        updateDataAction({
+                          qualityOfWorkScore11: Number(value),
+                        })
+                      }
+                      placeholder="-- Select --"
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-center">
+                    <div
+                      className={`px-2 py-1 rounded-md text-sm font-bold ${
+                        data.qualityOfWorkScore11 === 5
+                          ? "bg-green-100 text-green-800"
+                          : data.qualityOfWorkScore11 === 4
+                            ? "bg-blue-100 text-blue-800"
+                            : data.qualityOfWorkScore11 === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : data.qualityOfWorkScore11 === 2
+                                ? "bg-orange-100 text-orange-800"
+                                : data.qualityOfWorkScore11 === 1
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {data.qualityOfWorkScore11 === 5
+                        ? "Outstanding"
+                        : data.qualityOfWorkScore11 === 4
+                          ? "Exceeds Expectation"
+                          : data.qualityOfWorkScore11 === 3
+                            ? "Meets Expectations"
+                            : data.qualityOfWorkScore11 === 2
+                              ? "Needs Improvement"
+                              : data.qualityOfWorkScore11 === 1
+                                ? "Unsatisfactory"
+                                : "Leave blank if it doesn't apply"}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3">
+                    <textarea
+                      value={data.qualityOfWorkComments11 || ""}
+                      onChange={(e) =>
+                        updateDataAction({
+                          qualityOfWorkComments11: e.target.value,
                         })
                       }
                       placeholder="Enter comments about this competency..."

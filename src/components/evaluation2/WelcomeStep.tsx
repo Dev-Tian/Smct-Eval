@@ -99,6 +99,39 @@ export default function WelcomeStep({
         { id: 7, title: "Overall Assessment" },
       ];
     }
+
+    if (evaluationType === "basicHo") {
+      return [
+        {
+          id: 1,
+          title: "Employee Information / Job Knowledge",
+        },
+        { id: 2, title: "Quality of Work" },
+        { id: 3, title: "Adaptability" },
+        { id: 4, title: "Teamwork" },
+        { id: 5, title: "Reliability" },
+        { id: 6, title: "Ethical & Professional Behavior" },
+        { id: 7, title: "Managerial Skills" },
+        { id: 8, title: "Overall Assessment" },
+      ];
+    }
+
+    if (evaluationType === "basicBranch") {
+      return [
+        {
+          id: 1,
+          title: "Employee Information / Job Knowledge",
+        },
+        { id: 2, title: "Quality of Work" },
+        { id: 3, title: "Adaptability" },
+        { id: 4, title: "Teamwork" },
+        { id: 5, title: "Reliability" },
+        { id: 6, title: "Ethical & Professional Behavior" },
+        { id: 7, title: "Customer Service" },
+        { id: 8, title: "Managerial Skills" },
+        { id: 9, title: "Overall Assessment" },
+      ];
+    }
     return [];
   };
 

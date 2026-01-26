@@ -8,14 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Printer } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
-import { CONFIG } from "../../../config/config";
-import apiService from "@/lib/apiService";
+import { CONFIG } from "../../../../config/config";
 
 type Submission = {
   id: number;
   employee: any;
   evaluator: any;
-  hireDate?: string;
   category?: string;
   rating?: number;
   status: string;
@@ -36,13 +34,13 @@ type Submission = {
 
   //relations
   job_knowledge: any;
-  adaptability: any;
   quality_of_works: any;
+  adaptability: any;
   teamworks: any;
   reliabilities: any;
   ethicals: any;
   customer_services: any;
-  managerial_skills?: any; // For Basic HO evaluations
+  managerial_skills: any;
 };
 
 interface ApprovalData {
@@ -119,7 +117,7 @@ const getQuarterFromDate = (dateString: string): string => {
   }
 };
 
-export default function ViewResultsModal({
+export default function Basic_HO_View({
   isOpen,
   onCloseAction,
   submission,
@@ -166,7 +164,7 @@ export default function ViewResultsModal({
       try {
         const approvalDataKey = `approvalData_${user.email}`;
         const storedApprovals = JSON.parse(
-          localStorage.getItem(approvalDataKey) || "{}"
+          localStorage.getItem(approvalDataKey) || "{}",
         );
         const submissionId = submission.id.toString();
         const storedApproval = storedApprovals[submissionId];
@@ -226,7 +224,7 @@ export default function ViewResultsModal({
 
     // Clone the content without no-print elements
     const clonedContent = printContentRef.current.cloneNode(
-      true
+      true,
     ) as HTMLElement;
     const noPrintElements = clonedContent.querySelectorAll(".no-print");
     noPrintElements.forEach((el) => el.remove());
@@ -235,7 +233,7 @@ export default function ViewResultsModal({
     if (printWindow) {
       // Get all styles from the current document
       const styles = Array.from(
-        document.querySelectorAll('style, link[rel="stylesheet"]')
+        document.querySelectorAll('style, link[rel="stylesheet"]'),
       )
         .map((el) => {
           if (el.tagName === "STYLE") {
@@ -1214,116 +1212,50 @@ export default function ViewResultsModal({
 
   if (!submission) return null;
 
-  // Determine evaluation type based on submission data
-  const hasCustomerService = submission.customer_services && 
-    Array.isArray(submission.customer_services) && 
-    submission.customer_services.length > 0;
-  const hasManagerialSkills = submission.managerial_skills && 
-    Array.isArray(submission.managerial_skills) && 
-    submission.managerial_skills.length > 0;
-  
-  let evaluationType: 'rankNfile' | 'basic' | 'default' = 'default';
-  if (!hasCustomerService && hasManagerialSkills) {
-    evaluationType = 'basic'; // Basic HO - has Managerial Skills, no Customer Service
-  } else if (!hasCustomerService && !hasManagerialSkills) {
-    evaluationType = 'rankNfile'; // RankNfile HO - no Customer Service, no Managerial Skills
-  } else {
-    evaluationType = 'default'; // Default - has Customer Service
-  }
-
   // Use stored rating from backend if available to match evaluation records table
   const finalRatingRaw =
     submission.rating !== undefined && submission.rating !== null
       ? Number(submission.rating)
       : (() => {
           const job_knowledgeScore = calculateScore(
-            (submission.job_knowledge || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.job_knowledge.map((item: any) => String(item.score)),
           );
           const quality_of_workScore = calculateScore(
-            (submission.quality_of_works || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.quality_of_works.map((item: any) => String(item.score)),
           );
           const adaptabilityScore = calculateScore(
-            (submission.adaptability || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.adaptability.map((item: any) => String(item.score)),
           );
           const teamworkScore = calculateScore(
-            (submission.teamworks || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.teamworks.map((item: any) => String(item.score)),
           );
           const reliabilityScore = calculateScore(
-            (submission.reliabilities || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.reliabilities.map((item: any) => String(item.score)),
           );
           const ethicalScore = calculateScore(
-            (submission.ethicals || []).map((item: any) =>
-              String(item.score)
-            )
+            submission.ethicals.map((item: any) => String(item.score)),
+          );
+          const managerial_skills = calculateScore(
+            submission.managerial_skills.map((item: any) => String(item.score)),
           );
 
-          // Calculate overall weighted score based on evaluation type
-          if (evaluationType === 'rankNfile') {
-            // RankNfile HO: 25%, 25%, 15%, 15%, 10%, 10% (no Customer Service)
-            return (
-              job_knowledgeScore * 0.25 +
-              quality_of_workScore * 0.25 +
-              adaptabilityScore * 0.15 +
-              teamworkScore * 0.15 +
-              reliabilityScore * 0.1 +
-              ethicalScore * 0.1
-            );
-          } else if (evaluationType === 'basic') {
-            // Basic HO: 25%, 25%, 15%, 15%, 10%, 10% + Managerial Skills 30%
-            const managerial_skillsScore = submission.managerial_skills
-              ? calculateScore(
-                  (submission.managerial_skills || []).map((item: any) =>
-                    String(item.score)
-                  )
-                )
-              : 0;
-            return (
-              job_knowledgeScore * 0.25 +
-              quality_of_workScore * 0.25 +
-              adaptabilityScore * 0.15 +
-              teamworkScore * 0.15 +
-              reliabilityScore * 0.1 +
-              ethicalScore * 0.1 +
-              managerial_skillsScore * 0.3
-            );
-          } else {
-            // Default: 20%, 20%, 10%, 10%, 5%, 5%, 30% (with Customer Service)
-            const customer_serviceScore = submission.customer_services
-              ? calculateScore(
-                  (submission.customer_services || []).map((item: any) =>
-                    String(item.score)
-                  )
-                )
-              : 0;
-            return (
-              job_knowledgeScore * 0.2 +
-              quality_of_workScore * 0.2 +
-              adaptabilityScore * 0.1 +
-              teamworkScore * 0.1 +
-              reliabilityScore * 0.05 +
-              ethicalScore * 0.05 +
-              customer_serviceScore * 0.3
-            );
-          }
+          const overallWeightedScore =
+            job_knowledgeScore * 0.15 +
+            quality_of_workScore * 0.2 +
+            adaptabilityScore * 0.1 +
+            teamworkScore * 0.1 +
+            reliabilityScore * 0.1 +
+            ethicalScore * 0.05 +
+            managerial_skills * 0.03;
+
+          return overallWeightedScore;
         })();
 
   const finalRating = Number.isFinite(finalRatingRaw)
     ? Number(finalRatingRaw)
     : 0;
   const finalRatingRounded = Number(finalRating.toFixed(2));
-  const finalPercentage = Number(
-    ((finalRatingRounded / 5) * 100).toFixed(2)
-  );
+  const finalPercentage = Number(((finalRatingRounded / 5) * 100).toFixed(2));
   const finalIsPass = finalRatingRounded >= 3.0;
 
   // Handle approval API call
@@ -1331,7 +1263,6 @@ export default function ViewResultsModal({
     if (!submission.id) {
       setApprovalError("Invalid submission ID");
       return;
-      
     }
     if (!submission?.employee?.signature) {
       setApprovalError("Signature required");
@@ -1452,12 +1383,6 @@ export default function ViewResultsModal({
       example:
         "Meets productivity expectations reliably, without significant fluctuations.",
     },
-    5: {
-      title: " Job Targets",
-      indicator:
-        " Achieves targets set for their respective position (Sales / CCR / Mechanic / etc.)",
-      example: "Consistently hits monthly targets assigned to their role.",
-    },
   };
 
   const ADAPTABILITY = {
@@ -1565,40 +1490,46 @@ export default function ViewResultsModal({
     },
   };
 
-  const CUSTOMER_SERVICE = {
+  const MANAGERIAL = {
     1: {
-      title: "Listening & Understanding",
-      indicator:
-        "Listens to customers and displays understanding of customer needs and concerns",
+      title: "Leadership",
+      indicator: "Guides the team to meet goals and improve performance",
       example:
-        "Repeats or summarizes customer concerns to ensure complete understanding before responding. Expresses genuine concern and seeks to understand the customer's perspective.",
+        " Encourages the team to complete a critical project ahead of the deadline while maintaining quality.",
     },
     2: {
-      title: "Problem-Solving for Customer Satisfaction",
+      title: " Motivation",
       indicator:
-        "Proactively identifies and solves customer problems to ensure satisfaction",
+        " Keeps the team engaged and focused on achieving goals and targets",
       example:
-        "Takes initiative to resolve issues and prevent future challenges for the customer. Offers alternative solutions when standard resolutions are not enough.",
+        " Recognizes and rewards team achievements to maintain high morale and engagement.",
     },
     3: {
-      title: " Product Knowledge for Customer Support (L.E.A.D.E.R.)",
+      title: "Decision-Making",
       indicator:
-        " Possesses comprehensive product knowledge to assist customers effectively",
+        " Makes timely and informed decisions that benefit the department or company",
       example:
-        "Demonstrates a deep understanding of products and/or services, enabling accurate and helpful guidance. Suggests the most suitable product or service based on customer requirements.",
+        " Evaluates a situation, assesses needs, considers alternatives, and implements solutions that benefit the team and the company.",
     },
     4: {
-      title: "Positive and Professional Attitude (L.E.A.D.E.R.)",
+      title: "Planning & Resource Management",
       indicator:
-        " Maintains a positive and professional demeanor, particularly during customer interactions",
+        " Creates detailed plans and allocates resources, time, and budget efficiently",
       example:
-        "Represents the organization positively. Remains courteous and patient, even with challenging customers or in stressful situations.",
+        "Develops a timeline for team deliverables, ensuring tasks are assigned based on workload and skills.",
     },
     5: {
-      title: "Timely Resolution of Customer Issues (L.E.A.D.E.R.)",
-      indicator: "Resolves customer issues promptly and efficiently",
+      title: "Performance Feedback",
+      indicator:
+        "Regularly monitors performance and gives constructive feedback",
       example:
-        "Addresses and resolves customer complaints or concerns within established timeframes. Ensures follow-ups are conducted for unresolved issues until completion.",
+        " Holds one-on-one meetings to discuss individual performance and offer guidance for improvement.",
+    },
+    6: {
+      title: "Conflict Resolution",
+      indicator: " Resolves disagreements professionally and fairly",
+      example:
+        " Mediates conflict between team members, ensuring a collaborative solution that benefits the group.",
     },
   };
 
@@ -1697,14 +1628,14 @@ export default function ViewResultsModal({
           <div className="sticky top-0 z-50 flex justify-end gap-2 mb-4 -mr-6 pr-6 py-4 no-print ">
             <Button
               onClick={handlePrint}
-              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 transition-transform duration-200"
+              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Printer className="h-4 w-4" />
               Print
             </Button>
             <Button
               onClick={onCloseAction}
-              className="px-4 py-2 bg-red-500 text-white hover:bg-red-600 hover:text-white cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 transition-transform duration-200"
+              className="px-4 py-2 bg-blue-500 text-white hover:bg-red-600 hover:text-white cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
             >
               🗙 Close
             </Button>
@@ -1721,23 +1652,9 @@ export default function ViewResultsModal({
               {/* Title */}
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {evaluationType === 'rankNfile' ? (
-                    <>
-                      Performance Review Form (HEAD OFFICE)
-                      <br />
-                      Rank and File I & II
-                    </>
-                  ) : evaluationType === 'basic' ? (
-                    <>
-                      Performance Review Form (HEAD OFFICE)
-                      <br />
-                      Basic
-                    </>
-                  ) : (
-                    <>
-                      Performance Review Form
-                    </>
-                  )}
+                  Performance Review Form (HEAD OFFICE)
+                  <br />
+                  Basic
                 </h1>
               </div>
 
@@ -1910,7 +1827,8 @@ export default function ViewResultsModal({
                         className="font-semibold text-gray-900 print-value"
                         style={{ fontSize: "11px" }}
                       >
-                        {submission?.employee?.fname && submission?.employee?.lname
+                        {submission?.employee?.fname &&
+                        submission?.employee?.lname
                           ? `${submission.employee.fname} ${submission.employee.lname}`
                           : "Unknown Employee"}
                       </p>
@@ -1920,13 +1838,13 @@ export default function ViewResultsModal({
                         className="font-medium text-black block mb-1 print-label"
                         style={{ fontSize: "11px" }}
                       >
-                        Employee Contact #:
+                        Employee Contact:
                       </Label>
                       <p
                         className="text-gray-900 print-value"
                         style={{ fontSize: "11px" }}
                       >
-                        {submission?.employee?.contact ?? submission?.employee?.phone ?? "Not specified"}
+                        {submission.evaluator.contact}
                       </p>
                     </div>
                     <div className="print-info-row">
@@ -1940,7 +1858,8 @@ export default function ViewResultsModal({
                         className="text-gray-900 print-value"
                         style={{ fontSize: "11px" }}
                       >
-                        {submission?.employee?.positions?.label || "Not specified"}
+                        {submission?.employee?.positions?.label ||
+                          "Not specified"}
                       </p>
                     </div>
                     <div className="print-info-row">
@@ -1954,7 +1873,8 @@ export default function ViewResultsModal({
                         className="text-gray-900 print-value"
                         style={{ fontSize: "11px" }}
                       >
-                        {submission?.employee?.branches?.[0]?.branch_name || "Not specified"}
+                        {submission?.employee?.branches?.[0]?.branch_name ||
+                          "Not specified"}
                       </p>
                     </div>
                     <div className="print-info-row">
@@ -1969,10 +1889,11 @@ export default function ViewResultsModal({
                         style={{ fontSize: "11px" }}
                       >
                         {(() => {
-                          const dateHired = submission?.employee?.date_hired || 
-                                           submission?.employee?.dateHired || 
-                                           submission?.employee?.hireDate ||
-                                           (submission as any)?.hireDate;
+                          const dateHired =
+                            submission?.employee?.date_hired ||
+                            submission?.employee?.dateHired ||
+                            submission?.employee?.hireDate ||
+                            (submission as any)?.hireDate;
                           if (!dateHired) return "Not specified";
                           try {
                             const date = new Date(dateHired);
@@ -2019,13 +1940,13 @@ export default function ViewResultsModal({
                           <>
                             <span className="screen-date">
                               {`${new Date(
-                                submission.coverageFrom
+                                submission.coverageFrom,
                               ).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
                               })} - ${new Date(
-                                submission.coverageTo
+                                submission.coverageTo,
                               ).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "long",
@@ -2034,13 +1955,13 @@ export default function ViewResultsModal({
                             </span>
                             <span className="print-date">
                               {`${new Date(
-                                submission.coverageFrom
+                                submission.coverageFrom,
                               ).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
                                 year: "numeric",
                               })} - ${new Date(
-                                submission.coverageTo
+                                submission.coverageTo,
                               ).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
@@ -2094,7 +2015,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.job_knowledge || []).map(
+                          {submission.job_knowledge.map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2120,7 +2041,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2131,7 +2052,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2178,9 +2099,9 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.quality_of_works || []).map(
+                          {submission.quality_of_works.map(
                             (item: {
-                              question_number: 1 | 2 | 3 | 4 | 5;
+                              question_number: 1 | 2 | 3 | 4;
                               score: number;
                               comment: string;
                             }) => {
@@ -2204,7 +2125,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2215,7 +2136,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2261,7 +2182,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.adaptability || []).map(
+                          {submission.adaptability.map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2287,7 +2208,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2298,7 +2219,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2343,7 +2264,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.teamworks || []).map(
+                          {submission.teamworks.map(
                             (item: {
                               question_number: 1 | 2 | 3;
                               score: number;
@@ -2368,7 +2289,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2379,7 +2300,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2424,7 +2345,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.reliabilities || []).map(
+                          {submission.reliabilities.map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4;
                               score: number;
@@ -2450,7 +2371,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2461,7 +2382,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2507,7 +2428,7 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.ethicals || []).map(
+                          {submission.ethicals.map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4;
                               score: number;
@@ -2532,7 +2453,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2543,7 +2464,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2552,17 +2473,19 @@ export default function ViewResultsModal({
                 </Card>
               )}
 
-              {/* Step 7: Managerial Skills - Only for Basic HO evaluations */}
-              {evaluationType === 'basic' && submission.managerial_skills && (
+              {/* Step 7: Managerial Skills  */}
+              {submission.managerial_skills && (
                 <Card className="shadow-md hide-in-print">
                   <CardHeader className="bg-teal-50 border-b border-teal-200">
                     <CardTitle className="text-xl font-semibold text-teal-900">
-                      VII. MANAGERIAL SKILLS
+                      VIII. MANAGERIAL SKILLS
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Leadership abilities. Decision-making skills. Team management and development.
+                      Leadership capabilities. Team management and development.
+                      Decision-making and strategic thinking. Performance
+                      management and coaching.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2587,93 +2510,14 @@ export default function ViewResultsModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {(submission.managerial_skills || []).map(
+                          {submission.managerial_skills.map(
                             (item: {
                               question_number: 1 | 2 | 3 | 4 | 5 | 6;
                               score: number;
                               explanation: string;
                             }) => {
-                              return (
-                                <tr key={item.question_number}>
-                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
-                                    Question {item.question_number}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
-                                    Managerial Skills Indicator {item.question_number}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">
-                                    Example for Managerial Skills {item.question_number}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                                    {item.score}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-3 text-center">
-                                    <div
-                                      className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
-                                      )}`}
-                                    >
-                                      {rating(item.score)}
-                                    </div>
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.explanation || ""}
-                                  </td>
-                                </tr>
-                              );
-                            }
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Step 7: Customer Service - Only show for default evaluations */}
-              {evaluationType === 'default' && submission.customer_services && (
-                <Card className="shadow-md hide-in-print">
-                  <CardHeader className="bg-teal-50 border-b border-teal-200">
-                    <CardTitle className="text-xl font-semibold text-teal-900">
-                      VII. CUSTOMER SERVICE
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <p className="text-sm text-gray-600 mb-4">
-                      Customer satisfaction. Responsiveness to customer needs.
-                      Professional and positive interactions with customers.
-                    </p>
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse border border-gray-300">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900"></th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                              Behavioral Indicators
-                            </th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                              Example
-                            </th>
-                            <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-24">
-                              Score
-                            </th>
-                            <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-900 w-32">
-                              Rating
-                            </th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                              Comments
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(submission.customer_services || []).map(
-                            (item: {
-                              question_number: 1 | 2 | 3 | 4 | 5;
-                              score: number;
-                              explanation: string;
-                            }) => {
                               const indicators =
-                                CUSTOMER_SERVICE[item.question_number];
+                                MANAGERIAL[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2692,7 +2536,7 @@ export default function ViewResultsModal({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score
+                                        item.score,
                                       )}`}
                                     >
                                       {rating(item.score)}
@@ -2703,7 +2547,7 @@ export default function ViewResultsModal({
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           )}
                         </tbody>
                       </table>
@@ -2754,74 +2598,58 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.job_knowledge || []).map(
+                                            submission.job_knowledge.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.job_knowledge || []).map(
+                                          submission.job_knowledge.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.job_knowledge || []).map(
+                                          submission.job_knowledge.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {Math.round(
+                                  {calculateScore(
+                                    submission.job_knowledge.map(
+                                      (item: any) => {
+                                        return item.score;
+                                      },
+                                    ),
+                                  ).toFixed(2)}
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                  15%
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                  {(
                                     calculateScore(
-                                      (submission.job_knowledge || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 10
-                                  ) / 10}
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '25%' : '20%'}
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.job_knowledge || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.25).toFixed(2)
-                                  ) : (
-                                    Math.round(
-                                      calculateScore(
-                                        (submission.job_knowledge || []).map(
-                                          (item: any) => {
-                                            return String(item.score || 0);
-                                          }
-                                        )
-                                      ) *
-                                        0.2 *
-                                        10
-                                    ) / 10
-                                  )}
+                                      submission.job_knowledge.map(
+                                        (item: any) => item.score,
+                                      ),
+                                    ) * 0.15
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
@@ -2836,68 +2664,60 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.quality_of_works || []).map(
+                                            submission.quality_of_works.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.quality_of_works || []).map(
+                                          submission.quality_of_works.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.quality_of_works || []).map(
+                                          submission.quality_of_works.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    (submission.quality_of_works || []).map(
+                                    submission.quality_of_works.map(
                                       (item: any) => {
-                                        return String(item.score || 0);
-                                      }
-                                    )
+                                        return item.score;
+                                      },
+                                    ),
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '25%' : '20%'}
+                                  20%
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.quality_of_works || []).map(
+                                  {(
+                                    calculateScore(
+                                      submission.quality_of_works.map(
                                         (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.25).toFixed(2)
-                                  ) : (
-                                    (calculateScore(
-                                      (submission.quality_of_works || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.2).toFixed(2)
-                                  )}
+                                          return item.score;
+                                        },
+                                      ),
+                                    ) * 0.2
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
@@ -2912,66 +2732,58 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.adaptability || []).map(
+                                            submission.adaptability.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.adaptability || []).map(
+                                          submission.adaptability.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.adaptability || []).map(
+                                          submission.adaptability.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    (submission.adaptability || []).map((item: any) => {
-                                      return String(item.score || 0);
-                                    })
+                                    submission.adaptability.map((item: any) => {
+                                      return item.score;
+                                    }),
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '15%' : '10%'}
+                                  10%
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.adaptability || []).map(
+                                  {(
+                                    calculateScore(
+                                      submission.adaptability.map(
                                         (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.15).toFixed(2)
-                                  ) : (
-                                    (calculateScore(
-                                      (submission.adaptability || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.1).toFixed(2)
-                                  )}
+                                          return item.score;
+                                        },
+                                      ),
+                                    ) * 0.1
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
@@ -2986,62 +2798,56 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.teamworks || []).map(
+                                            submission.teamworks.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.teamworks || []).map(
+                                          submission.teamworks.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.teamworks || []).map(
+                                          submission.teamworks.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    (submission.teamworks || []).map((item: any) => {
-                                      return String(item.score || 0);
-                                    })
+                                    submission.teamworks.map((item: any) => {
+                                      return item.score;
+                                    }),
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '15%' : '10%'}
+                                  10%
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.teamworks || []).map((item: any) => {
-                                        return String(item.score || 0);
-                                      })
-                                    ) * 0.15).toFixed(2)
-                                  ) : (
-                                    (calculateScore(
-                                      (submission.teamworks || []).map((item: any) => {
-                                        return String(item.score || 0);
-                                      })
-                                    ) * 0.1).toFixed(2)
-                                  )}
+                                  {(
+                                    calculateScore(
+                                      submission.teamworks.map((item: any) => {
+                                        return item.score;
+                                      }),
+                                    ) * 0.1
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
@@ -3056,68 +2862,60 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.reliabilities || []).map(
+                                            submission.reliabilities.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.reliabilities || []).map(
+                                          submission.reliabilities.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.reliabilities || []).map(
+                                          submission.reliabilities.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    (submission.reliabilities || []).map(
+                                    submission.reliabilities.map(
                                       (item: any) => {
-                                        return String(item.score || 0);
-                                      }
-                                    )
+                                        return item.score;
+                                      },
+                                    ),
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '10%' : '5%'}
+                                  10%
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.reliabilities || []).map(
+                                  {(
+                                    calculateScore(
+                                      submission.reliabilities.map(
                                         (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.1).toFixed(2)
-                                  ) : (
-                                    (calculateScore(
-                                      (submission.reliabilities || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ) * 0.05).toFixed(2)
-                                  )}
+                                          return item.score;
+                                        },
+                                      ),
+                                    ) * 0.1
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
@@ -3132,213 +2930,137 @@ export default function ViewResultsModal({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            (submission.ethicals || []).map(
+                                            submission.ethicals.map(
                                               (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.ethicals || []).map(
+                                          submission.ethicals.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          (submission.ethicals || []).map(
+                                          submission.ethicals.map(
                                             (item: any) => {
-                                              return String(item.score || 0);
-                                            }
-                                          )
-                                        )
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    (submission.ethicals || []).map((item: any) => {
-                                      return String(item.score || 0);
-                                    })
+                                    submission.ethicals.map((item: any) => {
+                                      return item.score;
+                                    }),
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? '10%' : '5%'}
+                                  5%
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                  {evaluationType === 'rankNfile' || evaluationType === 'basic' ? (
-                                    (calculateScore(
-                                      (submission.ethicals || []).map((item: any) => {
-                                        return String(item.score || 0);
-                                      })
-                                    ) * 0.1).toFixed(2)
-                                  ) : (
-                                    (calculateScore(
-                                      (submission.ethicals || []).map((item: any) => {
-                                        return String(item.score || 0);
-                                      })
-                                    ) * 0.05).toFixed(2)
-                                  )}
+                                  {(
+                                    calculateScore(
+                                      submission.ethicals.map((item: any) => {
+                                        return item.score;
+                                      }),
+                                    ) * 0.05
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
 
-                              {/* Managerial Skills - Only for Basic HO */}
-                              {evaluationType === 'basic' && submission.managerial_skills && (
-                                <tr>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
-                                    Managerial Skills
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center">
-                                    <div className="flex items-center justify-center space-x-1">
-                                      <span
-                                        className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
-                                          getRatingLabel(
-                                            calculateScore(
-                                              (submission.managerial_skills || []).map(
-                                                (item: any) => {
-                                                  return String(item.score || 0);
-                                                }
-                                              )
-                                            )
-                                          )
-                                        )}`}
-                                      >
-                                        {getRatingLabel(
-                                          calculateScore(
-                                            (submission.managerial_skills || []).map(
-                                              (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )}
-                                      </span>
-                                      <span className="print-rating-text">
-                                        {getRatingLabel(
-                                          calculateScore(
-                                            (submission.managerial_skills || []).map(
-                                              (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    {calculateScore(
-                                      (submission.managerial_skills || []).map((item: any) => {
-                                        return String(item.score || 0);
-                                      })
-                                    ).toFixed(2)}
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    30%
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    {(
-                                      calculateScore(
-                                        (submission.managerial_skills || []).map((item: any) => {
-                                          return String(item.score || 0);
-                                        })
-                                      ) * 0.3
-                                    ).toFixed(2)}
-                                  </td>
-                                </tr>
-                              )}
-
-                              {/* Customer Service - Only for Default evaluations */}
-                              {evaluationType === 'default' && submission.customer_services && (
-                                <tr>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
-                                    Customer Service
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center">
-                                    <div className="flex items-center justify-center space-x-1">
-                                      <span
-                                        className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
-                                          getRatingLabel(
-                                            calculateScore(
-                                              (submission.customer_services || []).map(
-                                                (item: any) => {
-                                                  return String(item.score || 0);
-                                                }
-                                              )
-                                            )
-                                          )
-                                        )}`}
-                                      >
-                                        {getRatingLabel(
-                                          calculateScore(
-                                            (submission.customer_services || []).map(
-                                              (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )}
-                                      </span>
-                                      <span className="print-rating-text">
-                                        {getRatingLabel(
-                                          calculateScore(
-                                            (submission.customer_services || []).map(
-                                              (item: any) => {
-                                                return String(item.score || 0);
-                                              }
-                                            )
-                                          )
-                                        )}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    {calculateScore(
-                                      (submission.customer_services || []).map(
-                                        (item: any) => {
-                                          return String(item.score || 0);
-                                        }
-                                      )
-                                    ).toFixed(2)}
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    30%
-                                  </td>
-                                  <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
-                                    {(
-                                      calculateScore(
-                                        (submission.customer_services || []).map(
-                                          (item: any) => {
-                                            return String(item.score || 0);
-                                          }
-                                        )
-                                      ) * 0.3
-                                    ).toFixed(2)}
-                                  </td>
-                                </tr>
-                              )}
-
                               {/* Overall Performance Rating */}
                               <tr className="bg-gray-100">
-                                <td className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700">
+                                <td
+                                  colSpan={4}
+                                  className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700"
+                                >
                                   Overall Performance Rating
                                 </td>
-                                <td
-                                  colSpan={2}
-                                  className="border-2 border-gray-400 px-4 py-3 text-center"
-                                ></td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center"></td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-lg">
                                   {finalRatingRounded.toFixed(2)}
+                                </td>
+                              </tr>
+
+                              {/* Managerial Skills */}
+                              <tr>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
+                                  Managerial Skills
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center">
+                                  <div className="flex items-center justify-center space-x-1">
+                                    <span
+                                      className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
+                                        getRatingLabel(
+                                          calculateScore(
+                                            submission.managerial_skills.map(
+                                              (item: any) => {
+                                                return item.score;
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      )}`}
+                                    >
+                                      {getRatingLabel(
+                                        calculateScore(
+                                          submission.managerial_skills.map(
+                                            (item: any) => {
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
+                                      )}
+                                    </span>
+                                    <span className="print-rating-text">
+                                      {getRatingLabel(
+                                        calculateScore(
+                                          submission.managerial_skills.map(
+                                            (item: any) => {
+                                              return item.score;
+                                            },
+                                          ),
+                                        ),
+                                      )}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                  {calculateScore(
+                                    submission.managerial_skills.map(
+                                      (item: any) => {
+                                        return item.score;
+                                      },
+                                    ),
+                                  ).toFixed(2)}
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                  30%
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
+                                  {(
+                                    calculateScore(
+                                      submission.managerial_skills.map(
+                                        (item: any) => {
+                                          return item.score;
+                                        },
+                                      ),
+                                    ) * 0.3
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
                             </tbody>
@@ -3349,8 +3071,7 @@ export default function ViewResultsModal({
                         <div className="mt-6 flex justify-center items-center space-x-8 print-performance-score-wrapper">
                           <div className="text-center">
                             <div className="text-4xl font-bold text-gray-700">
-                              {finalPercentage.toFixed(2)}
-                              %
+                              {finalPercentage.toFixed(2)}%
                             </div>
                             <div className="text-base text-gray-500 mt-1">
                               Performance Score
@@ -3391,8 +3112,8 @@ export default function ViewResultsModal({
                           idx === 1
                             ? submission.priorityArea1
                             : idx === 2
-                            ? submission.priorityArea2
-                            : submission.priorityArea3;
+                              ? submission.priorityArea2
+                              : submission.priorityArea3;
                         return (
                           <div
                             key={idx}
@@ -3453,7 +3174,8 @@ export default function ViewResultsModal({
                             <div className="print-signature-line"></div>
                             {/* Name as background text - always show */}
                             <span className="text-md text-gray-900 font-bold">
-                              {submission?.employee?.fname && submission?.employee?.lname
+                              {submission?.employee?.fname &&
+                              submission?.employee?.lname
                                 ? `${submission.employee.fname} ${submission.employee.lname}`
                                 : "Employee Name"}
                             </span>
@@ -3500,7 +3222,7 @@ export default function ViewResultsModal({
                                   <Button
                                     onClick={handleApproveEvaluation}
                                     disabled={!submission.id || isApproving}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-sm font-medium disabled:bg-gray-400 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-sm"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
                                   >
                                     {isApproving ? (
                                       <>
@@ -3537,7 +3259,7 @@ export default function ViewResultsModal({
                                     Approved on{" "}
                                     {submission.employeeApprovedAt
                                       ? new Date(
-                                          submission.employeeApprovedAt
+                                          submission.employeeApprovedAt,
                                         ).toLocaleDateString("en-US", {
                                           year: "numeric",
                                           month: "long",
@@ -3556,7 +3278,7 @@ export default function ViewResultsModal({
                             {submission.employeeApprovedAt ||
                             submission.employeeApprovedAt
                               ? new Date(
-                                  submission.employeeApprovedAt
+                                  submission.employeeApprovedAt,
                                 ).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "long",
@@ -3610,7 +3332,7 @@ export default function ViewResultsModal({
                           <p className="text-xs text-gray-500 mt-1">
                             {submission.evaluatorApprovedAt
                               ? new Date(
-                                  submission.evaluatorApprovedAt
+                                  submission.evaluatorApprovedAt,
                                 ).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "long",
@@ -3647,7 +3369,7 @@ export default function ViewResultsModal({
                           ? new Date(
                               submission.employeeApprovedAt ||
                                 submission.evaluatorApprovedAt ||
-                                submission.created_at
+                                submission.created_at,
                             ).toLocaleDateString("en-GB", {
                               day: "2-digit",
                               month: "2-digit",

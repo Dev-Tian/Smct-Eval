@@ -28,8 +28,11 @@ import {
 import apiService from "@/lib/apiService";
 import { Progress } from "@/components/ui/progress";
 import EvaluationsPagination from "@/components/paginationComponent";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
 import { set } from "date-fns";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 interface Review {
   id: number;
@@ -77,7 +80,7 @@ export default function OverviewTab() {
         const response = await apiService.evaluatorDashboard(
           debouncedSearchTerm,
           currentPage,
-          itemsPerPage
+          itemsPerPage,
         );
 
         setData(response.myEval_as_Evaluator.data);
@@ -141,7 +144,7 @@ export default function OverviewTab() {
 
   const getTimeAgo = (submittedAt: string) => {
     const diffSeconds = Math.floor(
-      (Date.now() - new Date(submittedAt).getTime()) / 1000
+      (Date.now() - new Date(submittedAt).getTime()) / 1000,
     );
 
     if (diffSeconds < 60) return rtf.format(-diffSeconds, "second");
@@ -302,7 +305,7 @@ export default function OverviewTab() {
                 onClick={() => setSearchTerm("")}
                 className="px-3 py-2 text-white hover:text-white bg-blue-400 hover:bg-blue-500"
               >
-                 Clear
+                Clear
               </Button>
             )}
             <Button
@@ -594,7 +597,7 @@ export default function OverviewTab() {
                               <div className="flex flex-col items-center">
                                 <span className="font-medium">
                                   {new Date(
-                                    review.created_at
+                                    review.created_at,
                                   ).toLocaleDateString()}
                                 </span>
                                 <span className="text-xs text-gray-500">
@@ -607,8 +610,8 @@ export default function OverviewTab() {
                                 className={getQuarterColor(
                                   String(
                                     review.reviewTypeProbationary ||
-                                      review.reviewTypeRegular
-                                  )
+                                      review.reviewTypeRegular,
+                                  ),
                                 )}
                               >
                                 {review.reviewTypeRegular ||
@@ -652,14 +655,57 @@ export default function OverviewTab() {
               )}
 
               {/* View Results Modal */}
-              <ViewResultsModal
-                isOpen={isViewResultsModalOpen}
-                onCloseAction={() => {
-                  handleClose();
-                }}
-                submission={selectedSubmission}
-                showApprovalButton={false}
-              />
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchRankNFile" && (
+                  <RnF_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={false}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchBasic" && (
+                  <Basic_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={false}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoRankNFile" && (
+                  <RnF_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={false}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoBasic" && (
+                  <Basic_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={false}
+                  />
+                )}
             </>
           )}
         </CardContent>

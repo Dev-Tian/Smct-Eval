@@ -77,7 +77,7 @@ export default function AreaManagersTab() {
   }>({ areaManager: null, branches: [] });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [areaManagerToEdit, setAreaManagerToEdit] = useState<Employee | null>(
-    null
+    null,
   );
   const [editSelectedBranches, setEditSelectedBranches] = useState<
     { id: string; name: string }[]
@@ -298,7 +298,7 @@ export default function AreaManagersTab() {
   const areaManagersEndIndex = areaManagersStartIndex + itemsPerPage;
   const areaManagersPaginated = filteredAreaManagers.slice(
     areaManagersStartIndex,
-    areaManagersEndIndex
+    areaManagersEndIndex,
   );
 
   // Reset to page 1 when search term changes
@@ -309,7 +309,7 @@ export default function AreaManagersTab() {
   // Helper function to generate pagination pages
   const generatePaginationPages = (
     currentPage: number,
-    totalPages: number
+    totalPages: number,
   ): (number | "ellipsis")[] => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -381,7 +381,7 @@ export default function AreaManagersTab() {
         errorTitle: "Failed to Load Branches",
         errorMessage: "Unable to load branches. Please try again.",
         showSuccessToast: false,
-      }
+      },
     );
 
     setBranchesLoading(false);
@@ -651,7 +651,7 @@ export default function AreaManagersTab() {
                                   >
                                     {branch}
                                   </Badge>
-                                )
+                                ),
                               )}
                             </div>
                           ) : (
@@ -677,7 +677,7 @@ export default function AreaManagersTab() {
                                       // Try to find matching branch from loaded branches
                                       const branch = loadedBranches.find(
                                         (b: { id: string; name: string }) =>
-                                          b.name === name.trim()
+                                          b.name === name.trim(),
                                       );
                                       return (
                                         branch || { id: "", name: name.trim() }
@@ -685,7 +685,7 @@ export default function AreaManagersTab() {
                                     })
                                     .filter(
                                       (b: { id: string; name: string }) =>
-                                        b.id || b.name
+                                        b.id || b.name,
                                     );
                                   setEditSelectedBranches(existingBranches);
                                 } else {
@@ -742,7 +742,7 @@ export default function AreaManagersTab() {
                   </PaginationItem>
                   {generatePaginationPages(
                     areaManagersPage,
-                    areaManagersTotalPages
+                    areaManagersTotalPages,
                   ).map((page, index) => {
                     if (page === "ellipsis") {
                       return (
@@ -777,7 +777,7 @@ export default function AreaManagersTab() {
                       onClick={(e) => {
                         e.preventDefault();
                         setAreaManagersPage((prev) =>
-                          Math.min(areaManagersTotalPages, prev + 1)
+                          Math.min(areaManagersTotalPages, prev + 1),
                         );
                       }}
                       className={
@@ -1013,7 +1013,7 @@ export default function AreaManagersTab() {
                             // Use updateUserBranch API endpoint for branch assignments
                             await apiService.updateUserBranch(
                               selectedAreaManager.id,
-                              formData
+                              formData,
                             );
 
                             // Close the branches modal after confirmation
@@ -1037,7 +1037,7 @@ export default function AreaManagersTab() {
                                 selectedBranches.length === 1
                                   ? "branch"
                                   : "branches"
-                              }.`
+                              }.`,
                             );
 
                             // Reload area managers data to update the table
@@ -1052,7 +1052,7 @@ export default function AreaManagersTab() {
                             errorMessage:
                               "Failed to assign branches. Please try again.",
                             showSuccessToast: false, // We show custom success toast above
-                          }
+                          },
                         );
                       }}
                     >
@@ -1099,7 +1099,7 @@ export default function AreaManagersTab() {
                               <Button
                                 className={`${
                                   selectedBranches.some(
-                                    (b) => b.id === branch.id
+                                    (b) => b.id === branch.id,
                                   )
                                     ? "bg-green-600 hover:bg-green-700 text-white"
                                     : "bg-blue-600 hover:bg-blue-700 text-white"
@@ -1108,15 +1108,15 @@ export default function AreaManagersTab() {
                                 onClick={() => {
                                   // Check if branch is already selected
                                   const isSelected = selectedBranches.some(
-                                    (b) => b.id === branch.id
+                                    (b) => b.id === branch.id,
                                   );
 
                                   if (isSelected) {
                                     // Remove from selection
                                     setSelectedBranches(
                                       selectedBranches.filter(
-                                        (b) => b.id !== branch.id
-                                      )
+                                        (b) => b.id !== branch.id,
+                                      ),
                                     );
                                     if (selectedBranches.length === 1) {
                                       setShowConfirmation(false);
@@ -1132,7 +1132,7 @@ export default function AreaManagersTab() {
                                 }}
                               >
                                 {selectedBranches.some(
-                                  (b) => b.id === branch.id
+                                  (b) => b.id === branch.id,
                                 )
                                   ? "Added"
                                   : "Add"}
@@ -1268,7 +1268,7 @@ export default function AreaManagersTab() {
                     <TableBody>
                       {branches.map((branch) => {
                         const isSelected = editSelectedBranches.some(
-                          (b) => b.id === branch.id
+                          (b) => b.id === branch.id,
                         );
                         return (
                           <TableRow
@@ -1294,8 +1294,8 @@ export default function AreaManagersTab() {
                                     if (isSelected) {
                                       setEditSelectedBranches(
                                         editSelectedBranches.filter(
-                                          (b) => b.id !== branch.id
-                                        )
+                                          (b) => b.id !== branch.id,
+                                        ),
                                       );
                                     } else {
                                       setEditSelectedBranches([
@@ -1355,7 +1355,7 @@ export default function AreaManagersTab() {
                 if (!areaManagerToEdit) {
                   toastMessages.generic.error(
                     "Validation Error",
-                    "No area manager selected."
+                    "No area manager selected.",
                   );
                   return;
                 }
@@ -1377,7 +1377,7 @@ export default function AreaManagersTab() {
 
                         await apiService.updateUserBranch(
                           areaManagerToEdit.id,
-                          formData
+                          formData,
                         );
                       }
 
@@ -1391,8 +1391,8 @@ export default function AreaManagersTab() {
                         prevData.map((manager) =>
                           manager.id === areaManagerToEdit.id
                             ? { ...manager, branch: branchNames }
-                            : manager
-                        )
+                            : manager,
+                        ),
                       );
 
                       // Reload in background
@@ -1400,7 +1400,7 @@ export default function AreaManagersTab() {
                         .getAllAreaManager()
                         .then((reloadedData) => {
                           setAreaManagersData(
-                            normalizeAreaManagerData(reloadedData)
+                            normalizeAreaManagerData(reloadedData),
                           );
                         })
                         .catch(() => {});
@@ -1417,7 +1417,7 @@ export default function AreaManagersTab() {
 
                       toastMessages.generic.success(
                         "Branch Assignment Updated",
-                        `${areaManagerToEdit.name}'s branch assignment has been updated.`
+                        `${areaManagerToEdit.name}'s branch assignment has been updated.`,
                       );
                     },
                     {
@@ -1425,7 +1425,7 @@ export default function AreaManagersTab() {
                       errorMessage:
                         "Failed to update branch assignment. Please try again.",
                       showSuccessToast: false,
-                    }
+                    },
                   );
                 } finally {
                   setIsSavingAreaManagerEdit(false);
@@ -1552,7 +1552,7 @@ export default function AreaManagersTab() {
                       async () => {
                         // Remove all branch assignments
                         await apiService.removeUserBranches(
-                          areaManagerToDelete.id
+                          areaManagerToDelete.id,
                         );
 
                         // Reload area managers
@@ -1565,7 +1565,7 @@ export default function AreaManagersTab() {
                         // Success toast
                         toastMessages.generic.success(
                           "Branch Assignment Removed",
-                          `${areaManagerToDelete.name}'s branch assignment has been removed.`
+                          `${areaManagerToDelete.name}'s branch assignment has been removed.`,
                         );
 
                         // Close modal
@@ -1577,7 +1577,7 @@ export default function AreaManagersTab() {
                         errorMessage:
                           "Failed to remove branch assignment. Please try again.",
                         showSuccessToast: false,
-                      }
+                      },
                     );
                   } finally {
                     setIsDeletingAreaManager(false);

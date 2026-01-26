@@ -343,7 +343,7 @@ function LandingLoginPage() {
                     </svg>
                   </div>
                   <span className="text-gray-700 group-hover/item:text-gray-800 transition-colors duration-300">
-                  HR-defined evaluation templates
+                    HR-defined evaluation templates
                   </span>
                 </div>
                 <div className="flex items-center group/item hover:translate-x-2 transition-transform duration-300 cursor-default">
@@ -585,7 +585,10 @@ function LandingLoginPage() {
             </p>
 
             <div className="flex space-x-4 mt-4 md:mt-0">
-              <a href="#" className="text-white hover:text-yellow-300 cursor-pointer">
+              <a
+                href="#"
+                className="text-white hover:text-yellow-300 cursor-pointer"
+              >
                 <svg
                   className="h-6 w-6"
                   fill="currentColor"
@@ -679,7 +682,7 @@ function LandingLoginPage() {
               scrollbar-color: #3b82f6 #f1f5f9;
             }
           `}</style>
-          
+
           {/* Fixed Close Button - Always Visible */}
           <button
             onClick={() => setIsAboutModalOpen(false)}
@@ -700,7 +703,7 @@ function LandingLoginPage() {
               ></path>
             </svg>
           </button>
-          
+
           {/* Header */}
           <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-gray-200">
             <DialogHeader>
@@ -717,315 +720,319 @@ function LandingLoginPage() {
           {/* Scrollable Content */}
           <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-3">
             <div className="space-y-4">
-            {/* What is the Evaluation App */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-md border border-blue-100">
-              <h3 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
-                <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </span>
-                What is the SMCT Evaluation App?
-              </h3>
-              <p className="text-gray-700 leading-relaxed text-xs">
-                The SMCT Performance Evaluation System is a comprehensive
-                digital platform designed to streamline and enhance the
-                performance review process within organizations. Our system
-                transforms traditional paper-based evaluations into an
-                efficient, data-driven approach that benefits both employees and
-                managers.
-              </p>
-            </div>
+              {/* What is the Evaluation App */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-md border border-blue-100">
+                <h3 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
+                  <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </span>
+                  What is the SMCT Evaluation App?
+                </h3>
+                <p className="text-gray-700 leading-relaxed text-xs">
+                  The SMCT Performance Evaluation System is a comprehensive
+                  digital platform designed to streamline and enhance the
+                  performance review process within organizations. Our system
+                  transforms traditional paper-based evaluations into an
+                  efficient, data-driven approach that benefits both employees
+                  and managers.
+                </p>
+              </div>
 
-            {/* Key Features */}
-            <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
-                <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </span>
-                Key Features
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span className="text-base">📋</span>
+              {/* Key Features */}
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                  <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </span>
+                  Key Features
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-base">📋</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800 mb-1 text-sm">
+                          Customizable Templates
+                        </h4>
+                        <p className="text-gray-600 text-xs">
+                          Create and customize evaluation forms tailored to
+                          different roles and departments
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 mb-1 text-sm">
-                        Customizable Templates
-                      </h4>
-                      <p className="text-gray-600 text-xs">
-                        Create and customize evaluation forms tailored to
-                        different roles and departments
-                      </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-base">📊</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800 mb-1 text-sm">
+                          Real-time Analytics
+                        </h4>
+                        <p className="text-gray-600 text-xs">
+                          Track performance trends and generate insightful
+                          reports
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-base">🎯</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800 mb-1 text-sm">
+                          Goal Setting & Tracking
+                        </h4>
+                        <p className="text-gray-600 text-xs">
+                          Set SMART goals and monitor progress throughout the
+                          evaluation period
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-base">🤝</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800 mb-1 text-sm">
+                          360° Feedback
+                        </h4>
+                        <p className="text-gray-600 text-xs">
+                          Collect feedback from peers, managers, and direct
+                          reports
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span className="text-base">📊</span>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 mb-1 text-sm">
-                        Real-time Analytics
-                      </h4>
-                      <p className="text-gray-600 text-xs">
-                        Track performance trends and generate insightful reports
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                  <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </span>
+                  Benefits for Organizations
+                </h3>
+                <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
+                  <div className="space-y-2">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-700 text-sm">
+                        Reduce administrative burden and save time on manual
+                        processes
                       </p>
                     </div>
-                  </div>
-                </div>
-                <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span className="text-base">🎯</span>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 mb-1 text-sm">
-                        Goal Setting & Tracking
-                      </h4>
-                      <p className="text-gray-600 text-xs">
-                        Set SMART goals and monitor progress throughout the
-                        evaluation period
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-700 text-sm">
+                        Improve accuracy and consistency in performance
+                        assessments
                       </p>
                     </div>
-                  </div>
-                </div>
-                <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span className="text-base">🤝</span>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-700 text-sm">
+                        Enhance employee engagement and development through
+                        regular feedback
+                      </p>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 mb-1 text-sm">
-                        360° Feedback
-                      </h4>
-                      <p className="text-gray-600 text-xs">
-                        Collect feedback from peers, managers, and direct
-                        reports
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-700 text-sm">
+                        Make data-driven decisions for promotions and career
+                        development
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Benefits */}
-            <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
-                <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </span>
-                Benefits for Organizations
-              </h3>
-              <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
-                <div className="space-y-2">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg
-                        className="w-2 h-2 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
+              {/* How it Works */}
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                  <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                      ></path>
+                    </svg>
+                  </span>
+                  How It Works
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white font-bold text-xs">1</span>
                     </div>
-                    <p className="text-gray-700 text-sm">
-                      Reduce administrative burden and save time on manual
-                      processes
+                    <h4 className="font-medium text-gray-800 mb-1 text-xs">
+                      Setup & Configuration
+                    </h4>
+                    <p className="text-gray-600 text-xs">
+                      Configure evaluation criteria and templates for your
+                      organization
                     </p>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg
-                        className="w-2 h-2 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
+                  <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white font-bold text-xs">2</span>
                     </div>
-                    <p className="text-gray-700 text-sm">
-                      Improve accuracy and consistency in performance
-                      assessments
+                    <h4 className="font-medium text-gray-800 mb-1 text-xs">
+                      Evaluation Process
+                    </h4>
+                    <p className="text-gray-600 text-xs">
+                      Conduct evaluations with structured forms and real-time
+                      feedback
                     </p>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg
-                        className="w-2 h-2 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
+                  <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white font-bold text-xs">3</span>
                     </div>
-                    <p className="text-gray-700 text-sm">
-                      Enhance employee engagement and development through
-                      regular feedback
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg
-                        className="w-2 h-2 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                    </div>
-                    <p className="text-gray-700 text-sm">
-                      Make data-driven decisions for promotions and career
-                      development
+                    <h4 className="font-medium text-gray-800 mb-1 text-xs">
+                      Analysis & Insights
+                    </h4>
+                    <p className="text-gray-600 text-xs">
+                      Generate reports and insights to drive organizational
+                      growth
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* How it Works */}
-            <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center">
-                <span className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center mr-2">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                    ></path>
-                  </svg>
-                </span>
-                How It Works
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-white font-bold text-xs">1</span>
+              {/* Company Info */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-md shadow-lg">
+                <div className="flex items-center space-x-3 mb-3">
+                  <img
+                    src="/smct.png"
+                    alt="SMCT Group of Companies"
+                    className="h-10 w-auto"
+                  />
+                  <div>
+                    <h3 className="text-lg font-bold">
+                      SMCT Group of Companies
+                    </h3>
+                    <p className="text-blue-100 text-sm">
+                      Empowering organizations through innovative solutions
+                    </p>
                   </div>
-                  <h4 className="font-medium text-gray-800 mb-1 text-xs">
-                    Setup & Configuration
-                  </h4>
-                  <p className="text-gray-600 text-xs">
-                    Configure evaluation criteria and templates for your
-                    organization
-                  </p>
                 </div>
-                <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-white font-bold text-xs">2</span>
-                  </div>
-                  <h4 className="font-medium text-gray-800 mb-1 text-xs">
-                    Evaluation Process
-                  </h4>
-                  <p className="text-gray-600 text-xs">
-                    Conduct evaluations with structured forms and real-time
-                    feedback
-                  </p>
-                </div>
-                <div className="text-center p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-white font-bold text-xs">3</span>
-                  </div>
-                  <h4 className="font-medium text-gray-800 mb-1 text-xs">
-                    Analysis & Insights
-                  </h4>
-                  <p className="text-gray-600 text-xs">
-                    Generate reports and insights to drive organizational growth
-                  </p>
-                </div>
+                <p className="text-blue-100 text-xs leading-relaxed">
+                  As a leading provider of business solutions, we understand the
+                  challenges organizations face in managing performance
+                  evaluations. Our platform is built with years of experience in
+                  HR technology and organizational development, ensuring that
+                  every feature serves a real business need.
+                </p>
               </div>
-            </div>
-
-            {/* Company Info */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-md shadow-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <img
-                  src="/smct.png"
-                  alt="SMCT Group of Companies"
-                  className="h-10 w-auto"
-                />
-                <div>
-                  <h3 className="text-lg font-bold">SMCT Group of Companies</h3>
-                  <p className="text-blue-100 text-sm">
-                    Empowering organizations through innovative solutions
-                  </p>
-                </div>
-              </div>
-              <p className="text-blue-100 text-xs leading-relaxed">
-                As a leading provider of business solutions, we understand the
-                challenges organizations face in managing performance
-                evaluations. Our platform is built with years of experience in
-                HR technology and organizational development, ensuring that
-                every feature serves a real business need.
-              </p>
-            </div>
             </div>
           </div>
         </DialogContent>

@@ -23,10 +23,13 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiService } from "@/lib/apiService";
 import EvaluationsPagination from "@/components/paginationComponent";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
 import { useAuth } from "../../contexts/UserContext";
 import { toast } from "sonner";
 import { toastMessages } from "@/lib/toastMessages";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 interface Review {
   id: number;
@@ -67,12 +70,14 @@ export default function OverviewTab() {
       const response = await apiService.getMyEvalAuthEmployee(
         searchValue,
         currentPage,
-        itemsPerPage
+        itemsPerPage,
       );
-      
+
       // Add safety checks to prevent "Cannot read properties of undefined" error
       if (!response || !response.myEval_as_Employee) {
-        console.error("API response is undefined or missing myEval_as_Employee");
+        console.error(
+          "API response is undefined or missing myEval_as_Employee",
+        );
         setMyEvaluations([]);
         setOverviewTotal(0);
         setTotalPages(1);
@@ -102,7 +107,7 @@ export default function OverviewTab() {
     const loadDashboard = async () => {
       try {
         const dashboard = await apiService.employeeDashboard();
-        
+
         // Add safety checks to prevent "Cannot read properties of undefined" error
         if (!dashboard) {
           console.error("Dashboard API response is undefined");
@@ -183,7 +188,7 @@ export default function OverviewTab() {
       if (user?.signature === null || user?.signature === undefined) {
         toastMessages.generic.warning(
           "No signature found",
-          "Please set up your signature before approving evaluations."
+          "Please set up your signature before approving evaluations.",
         );
       }
       await apiService.approvedByEmployee(id);
@@ -219,7 +224,7 @@ export default function OverviewTab() {
 
   const getTimeAgo = (submittedAt: string) => {
     const diffSeconds = Math.floor(
-      (Date.now() - new Date(submittedAt).getTime()) / 1000
+      (Date.now() - new Date(submittedAt).getTime()) / 1000,
     );
 
     if (diffSeconds < 60) return rtf.format(-diffSeconds, "second");
@@ -700,8 +705,11 @@ export default function OverviewTab() {
                         <TableRow key={submission.id} className={rowClassName}>
                           <TableCell className="w-1/6 font-medium pl-4">
                             <div className="flex items-center gap-2">
-                              {submission.evaluator?.fname && submission.evaluator?.lname
-                                ? submission.evaluator.fname + " " + submission.evaluator.lname
+                              {submission.evaluator?.fname &&
+                              submission.evaluator?.lname
+                                ? submission.evaluator.fname +
+                                  " " +
+                                  submission.evaluator.lname
                                 : "Not specified"}
                               {isNew && (
                                 <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 font-semibold">
@@ -734,7 +742,7 @@ export default function OverviewTab() {
                             <div className="flex flex-col">
                               <span className="font-medium">
                                 {new Date(
-                                  submission.created_at
+                                  submission.created_at,
                                 ).toLocaleDateString()}
                               </span>
                               <span className="text-xs text-gray-500">
@@ -748,8 +756,8 @@ export default function OverviewTab() {
                                 className={getQuarterColor(
                                   String(
                                     submission.reviewTypeProbationary ||
-                                      submission.reviewTypeRegular
-                                  )
+                                      submission.reviewTypeRegular,
+                                  ),
                                 )}
                               >
                                 {submission.reviewTypeRegular ||
@@ -804,15 +812,61 @@ export default function OverviewTab() {
               )}
 
               {/* View Results Modal */}
-              <ViewResultsModal
-                isOpen={isViewResultsModalOpen}
-                onCloseAction={() => {
-                  handleClose();
-                }}
-                submission={selectedSubmission}
-                showApprovalButton={true}
-                onApprove={(id) => handleApprove(id)}
-              />
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchRankNFile" && (
+                  <RnF_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchBasic" && (
+                  <Basic_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoRankNFile" && (
+                  <RnF_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoBasic" && (
+                  <Basic_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
             </>
           )}
         </CardContent>

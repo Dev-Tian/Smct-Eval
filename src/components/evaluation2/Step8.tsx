@@ -159,11 +159,12 @@ export default function Step8({
 
   const calculateAverageScore = () => {
     const scores = [
-      data.customerServiceScore1,
-      data.customerServiceScore2,
-      data.customerServiceScore3,
-      data.customerServiceScore4,
-      data.customerServiceScore5,
+      data.managerialSkillsScore1,
+      data.managerialSkillsScore2,
+      data.managerialSkillsScore3,
+      data.managerialSkillsScore4,
+      data.managerialSkillsScore5,
+      data.managerialSkillsScore6,
     ]
       .filter((score) => score && score !== 0)
       .map((score) => parseInt(String(score)));

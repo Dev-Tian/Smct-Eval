@@ -103,5 +103,7 @@ interface EvaluationPayload {
   managerialSkillsExplanation4?: string;
   managerialSkillsExplanation5?: string;
   managerialSkillsExplanation6?: string;
+
+  created_at?: string;
 }
 export type { EvaluationPayload };

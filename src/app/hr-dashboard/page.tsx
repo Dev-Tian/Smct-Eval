@@ -21,9 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { getQuarterColor } from "@/lib/quarterUtils";
 import apiService from "@/lib/apiService";
-import { EvaluationPayload } from "@/components/evaluation/types";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
+import { EvaluationPayload } from "@/components/evaluation2/types";
 import EvaluationsPagination from "@/components/paginationComponent";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 export default function OverviewTab() {
   //data
@@ -44,7 +47,7 @@ export default function OverviewTab() {
   const [totalPages, setTotalPages] = useState(1);
   const [perPage, setPerPage] = useState(0);
   //view
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   //modal
   const [isViewResultsModalOpen, setIsViewResultsModalOpen] = useState(false);
   //refresh state
@@ -56,7 +59,7 @@ export default function OverviewTab() {
         const res = await apiService.getSubmissions(
           overviewSearchTerm,
           currentPage,
-          itemsPerPage
+          itemsPerPage,
         );
         setSubmissions(res.data);
         setOverviewTotal(res.total);
@@ -191,7 +194,7 @@ export default function OverviewTab() {
                 const newCount = 0;
                 submissions.filter((sub) => {
                   const hoursDiff =
-                    (now.getTime() - new Date(sub.created_at).getTime()) /
+                    (now.getTime() - new Date(sub.created_at || "").getTime()) /
                     (1000 * 60 * 60);
                   return hoursDiff <= 24;
                 }).length;
@@ -431,7 +434,8 @@ export default function OverviewTab() {
                             <div>
                               <div className="flex flex-wrap items-center gap-1 md:gap-2 mb-1">
                                 <span className="font-medium text-gray-900 text-xs md:text-sm lg:text-base">
-                                  {submission.employee?.fname && submission.employee?.lname
+                                  {submission.employee?.fname &&
+                                  submission.employee?.lname
                                     ? `${submission.employee.fname} ${submission.employee.lname}`
                                     : "Unknown Employee"}
                                 </span>
@@ -460,7 +464,7 @@ export default function OverviewTab() {
                             {submission.rating && (
                               <Badge
                                 className={`text-xs md:text-sm font-semibold ${getRatingColor(
-                                  submission.rating
+                                  submission.rating,
                                 )}`}
                               >
                                 {submission.rating > 0
@@ -473,7 +477,7 @@ export default function OverviewTab() {
                             <Badge
                               className={`${getQuarterColor(
                                 submission.reviewTypeProbationary ||
-                                  submission.reviewTypeRegular
+                                  submission.reviewTypeRegular,
                               )} text-xs md:text-sm`}
                             >
                               {submission.reviewTypeRegular ||
@@ -482,7 +486,7 @@ export default function OverviewTab() {
                           </TableCell>
                           <TableCell className="px-3 py-2 md:px-4 md:py-2.5 lg:px-6 lg:py-3 text-xs md:text-sm text-gray-600">
                             {new Date(
-                              submission.created_at
+                              submission.created_at,
                             ).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="px-3 py-2 md:px-4 md:py-2.5 lg:px-6 lg:py-3">
@@ -491,15 +495,15 @@ export default function OverviewTab() {
                                 submission.status === "completed"
                                   ? "bg-green-100 text-green-800"
                                   : submission.status === "pending"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-gray-100 text-gray-800"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
                               }`}
                             >
                               {submission.status === "completed"
                                 ? "✓ Fully Approved"
                                 : submission.status === "pending"
-                                ? "⏳ Pending"
-                                : ""}
+                                  ? "⏳ Pending"
+                                  : ""}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-3 py-2 md:px-4 md:py-2.5 lg:px-6 lg:py-3">
@@ -532,15 +536,57 @@ export default function OverviewTab() {
               />
             )}
             {/* View Results Modal */}
-            <ViewResultsModal
-              isOpen={isViewResultsModalOpen}
-              onCloseAction={() => {
-                setIsViewResultsModalOpen(false);
-                setSelectedSubmission(null);
-              }}
-              submission={selectedSubmission}
-              showApprovalButton={false}
-            />
+            {selectedSubmission &&
+              selectedSubmission.evaluationType === "BranchRankNFile" && (
+                <RnF_B_View
+                  isOpen={isViewResultsModalOpen}
+                  onCloseAction={() => {
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                  submission={selectedSubmission}
+                  showApprovalButton={false}
+                />
+              )}
+
+            {selectedSubmission &&
+              selectedSubmission.evaluationType === "BranchBasic" && (
+                <Basic_B_View
+                  isOpen={isViewResultsModalOpen}
+                  onCloseAction={() => {
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                  submission={selectedSubmission}
+                  showApprovalButton={false}
+                />
+              )}
+
+            {selectedSubmission &&
+              selectedSubmission.evaluationType === "HoRankNFile" && (
+                <RnF_HO_View
+                  isOpen={isViewResultsModalOpen}
+                  onCloseAction={() => {
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                  submission={selectedSubmission}
+                  showApprovalButton={false}
+                />
+              )}
+
+            {selectedSubmission &&
+              selectedSubmission.evaluationType === "HoBasic" && (
+                <Basic_HO_View
+                  isOpen={isViewResultsModalOpen}
+                  onCloseAction={() => {
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                  submission={selectedSubmission}
+                  showApprovalButton={false}
+                />
+              )}
           </CardContent>
         </Card>
       </div>

@@ -46,15 +46,11 @@ import { useDialogAnimation } from "@/hooks/useDialogAnimation";
 import EvaluationsPagination from "@/components/paginationComponent";
 import ViewEmployeeModal from "@/components/ViewEmployeeModal";
 import { User, useAuth } from "@/contexts/UserContext";
-import { Combobox } from "@/components/ui/combobox";
-import EvaluationForm from "@/components/evaluation";
 import EvaluationTypeModal from "@/components/EvaluationTypeModal";
-import ManagerEvaluationForm from "@/components/evaluation/ManagerEvaluationForm";
-import BranchEvaluationForm from "@/components/evaluation/BranchEvaluationForm";
-import RankNfileHo from "@/components/evaluation/RankNfileHo";
-import BasicHo from "@/components/evaluation/BasicHo";
 import RnF_HO_EvaluationForm from "@/components/evaluation2/indexes/RnF_HO";
 import RnF_B_EvaluationForm from "@/components/evaluation2/indexes/RnF_B";
+import Basic_HO_EvaluationForm from "@/components/evaluation2/indexes/Basic_HO";
+import Basic_B_EvaluationForm from "@/components/evaluation2/indexes/Basic_B";
 
 interface Employee {
   id: number;
@@ -1757,9 +1753,10 @@ export default function UserManagementTab() {
           )}
           {selectedEmployeeForEvaluation && evaluationType === "manager" && (
             <>
-              {isHO &&
-              !isEmployeeAreaManagerWithHO(selectedEmployeeForEvaluation) ? (
-                <BasicHo
+              {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
+              selectedEmployeeForEvaluation.branches[0]?.name ===
+                "HEAD OFFICE" ? (
+                <Basic_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
@@ -1768,7 +1765,7 @@ export default function UserManagementTab() {
                   }}
                 />
               ) : (
-                <BranchEvaluationForm
+                <Basic_B_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);

@@ -34,7 +34,10 @@ import {
 } from "@/lib/quarterUtils";
 import { apiService } from "@/lib/apiService";
 import EvaluationsPagination from "@/components/paginationComponent";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 interface Review {
   id: number;
@@ -76,13 +79,13 @@ export default function performanceReviews() {
       const response = await apiService.getMyEvalAuthEmployee(
         "",
         currentPage,
-        itemsPerPage
+        itemsPerPage,
       );
 
       // Add safety checks to prevent "Cannot read properties of undefined" error
       if (!response || !response.myEval_as_Employee) {
         console.error(
-          "API response is undefined or missing myEval_as_Employee"
+          "API response is undefined or missing myEval_as_Employee",
         );
         setSubmissions([]);
         setOverviewTotal(0);
@@ -538,19 +541,19 @@ export default function performanceReviews() {
                         parseFloat(average) >= 4.5
                           ? "bg-green-100 text-green-800"
                           : parseFloat(average) >= 4.0
-                          ? "bg-blue-100 text-blue-800"
-                          : parseFloat(average) >= 3.5
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
+                            ? "bg-blue-100 text-blue-800"
+                            : parseFloat(average) >= 3.5
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
                       }
                     >
                       {parseFloat(average) >= 4.5
                         ? "Outstanding"
                         : parseFloat(average) >= 4.0
-                        ? "Exceeds Expectations"
-                        : parseFloat(average) >= 3.5
-                        ? "Meets Expectations"
-                        : "Needs Improvement"}
+                          ? "Exceeds Expectations"
+                          : parseFloat(average) >= 3.5
+                            ? "Meets Expectations"
+                            : "Needs Improvement"}
                     </Badge>
                   </div>
                 </CardContent>
@@ -578,14 +581,14 @@ export default function performanceReviews() {
                         insight.type === "excellent"
                           ? "bg-green-50 border-green-200"
                           : insight.type === "good"
-                          ? "bg-blue-50 border-blue-200"
-                          : insight.type === "average"
-                          ? "bg-yellow-50 border-yellow-200"
-                          : insight.type === "improvement"
-                          ? "bg-red-50 border-red-200"
-                          : insight.type === "consistency"
-                          ? "bg-emerald-50 border-emerald-200"
-                          : "bg-gray-50 border-gray-200"
+                            ? "bg-blue-50 border-blue-200"
+                            : insight.type === "average"
+                              ? "bg-yellow-50 border-yellow-200"
+                              : insight.type === "improvement"
+                                ? "bg-red-50 border-red-200"
+                                : insight.type === "consistency"
+                                  ? "bg-emerald-50 border-emerald-200"
+                                  : "bg-gray-50 border-gray-200"
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -723,8 +726,8 @@ export default function performanceReviews() {
                                   isPoorPerformance
                                     ? "bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100"
                                     : isLowPerformance
-                                    ? "bg-orange-50 border-l-4 border-l-orange-400 hover:bg-orange-100"
-                                    : ""
+                                      ? "bg-orange-50 border-l-4 border-l-orange-400 hover:bg-orange-100"
+                                      : ""
                                 }`}
                               >
                                 <TableCell className="w-1/5 font-medium pl-4">
@@ -754,8 +757,8 @@ export default function performanceReviews() {
                                       isPoorPerformance
                                         ? "text-red-700"
                                         : isLowPerformance
-                                        ? "text-orange-600"
-                                        : "text-gray-900"
+                                          ? "text-orange-600"
+                                          : "text-gray-900"
                                     }`}
                                   >
                                     <span
@@ -763,23 +766,23 @@ export default function performanceReviews() {
                                         isPoorPerformance
                                           ? "bg-red-100 text-red-800"
                                           : isLowPerformance
-                                          ? "bg-orange-100 text-orange-800"
-                                          : rating >= 4.0
-                                          ? "bg-green-100 text-green-800"
-                                          : rating >= 3.5
-                                          ? "bg-blue-100 text-blue-800"
-                                          : "bg-blue-100 text-blue-800"
+                                            ? "bg-orange-100 text-orange-800"
+                                            : rating >= 4.0
+                                              ? "bg-green-100 text-green-800"
+                                              : rating >= 3.5
+                                                ? "bg-blue-100 text-blue-800"
+                                                : "bg-blue-100 text-blue-800"
                                       }`}
                                     >
                                       {isPoorPerformance
                                         ? "POOR"
                                         : isLowPerformance
-                                        ? "LOW"
-                                        : rating >= 4.0
-                                        ? "EXCELLENT"
-                                        : rating >= 3.5
-                                        ? "GOOD"
-                                        : "FAIR"}
+                                          ? "LOW"
+                                          : rating >= 4.0
+                                            ? "EXCELLENT"
+                                            : rating >= 3.5
+                                              ? "GOOD"
+                                              : "FAIR"}
                                     </span>
                                     <span className="font-bold">
                                       {rating}/5
@@ -790,7 +793,7 @@ export default function performanceReviews() {
                                   <div className="flex flex-col items-center">
                                     <span className="font-medium">
                                       {new Date(
-                                        submission.created_at
+                                        submission.created_at,
                                       ).toLocaleDateString()}
                                     </span>
                                     <span className="text-xs text-gray-500">
@@ -803,7 +806,7 @@ export default function performanceReviews() {
                                     <Badge
                                       className={getQuarterColor(
                                         submission.reviewTypeRegular ||
-                                          submission.reviewTypeProbationary
+                                          submission.reviewTypeProbationary,
                                       )}
                                     >
                                       {submission.reviewTypeRegular ||
@@ -850,16 +853,61 @@ export default function performanceReviews() {
                   )}
 
                   {/* View Results Modal */}
-                  <ViewResultsModal
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={true}
-                    onApprove={(id) => handleApprove(id)}
-                  />
+                  {selectedSubmission &&
+                    selectedSubmission.evaluationType === "BranchRankNFile" && (
+                      <RnF_B_View
+                        isOpen={isViewResultsModalOpen}
+                        onCloseAction={() => {
+                          setIsViewResultsModalOpen(false);
+                          setSelectedSubmission(null);
+                        }}
+                        submission={selectedSubmission}
+                        showApprovalButton={true}
+                        onApprove={(id) => handleApprove(id)}
+                      />
+                    )}
+
+                  {selectedSubmission &&
+                    selectedSubmission.evaluationType === "BranchBasic" && (
+                      <Basic_B_View
+                        isOpen={isViewResultsModalOpen}
+                        onCloseAction={() => {
+                          setIsViewResultsModalOpen(false);
+                          setSelectedSubmission(null);
+                        }}
+                        submission={selectedSubmission}
+                        showApprovalButton={true}
+                        onApprove={(id) => handleApprove(id)}
+                      />
+                    )}
+
+                  {selectedSubmission &&
+                    selectedSubmission.evaluationType === "HoRankNFile" && (
+                      <RnF_HO_View
+                        isOpen={isViewResultsModalOpen}
+                        onCloseAction={() => {
+                          setIsViewResultsModalOpen(false);
+                          setSelectedSubmission(null);
+                        }}
+                        submission={selectedSubmission}
+                        showApprovalButton={true}
+                        onApprove={(id) => handleApprove(id)}
+                      />
+                    )}
+
+                  {selectedSubmission &&
+                    selectedSubmission.evaluationType === "HoBasic" && (
+                      <Basic_HO_View
+                        isOpen={isViewResultsModalOpen}
+                        onCloseAction={() => {
+                          setIsViewResultsModalOpen(false);
+                          setSelectedSubmission(null);
+                        }}
+                        submission={selectedSubmission}
+                        showApprovalButton={true}
+                        onApprove={(id) => handleApprove(id)}
+                      />
+                    )}
                 </>
               ) : (
                 <div className="text-center py-12 px-6">

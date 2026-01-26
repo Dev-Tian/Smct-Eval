@@ -23,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiService } from "@/lib/apiService";
 import EvaluationsPagination from "@/components/paginationComponent";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
 import {
   Select,
   SelectContent,
@@ -31,6 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 interface Review {
   id: number;
@@ -74,7 +77,7 @@ export default function OverviewTab() {
         currentPage,
         itemsPerPage,
         selectedYear,
-        selectedQuarter
+        selectedQuarter,
       );
       setMyEvaluations(response.myEval_as_Employee.data);
       setOverviewTotal(response.myEval_as_Employee.total);
@@ -709,8 +712,8 @@ export default function OverviewTab() {
                                 className={getQuarterColor(
                                   String(
                                     submission.reviewTypeProbationary ||
-                                      submission.reviewTypeRegular
-                                  )
+                                      submission.reviewTypeRegular,
+                                  ),
                                 )}
                               >
                                 {submission.reviewTypeRegular ||
@@ -725,7 +728,7 @@ export default function OverviewTab() {
                             <div className="flex flex-col">
                               <span className="font-medium">
                                 {new Date(
-                                  submission.created_at
+                                  submission.created_at,
                                 ).toLocaleDateString()}
                               </span>
                               <span className="text-xs text-gray-500">
@@ -782,15 +785,61 @@ export default function OverviewTab() {
               )}
 
               {/* View Results Modal */}
-              <ViewResultsModal
-                isOpen={isViewResultsModalOpen}
-                onCloseAction={() => {
-                  handleClose();
-                }}
-                submission={selectedSubmission}
-                showApprovalButton={true}
-                onApprove={(id) => handleApprove(id)}
-              />
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchRankNFile" && (
+                  <RnF_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "BranchBasic" && (
+                  <Basic_B_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoRankNFile" && (
+                  <RnF_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
+
+              {selectedSubmission &&
+                selectedSubmission.evaluationType === "HoBasic" && (
+                  <Basic_HO_View
+                    isOpen={isViewResultsModalOpen}
+                    onCloseAction={() => {
+                      setIsViewResultsModalOpen(false);
+                      setSelectedSubmission(null);
+                    }}
+                    submission={selectedSubmission}
+                    showApprovalButton={true}
+                    onApprove={(id) => handleApprove(id)}
+                  />
+                )}
             </>
           )}
         </CardContent>

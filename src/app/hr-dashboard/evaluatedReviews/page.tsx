@@ -40,11 +40,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
-import { setQuarter } from "date-fns";
 import { useDialogAnimation } from "@/hooks/useDialogAnimation";
 import { toastMessages } from "@/lib/toastMessages";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 interface Review {
   id: number;
   employee: any;
@@ -90,7 +91,7 @@ export default function OverviewTab() {
     searchValue: string,
     status: string,
     quarter: string,
-    year: string
+    year: string,
   ) => {
     const response = await clientDataService.getSubmissions(
       searchValue,
@@ -98,7 +99,7 @@ export default function OverviewTab() {
       itemsPerPage,
       status,
       quarter,
-      year
+      year,
     );
     setEvaluations(response.data);
     setOverviewTotal(response.total);
@@ -116,7 +117,7 @@ export default function OverviewTab() {
           searchTerm,
           statusFilter,
           quarterFilter,
-          yearFilter
+          yearFilter,
         );
       } catch (error) {
         console.log(error);
@@ -153,7 +154,7 @@ export default function OverviewTab() {
           debouncedSearchTerm,
           debouncedStatusFilter,
           debouncedQuarterFilter,
-          debouncedYearFilter
+          debouncedYearFilter,
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -189,7 +190,7 @@ export default function OverviewTab() {
         debouncedSearchTerm,
         debouncedStatusFilter,
         debouncedQuarterFilter,
-        debouncedYearFilter
+        debouncedYearFilter,
       );
     } catch (error) {
       console.error("Error refreshing data:", error);
@@ -225,7 +226,7 @@ export default function OverviewTab() {
       await clientDataService.deleteSubmission(submission.id);
       await handleRefresh();
       toastMessages.evaluation.deleted(
-        submission.employee?.fname + " " + submission.employee?.lname
+        submission.employee?.fname + " " + submission.employee?.lname,
       );
     } catch (error) {
       console.error("Error deleting submission:", error);
@@ -239,8 +240,6 @@ export default function OverviewTab() {
     setReviewToDelete(review);
     setIsDeleteModalOpen(true);
   };
-  
-
 
   return (
     <div className="relative ">
@@ -652,8 +651,8 @@ export default function OverviewTab() {
                               className={getQuarterColor(
                                 String(
                                   review.reviewTypeRegular ||
-                                    review.reviewTypeProbationary
-                                )
+                                    review.reviewTypeProbationary,
+                                ),
                               )}
                             >
                               {review.reviewTypeRegular ||
@@ -672,7 +671,7 @@ export default function OverviewTab() {
                                 day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )}
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
@@ -684,15 +683,15 @@ export default function OverviewTab() {
                                 review.status === "completed"
                                   ? "bg-green-100 text-green-800"
                                   : review.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {review.status === "completed"
                                 ? `✓ ${review.status}`
                                 : review.status === "pending"
-                                ? `⏳ ${review.status}`
-                                : review.status}
+                                  ? `⏳ ${review.status}`
+                                  : review.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
@@ -790,8 +789,8 @@ export default function OverviewTab() {
                 Delete Evaluation of{" "}
                 {(reviewToDelete?.employee?.fname || "") +
                   " " +
-                  (reviewToDelete?.employee?.lname || "") || 
-                  reviewToDelete?.employee?.name || 
+                  (reviewToDelete?.employee?.lname || "") ||
+                  reviewToDelete?.employee?.name ||
                   "Unknown Employee"}
               </DialogTitle>
               <DialogDescription className="text-red-700">
@@ -835,16 +834,16 @@ export default function OverviewTab() {
                       <span className="font-medium">Employee Name:</span>{" "}
                       {(reviewToDelete?.employee?.fname || "") +
                         " " +
-                        (reviewToDelete?.employee?.lname || "") || 
-                        reviewToDelete?.employee?.name || 
+                        (reviewToDelete?.employee?.lname || "") ||
+                        reviewToDelete?.employee?.name ||
                         "Unknown Employee"}
                     </p>
                     <p>
                       <span className="font-medium">Evaluator Name:</span>{" "}
                       {(reviewToDelete?.evaluator?.fname || "") +
                         " " +
-                        (reviewToDelete?.evaluator?.lname || "") || 
-                        reviewToDelete?.evaluator?.name || 
+                        (reviewToDelete?.evaluator?.lname || "") ||
+                        reviewToDelete?.evaluator?.name ||
                         "Unknown Evaluator"}
                     </p>
                     <p>
@@ -901,15 +900,57 @@ export default function OverviewTab() {
         </Dialog>
 
         {/* View Results Modal */}
-        <ViewResultsModal
-          isOpen={isViewResultsModalOpen}
-          onCloseAction={() => {
-            setIsViewResultsModalOpen(false);
-            setSelectedSubmission(null);
-          }}
-          submission={selectedSubmission}
-          showApprovalButton={false}
-        />
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchRankNFile" && (
+            <RnF_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchBasic" && (
+            <Basic_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoRankNFile" && (
+            <RnF_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoBasic" && (
+            <Basic_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
       </div>
     </div>
   );

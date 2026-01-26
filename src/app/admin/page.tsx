@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import clientDataService from "@/lib/apiService";
-import ViewResultsModal from "@/components/evaluation/ViewResultsModal";
 import EvaluationsPagination from "@/components/paginationComponent";
+import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
+import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
+import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
 
 interface Review {
   id: number;
@@ -60,9 +62,9 @@ export default function OverviewTab() {
       const response = await clientDataService.getSubmissions(
         searchValue,
         currentPage,
-        itemsPerPage
+        itemsPerPage,
       );
-      
+
       // Add safety checks to prevent "Cannot read properties of undefined" error
       if (!response) {
         console.error("API response is undefined");
@@ -537,8 +539,8 @@ export default function OverviewTab() {
                               className={getQuarterColor(
                                 String(
                                   review.reviewTypeRegular ||
-                                    review.reviewTypeProbationary
-                                )
+                                    review.reviewTypeProbationary,
+                                ),
                               )}
                             >
                               {review.reviewTypeRegular ||
@@ -557,7 +559,7 @@ export default function OverviewTab() {
                                 day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )}
                           </TableCell>
                           <TableCell className="px-6 py-3">
@@ -566,15 +568,15 @@ export default function OverviewTab() {
                                 review.status === "completed"
                                   ? "bg-green-100 text-green-800"
                                   : review.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {review.status === "completed"
                                 ? `✓ ${review.status}`
                                 : review.status === "pending"
-                                ? `⏳ ${review.status}`
-                                : review.status}
+                                  ? `⏳ ${review.status}`
+                                  : review.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3">
@@ -609,15 +611,57 @@ export default function OverviewTab() {
         </div>
 
         {/* View Results Modal */}
-        <ViewResultsModal
-          isOpen={isViewResultsModalOpen}
-          onCloseAction={() => {
-            setIsViewResultsModalOpen(false);
-            setSelectedSubmission(null);
-          }}
-          submission={selectedSubmission}
-          showApprovalButton={false}
-        />
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchRankNFile" && (
+            <RnF_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "BranchBasic" && (
+            <Basic_B_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoRankNFile" && (
+            <RnF_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
+
+        {selectedSubmission &&
+          selectedSubmission.evaluationType === "HoBasic" && (
+            <Basic_HO_View
+              isOpen={isViewResultsModalOpen}
+              onCloseAction={() => {
+                setIsViewResultsModalOpen(false);
+                setSelectedSubmission(null);
+              }}
+              submission={selectedSubmission}
+              showApprovalButton={false}
+            />
+          )}
       </div>
     </div>
   );
