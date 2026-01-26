@@ -138,13 +138,6 @@ export default function Basic_HO_View({
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
-  // Fetch employee signature for this evaluation
-  // const {
-  //   signature: employeeSignature,
-  //   loading: signatureLoading,
-  //   error: signatureError,
-  // } = useemployee.signatureByEvaluation(submission?.id || null);
-
   // Update currentApprovalData when approvalData prop changes
   useEffect(() => {
     setCurrentApprovalData(approvalData);
@@ -2983,19 +2976,6 @@ export default function Basic_HO_View({
                                 </td>
                               </tr>
 
-                              {/* Overall Performance Rating */}
-                              <tr className="bg-gray-100">
-                                <td
-                                  colSpan={4}
-                                  className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700"
-                                >
-                                  Overall Performance Rating
-                                </td>
-                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-lg">
-                                  {finalRatingRounded.toFixed(2)}
-                                </td>
-                              </tr>
-
                               {/* Managerial Skills */}
                               <tr>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-sm text-gray-700 font-medium">
@@ -3061,6 +3041,18 @@ export default function Basic_HO_View({
                                       ),
                                     ) * 0.3
                                   ).toFixed(2)}
+                                </td>
+                              </tr>
+                              {/* Overall Performance Rating */}
+                              <tr className="bg-gray-100">
+                                <td
+                                  colSpan={4}
+                                  className="border-2 border-gray-400 px-4 py-3 text-sm font-bold text-gray-700"
+                                >
+                                  Overall Performance Rating
+                                </td>
+                                <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-lg">
+                                  {finalRatingRounded.toFixed(2)}
                                 </td>
                               </tr>
                             </tbody>
