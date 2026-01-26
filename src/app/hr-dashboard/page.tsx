@@ -485,9 +485,16 @@ export default function OverviewTab() {
                             </Badge>
                           </TableCell>
                           <TableCell className="px-3 py-2 md:px-4 md:py-2.5 lg:px-6 lg:py-3 text-xs md:text-sm text-gray-600">
-                            {new Date(
-                              submission.created_at,
-                            ).toLocaleDateString()}
+                            {new Date(submission.created_at).toLocaleString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </TableCell>
                           <TableCell className="px-3 py-2 md:px-4 md:py-2.5 lg:px-6 lg:py-3">
                             <Badge

@@ -596,9 +596,14 @@ export default function OverviewTab() {
                             <TableCell className="w-1/5">
                               <div className="flex flex-col items-center">
                                 <span className="font-medium">
-                                  {new Date(
-                                    review.created_at,
-                                  ).toLocaleDateString()}
+                                  {new Date(review.created_at).toLocaleString(
+                                    "en-US",
+                                    {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                    },
+                                  )}
                                 </span>
                                 <span className="text-xs text-gray-500">
                                   {getTimeAgo(String(review.created_at))}

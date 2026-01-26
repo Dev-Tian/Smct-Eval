@@ -17,7 +17,7 @@ interface EvaluationTypeModalProps {
   onCloseAction: () => void;
   onSelectEmployeeAction: () => void;
   onSelectManagerAction: () => void;
-  employeeName?: string;
+  employee?: any;
 }
 
 export default function EvaluationTypeModal({
@@ -25,7 +25,7 @@ export default function EvaluationTypeModal({
   onCloseAction,
   onSelectEmployeeAction,
   onSelectManagerAction,
-  employeeName,
+  employee,
 }: EvaluationTypeModalProps) {
   const dialogAnimationClass = useDialogAnimation({ duration: 0.4 });
 
@@ -47,13 +47,19 @@ export default function EvaluationTypeModal({
             Select Evaluation Type
           </DialogTitle>
           <DialogDescription className="text-base text-gray-600 mt-2">
-            {employeeName
-              ? `Choose the type of evaluation for ${employeeName}`
+            {employee
+              ? `Choose the type of evaluation for ${employee.full_name}`
               : "Choose the type of evaluation you want to start"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 px-2">
+        <h1 className="text-center mt-5 font-bold ">
+          {employee.branches[0]?.id === 126 ||
+          employee.branches[0]?.name === "HEAD OFFICE"
+            ? "FOR HEAD OFFICE"
+            : "FOR BRANCH"}
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 px-2">
           {/* Employee Evaluation Option */}
           <Card
             className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-500 group"
@@ -66,7 +72,7 @@ export default function EvaluationTypeModal({
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                   Rank and File Evaluation
+                    Rank and File Evaluation
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
                     Standard performance evaluation for rank and file employees.
@@ -76,7 +82,14 @@ export default function EvaluationTypeModal({
                   </p>
                   <ul className="text-xs text-gray-500 space-y-1 text-left mb-4">
                     <li>• Rank and File I & II</li>
-                    <li>• 7 evaluation steps</li>
+                    <li>
+                      •{" "}
+                      {employee.branches[0]?.id === 126 ||
+                      employee.branches[0]?.name === "HEAD OFFICE"
+                        ? "6"
+                        : "7"}{" "}
+                      evaluation steps
+                    </li>
                     <li>• Standard performance metrics</li>
                   </ul>
                 </div>
@@ -109,13 +122,21 @@ export default function EvaluationTypeModal({
                     Basic Evaluation
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Comprehensive evaluation for Head Office (HO) users. Assesses
-                    job knowledge, quality of work, adaptability, teamwork,
-                    reliability, ethical behavior, and managerial skills.
+                    Comprehensive evaluation for Head Office (HO) users.
+                    Assesses job knowledge, quality of work, adaptability,
+                    teamwork, reliability, ethical behavior, and managerial
+                    skills.
                   </p>
                   <ul className="text-xs text-gray-500 space-y-1 text-left mb-4">
                     <li>• Head Office (HO) Evaluation</li>
-                    <li>• 8 evaluation steps</li>
+                    <li>
+                      •{" "}
+                      {employee.branches[0]?.id === 126 ||
+                      employee.branches[0]?.name === "HEAD OFFICE"
+                        ? "7"
+                        : "8"}{" "}
+                      evaluation steps
+                    </li>
                     <li>• Includes Managerial Skills assessment</li>
                   </ul>
                 </div>

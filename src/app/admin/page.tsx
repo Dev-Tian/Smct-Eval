@@ -19,6 +19,7 @@ import EvaluationsPagination from "@/components/paginationComponent";
 import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
 import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
 import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
+import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
 
 interface Review {
   id: number;
@@ -552,7 +553,7 @@ export default function OverviewTab() {
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
                             {new Date(review.created_at).toLocaleString(
-                              undefined,
+                              "en-US",
                               {
                                 year: "numeric",
                                 month: "short",

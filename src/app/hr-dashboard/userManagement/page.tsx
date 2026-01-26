@@ -1708,11 +1708,7 @@ export default function UserManagementTab() {
 
           setIsEvaluationModalOpen(true);
         }}
-        employeeName={
-          selectedEmployeeForEvaluation
-            ? `${selectedEmployeeForEvaluation?.fname || ""} ${selectedEmployeeForEvaluation?.lname || ""}`.trim()
-            : ""
-        }
+        employee={selectedEmployeeForEvaluation}
       />
 
       <Dialog
