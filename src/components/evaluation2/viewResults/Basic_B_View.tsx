@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Printer } from "lucide-react";
-import { useUser } from "@/contexts/UserContext";
-import { CONFIG } from "../../../../config/config";
+import React, { useState, useRef, useEffect } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Printer } from 'lucide-react';
+import { useUser } from '@/contexts/UserContext';
+import { CONFIG } from '../../../../config/config';
 
 type Submission = {
   id: number;
@@ -59,41 +59,39 @@ interface ViewResultsModalProps {
   isApproved?: boolean;
   approvalData?: ApprovalData | null;
   currentUserName?: string;
-  currentUserSignature?: string; // New prop for current user's signature
-  showApprovalButton?: boolean; // New prop to control approval button visibility
+  currentUserSignature?: string;
+  showApprovalButton?: boolean;
 }
 
 // Helper functions for rating calculations
 const getRatingLabel = (score: number) => {
-  if (score >= 4.5) return "Outstanding";
-  if (score >= 4.0) return "Exceeds Expectations";
-  if (score >= 3.5) return "Meets Expectations";
-  if (score >= 2.5) return "Needs Improvement";
-  return "Unsatisfactory";
+  if (score >= 4.5) return 'Outstanding';
+  if (score >= 4.0) return 'Exceeds Expectations';
+  if (score >= 3.5) return 'Meets Expectations';
+  if (score >= 2.5) return 'Needs Improvement';
+  return 'Unsatisfactory';
 };
 
 const calculateScore = (scores: string[]) => {
   const validScores = scores
-    .filter((score) => score && score !== "")
+    .filter((score) => score && score !== '')
     .map((score) => parseFloat(score));
   if (validScores.length === 0) return 0;
-  return (
-    validScores.reduce((sum, score) => sum + score, 0) / validScores.length
-  );
+  return validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
 };
 
 const getRatingColorForLabel = (rating: string) => {
   switch (rating) {
-    case "Outstanding":
-    case "Exceeds Expectations":
-      return "text-green-700 bg-green-100";
-    case "Needs Improvement":
-    case "Unsatisfactory":
-      return "text-red-700 bg-red-100";
-    case "Meets Expectations":
-      return "text-yellow-700 bg-yellow-100";
+    case 'Outstanding':
+    case 'Exceeds Expectations':
+      return 'text-green-700 bg-green-100';
+    case 'Needs Improvement':
+    case 'Unsatisfactory':
+      return 'text-red-700 bg-red-100';
+    case 'Meets Expectations':
+      return 'text-yellow-700 bg-yellow-100';
     default:
-      return "text-gray-500 bg-gray-100";
+      return 'text-gray-500 bg-gray-100';
   }
 };
 
@@ -101,7 +99,7 @@ const getRatingColorForLabel = (rating: string) => {
 const getQuarterFromDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Unknown";
+    if (isNaN(date.getTime())) return 'Unknown';
 
     const month = date.getMonth() + 1; // getMonth() returns 0-11
     const year = date.getFullYear();
@@ -111,9 +109,9 @@ const getQuarterFromDate = (dateString: string): string => {
     if (month >= 7 && month <= 9) return `Q3 ${year}`;
     if (month >= 10 && month <= 12) return `Q4 ${year}`;
 
-    return "Unknown";
+    return 'Unknown';
   } catch (error) {
-    return "Unknown";
+    return 'Unknown';
   }
 };
 
@@ -128,22 +126,14 @@ export default function Basic_B_View({
 }: ViewResultsModalProps) {
   const { user } = useUser();
   const [isApproving, setIsApproving] = useState(false);
-  const [approvalError, setApprovalError] = useState("");
-  const [currentApprovalData, setCurrentApprovalData] =
-    useState<ApprovalData | null>(approvalData);
+  const [approvalError, setApprovalError] = useState('');
+  const [currentApprovalData, setCurrentApprovalData] = useState<ApprovalData | null>(approvalData);
   const printContentRef = useRef<HTMLDivElement>(null);
-  const lastApprovalDataRef = useRef<string>("");
+  const lastApprovalDataRef = useRef<string>('');
   const [signatureLoading, setSignatureLoading] = useState(false);
   const [signatureError, setSignatureError] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-
-  // Fetch employee signature for this evaluation
-  // const {
-  //   signature: employeeSignature,
-  //   loading: signatureLoading,
-  //   error: signatureError,
-  // } = useemployee.signatureByEvaluation(submission?.id || null);
 
   // Update currentApprovalData when approvalData prop changes
   useEffect(() => {
@@ -163,9 +153,7 @@ export default function Basic_B_View({
     const checkForApprovalChanges = () => {
       try {
         const approvalDataKey = `approvalData_${user.email}`;
-        const storedApprovals = JSON.parse(
-          localStorage.getItem(approvalDataKey) || "{}",
-        );
+        const storedApprovals = JSON.parse(localStorage.getItem(approvalDataKey) || '{}');
         const submissionId = submission.id.toString();
         const storedApproval = storedApprovals[submissionId];
 
@@ -180,14 +168,14 @@ export default function Basic_B_View({
             setCurrentApprovalData({
               id: storedApproval.id || submissionId,
               approvedAt: storedApproval.approvedAt,
-              employeeSignature: submission?.employee?.signature || "",
+              employeeSignature: submission?.employee?.signature || '',
               employeeName: storedApproval.employeeName,
               employeeEmail: storedApproval.employeeEmail || user.email,
             });
           }
         }
       } catch (error) {
-        console.error("Error checking for approval changes:", error);
+        console.error('Error checking for approval changes:', error);
       }
     };
 
@@ -199,53 +187,44 @@ export default function Basic_B_View({
 
     // Listen for storage events (for cross-tab synchronization)
     const handleStorageChange = (e: StorageEvent) => {
-      if (
-        e.key === `approvalData_${user.email}` ||
-        e.key === `approvedEvaluations_${user.email}`
-      ) {
+      if (e.key === `approvalData_${user.email}` || e.key === `approvedEvaluations_${user.email}`) {
         checkForApprovalChanges();
       }
     };
 
-    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [isOpen, submission?.id, user?.email]);
 
   // Handle print functionality - prints the entire modal content
   const handlePrint = () => {
     if (!printContentRef.current) {
-      console.warn("Print content not available");
+      console.warn('Print content not available');
       return;
     }
 
     // Clone the content without no-print elements
-    const clonedContent = printContentRef.current.cloneNode(
-      true,
-    ) as HTMLElement;
-    const noPrintElements = clonedContent.querySelectorAll(".no-print");
+    const clonedContent = printContentRef.current.cloneNode(true) as HTMLElement;
+    const noPrintElements = clonedContent.querySelectorAll('.no-print');
     noPrintElements.forEach((el) => el.remove());
 
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
     if (printWindow) {
       // Get all styles from the current document
-      const styles = Array.from(
-        document.querySelectorAll('style, link[rel="stylesheet"]'),
-      )
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
         .map((el) => {
-          if (el.tagName === "STYLE") {
+          if (el.tagName === 'STYLE') {
             return `<style>${el.innerHTML}</style>`;
-          } else if (el.tagName === "LINK") {
-            return `<link rel="stylesheet" href="${
-              (el as HTMLLinkElement).href
-            }">`;
+          } else if (el.tagName === 'LINK') {
+            return `<link rel="stylesheet" href="${(el as HTMLLinkElement).href}">`;
           }
-          return "";
+          return '';
         })
-        .join("\n");
+        .join('\n');
 
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -256,9 +235,9 @@ export default function Basic_B_View({
                 ? `Evaluation Details - ${
                     submission?.employee?.fname && submission?.employee?.lname
                       ? `${submission.employee.fname} ${submission.employee.lname}`
-                      : "Unknown Employee"
+                      : 'Unknown Employee'
                   }`
-                : "Evaluation Details"
+                : 'Evaluation Details'
             }</title>
             ${styles}
             <style>
@@ -1218,28 +1197,28 @@ export default function Basic_B_View({
       ? Number(submission.rating)
       : (() => {
           const job_knowledgeScore = calculateScore(
-            submission.job_knowledge.map((item: any) => String(item.score)),
+            submission.job_knowledge.map((item: any) => String(item.score))
           );
           const quality_of_workScore = calculateScore(
-            submission.quality_of_works.map((item: any) => String(item.score)),
+            submission.quality_of_works.map((item: any) => String(item.score))
           );
           const adaptabilityScore = calculateScore(
-            submission.adaptability.map((item: any) => String(item.score)),
+            submission.adaptability.map((item: any) => String(item.score))
           );
           const teamworkScore = calculateScore(
-            submission.teamworks.map((item: any) => String(item.score)),
+            submission.teamworks.map((item: any) => String(item.score))
           );
           const reliabilityScore = calculateScore(
-            submission.reliabilities.map((item: any) => String(item.score)),
+            submission.reliabilities.map((item: any) => String(item.score))
           );
           const ethicalScore = calculateScore(
-            submission.ethicals.map((item: any) => String(item.score)),
+            submission.ethicals.map((item: any) => String(item.score))
           );
           const customer_serviceScore = calculateScore(
-            submission.customer_services.map((item: any) => String(item.score)),
+            submission.customer_services.map((item: any) => String(item.score))
           );
           const managerial_skills = calculateScore(
-            submission.managerial_skills.map((item: any) => String(item.score)),
+            submission.managerial_skills.map((item: any) => String(item.score))
           );
 
           const overallWeightedScore =
@@ -1255,9 +1234,7 @@ export default function Basic_B_View({
           return overallWeightedScore;
         })();
 
-  const finalRating = Number.isFinite(finalRatingRaw)
-    ? Number(finalRatingRaw)
-    : 0;
+  const finalRating = Number.isFinite(finalRatingRaw) ? Number(finalRatingRaw) : 0;
   const finalRatingRounded = Number(finalRating.toFixed(2));
   const finalPercentage = Number(((finalRatingRounded / 5) * 100).toFixed(2));
   const finalIsPass = finalRatingRounded >= 3.0;
@@ -1265,16 +1242,16 @@ export default function Basic_B_View({
   // Handle approval API call
   const handleApproveEvaluation = async () => {
     if (!submission.id) {
-      setApprovalError("Invalid submission ID");
+      setApprovalError('Invalid submission ID');
       return;
     }
     if (!submission?.employee?.signature) {
-      setApprovalError("Signature required");
+      setApprovalError('Signature required');
       return;
     }
 
     setIsApproving(true);
-    setApprovalError("");
+    setApprovalError('');
     setShowApprovalDialog(true);
     setShowSuccessAnimation(false);
 
@@ -1296,8 +1273,8 @@ export default function Basic_B_View({
         setIsApproving(false);
       }, 1500);
     } catch (error) {
-      console.error("❌ Error approving evaluation:", error);
-      setApprovalError("Failed to approve evaluation. Please try again.");
+      console.error('❌ Error approving evaluation:', error);
+      setApprovalError('Failed to approve evaluation. Please try again.');
       setShowApprovalDialog(false);
       setShowSuccessAnimation(false);
       setIsApproving(false);
@@ -1307,305 +1284,282 @@ export default function Basic_B_View({
   const ratingBG = (value: number) => {
     switch (value) {
       case 1:
-        return "bg-red-100 text-red-800";
+        return 'bg-red-100 text-red-800';
       case 2:
-        return "bg-orange-100 text-orange-800";
+        return 'bg-orange-100 text-orange-800';
       case 3:
-        return "bg-yellow-100 text-yellow-800";
+        return 'bg-yellow-100 text-yellow-800';
       case 4:
-        return "bg-blue-100 text-blue-800";
+        return 'bg-blue-100 text-blue-800';
       case 5:
-        return "bg-green-100 text-green-800";
+        return 'bg-green-100 text-green-800';
       default:
-        return "";
+        return '';
     }
   };
   const rating = (value: number) => {
     switch (value) {
       case 1:
-        return "Unsatisfactory";
+        return 'Unsatisfactory';
       case 2:
-        return "Needs Improvement";
+        return 'Needs Improvement';
       case 3:
-        return "Meets Expectations";
+        return 'Meets Expectations';
       case 4:
-        return "Exceeds Expectation";
+        return 'Exceeds Expectation';
       case 5:
-        return "Outstanding";
+        return 'Outstanding';
       default:
-        return "Not Rated";
+        return 'Not Rated';
     }
   };
 
   const JOB_KNOWLEDGE = {
     1: {
-      title:
-        "Mastery in Core Competencies and Job Understanding (L.E.A.D.E.R.)",
+      title: 'Mastery in Core Competencies and Job Understanding (L.E.A.D.E.R.)',
       indicator:
-        "  Exhibits mastery in essential skills and competencies required for the role. Displays a deep understanding of job responsibilities and requirements",
+        '  Exhibits mastery in essential skills and competencies required for the role. Displays a deep understanding of job responsibilities and requirements',
       example:
-        "Consistently performs tasks accurately and with precision, showing a deep understanding of core job functions.",
+        'Consistently performs tasks accurately and with precision, showing a deep understanding of core job functions.',
     },
     2: {
-      title: "Keeps Documentation Updated",
-      indicator:
-        " Maintains accurate and up-to-date documentation related to job functions",
+      title: 'Keeps Documentation Updated',
+      indicator: ' Maintains accurate and up-to-date documentation related to job functions',
       example:
-        " Ensures that procedures, guidelines, and documentation are current; contributing to organizational efficiency.",
+        ' Ensures that procedures, guidelines, and documentation are current; contributing to organizational efficiency.',
     },
     3: {
-      title: " Problem Solving",
-      indicator:
-        " Applies critical thinking skills to solve problems efficiently",
+      title: ' Problem Solving',
+      indicator: ' Applies critical thinking skills to solve problems efficiently',
       example:
-        " Identifies and resolves issues in advance, effectively preventing potential disruptions.",
+        ' Identifies and resolves issues in advance, effectively preventing potential disruptions.',
     },
   };
 
   const QUALITY_OF_WORK = {
     1: {
-      title: "Meets Standards and Requirements",
-      indicator:
-        "Ensures work is accurate and meets or exceeds established standards",
+      title: 'Meets Standards and Requirements',
+      indicator: 'Ensures work is accurate and meets or exceeds established standards',
       example:
-        "Complies with industry regulations and project specifications; delivers reliable, high-quality work, and accurate work.",
+        'Complies with industry regulations and project specifications; delivers reliable, high-quality work, and accurate work.',
     },
     2: {
-      title: " Timeliness (L.E.A.D.E.R.)",
-      indicator: "Completes tasks and projects within specified deadlines",
-      example: "Submits work on time without compromising quality.",
+      title: ' Timeliness (L.E.A.D.E.R.)',
+      indicator: 'Completes tasks and projects within specified deadlines',
+      example: 'Submits work on time without compromising quality.',
     },
     3: {
-      title: "Work Output Volume (L.E.A.D.E.R.)",
-      indicator:
-        "Produces a high volume of quality work within a given time frame",
-      example: "Handles a substantial workload without sacrificing quality.",
+      title: 'Work Output Volume (L.E.A.D.E.R.)',
+      indicator: 'Produces a high volume of quality work within a given time frame',
+      example: 'Handles a substantial workload without sacrificing quality.',
     },
     4: {
-      title: "Consistency in Performance (L.E.A.D.E.R.)",
-      indicator: " Maintains a consistent level of productivity over time",
-      example:
-        "Meets productivity expectations reliably, without significant fluctuations.",
+      title: 'Consistency in Performance (L.E.A.D.E.R.)',
+      indicator: ' Maintains a consistent level of productivity over time',
+      example: 'Meets productivity expectations reliably, without significant fluctuations.',
     },
     5: {
-      title: "Consistency in Performance (L.E.A.D.E.R.)",
-      indicator: "  Achieves branch sales targets for motorcycles",
-      example: "Consistently hits monthly sales targets..",
+      title: 'Consistency in Performance (L.E.A.D.E.R.)',
+      indicator: '  Achieves branch sales targets for motorcycles',
+      example: 'Consistently hits monthly sales targets..',
     },
     6: {
-      title: "  Sales Target for APPLIANCES",
-      indicator: "  Achieves branch sales targets for appliances",
-      example: "    Consistently hits monthly sales targets.",
+      title: '  Sales Target for APPLIANCES',
+      indicator: '  Achieves branch sales targets for appliances',
+      example: '    Consistently hits monthly sales targets.',
     },
     7: {
-      title: "  Sales Target for CARS",
-      indicator: "   Achieves branch sales targets for cars",
-      example: "    Consistently hits monthly sales targets.",
+      title: '  Sales Target for CARS',
+      indicator: '   Achieves branch sales targets for cars',
+      example: '    Consistently hits monthly sales targets.',
     },
     8: {
-      title: "   Sales Target for TRI-WHEELERS ( for 3S Shops only )",
-      indicator: "     Achieves branch sales targets for tri-wheelers",
-      example: "Consistently hits monthly sales targets.",
+      title: '   Sales Target for TRI-WHEELERS ( for 3S Shops only )',
+      indicator: '     Achieves branch sales targets for tri-wheelers',
+      example: 'Consistently hits monthly sales targets.',
     },
     9: {
-      title: " Collection Targets",
-      indicator: " Achieves branch collection targets",
-      example: "Consistently hits monthly collection targets.",
+      title: ' Collection Targets',
+      indicator: ' Achieves branch collection targets',
+      example: 'Consistently hits monthly collection targets.',
     },
     10: {
-      title: "Spare Parts And Lubricants Targets",
-      indicator: "Achieves branch spare parts and lubricants targets",
-      example: "Consistently hits monthly spare parts and lubricants targets",
+      title: 'Spare Parts And Lubricants Targets',
+      indicator: 'Achieves branch spare parts and lubricants targets',
+      example: 'Consistently hits monthly spare parts and lubricants targets',
     },
     11: {
-      title: "Shop Income Targets",
-      indicator: "Achieves branch shop income targets",
-      example: " Consistently hits monthly shop income targets",
+      title: 'Shop Income Targets',
+      indicator: 'Achieves branch shop income targets',
+      example: ' Consistently hits monthly shop income targets',
     },
   };
 
   const ADAPTABILITY = {
     1: {
-      title: "Openness to Change (attitude towards change)",
+      title: 'Openness to Change (attitude towards change)',
       indicator:
-        " Demonstrates a positive attitude and openness to new ideas and major changes at work",
+        ' Demonstrates a positive attitude and openness to new ideas and major changes at work',
       example:
-        " Welcomes changes in work processes, procedures, or tools without resistance. Maintains a cooperative attitude when asked to adjust to new ways of working.",
+        ' Welcomes changes in work processes, procedures, or tools without resistance. Maintains a cooperative attitude when asked to adjust to new ways of working.',
     },
     2: {
-      title: " Flexibility in Job Role (ability to adapt to changes)",
-      indicator:
-        "Adapts to changes in job responsibilities and willingly takes on new tasks",
+      title: ' Flexibility in Job Role (ability to adapt to changes)',
+      indicator: 'Adapts to changes in job responsibilities and willingly takes on new tasks',
       example:
-        "Quickly adjusts to changes in job assignments, schedules, or unexpected demands. Helps cover additional responsibilities during staffing shortages or high workloads.",
+        'Quickly adjusts to changes in job assignments, schedules, or unexpected demands. Helps cover additional responsibilities during staffing shortages or high workloads.',
     },
     3: {
-      title: "Resilience in the Face of Challenges",
+      title: 'Resilience in the Face of Challenges',
       indicator:
-        "Maintains a positive attitude and performance under challenging or difficult conditions",
+        'Maintains a positive attitude and performance under challenging or difficult conditions',
       example:
-        " Remains focused and effective during periods of high stress or uncertainty. Completes tasks or meets deadlines when faced with unforeseen obstacles.s",
+        ' Remains focused and effective during periods of high stress or uncertainty. Completes tasks or meets deadlines when faced with unforeseen obstacles.s',
     },
   };
 
   const TEAMWORK = {
     1: {
-      title: "Active Participation in Team Activities",
-      indicator: "Active Participation in Team Activities",
+      title: 'Active Participation in Team Activities',
+      indicator: 'Active Participation in Team Activities',
       example:
-        "  Actively participates in team meetings and projects. Contributes ideas and feedback during discussions. Engages in team tasks to achieve group goals.",
+        '  Actively participates in team meetings and projects. Contributes ideas and feedback during discussions. Engages in team tasks to achieve group goals.',
     },
     2: {
-      title: "Promotion of a Positive Team Culture",
-      indicator: "Promotion of a Positive Team Culture",
+      title: 'Promotion of a Positive Team Culture',
+      indicator: 'Promotion of a Positive Team Culture',
       example:
-        "  Interacts positively with coworkers. Fosters inclusive team culture. Provides support and constructive feedback. Promotes teamwork and camaraderie.",
+        '  Interacts positively with coworkers. Fosters inclusive team culture. Provides support and constructive feedback. Promotes teamwork and camaraderie.',
     },
     3: {
-      title: "  Effective Communication",
-      indicator: "  Effective Communication",
+      title: '  Effective Communication',
+      indicator: '  Effective Communication',
       example:
-        " Communicates openly and clearly with team members. Shares information and updates in a timely manner. Ensures important details are communicated clearly.",
+        ' Communicates openly and clearly with team members. Shares information and updates in a timely manner. Ensures important details are communicated clearly.',
     },
   };
 
   const RELIABILITY = {
     1: {
-      title: " Consistent Attendance",
-      indicator:
-        " Demonstrates regular attendance by being present at work as scheduled",
-      example:
-        " Has not taken any unplanned absences and follows the company's attendance policy.",
+      title: ' Consistent Attendance',
+      indicator: ' Demonstrates regular attendance by being present at work as scheduled',
+      example: " Has not taken any unplanned absences and follows the company's attendance policy.",
     },
     2: {
-      title: " Punctuality",
-      indicator:
-        "Arrives at work and meetings on time or before the scheduled time",
-      example:
-        "Consistently arrives at work on time, ready to begin work promptly.",
+      title: ' Punctuality',
+      indicator: 'Arrives at work and meetings on time or before the scheduled time',
+      example: 'Consistently arrives at work on time, ready to begin work promptly.',
     },
     3: {
-      title: "Follows Through on Commitments",
-      indicator: "Follows Through on Commitments",
+      title: 'Follows Through on Commitments',
+      indicator: 'Follows Through on Commitments',
       example:
-        " Follows through on assignments from and commitments made to coworkers or superiors",
+        ' Follows through on assignments from and commitments made to coworkers or superiors',
     },
     4: {
-      title: "Reliable Handling of Routine Tasks",
-      indicator:
-        " Demonstrates reliability in completing routine tasks without oversight",
-      example:
-        "Delivers on commitments, ensuring that expectations are met or exceeded.",
+      title: 'Reliable Handling of Routine Tasks',
+      indicator: ' Demonstrates reliability in completing routine tasks without oversight',
+      example: 'Delivers on commitments, ensuring that expectations are met or exceeded.',
     },
   };
 
   const ETHICAL = {
     1: {
-      title: " Follows Company Policies",
-      indicator: " Complies with company rules, regulations, and memorandums",
+      title: ' Follows Company Policies',
+      indicator: ' Complies with company rules, regulations, and memorandums',
       example:
-        "Follows established guidelines and protocols to ensure compliance with organizational standards.",
+        'Follows established guidelines and protocols to ensure compliance with organizational standards.',
     },
     2: {
-      title: "Professionalism (L.E.A.D.E.R.)",
-      indicator:
-        "Maintains a high level of professionalism in all work interactions",
+      title: 'Professionalism (L.E.A.D.E.R.)',
+      indicator: 'Maintains a high level of professionalism in all work interactions',
       example:
-        "Represents the organization positively, addressing work needs with integrity and professionalism. Handles sensitive information with discretion.",
+        'Represents the organization positively, addressing work needs with integrity and professionalism. Handles sensitive information with discretion.',
     },
     3: {
-      title: "Accountability for Mistakes (L.E.A.D.E.R.)",
-      indicator:
-        " Takes responsibility for errors and actively works to correct mistakes",
+      title: 'Accountability for Mistakes (L.E.A.D.E.R.)',
+      indicator: ' Takes responsibility for errors and actively works to correct mistakes',
       example:
-        "Acknowledges errors promptly, communicates about corrective actions, and learns from the experience. Takes ownership of mistakes and actively seeks ways to prevent future occurrences.",
+        'Acknowledges errors promptly, communicates about corrective actions, and learns from the experience. Takes ownership of mistakes and actively seeks ways to prevent future occurrences.',
     },
     4: {
-      title: "Respect for Others (L.E.A.D.E.R.)",
+      title: 'Respect for Others (L.E.A.D.E.R.)',
       indicator:
-        " Treats all individuals fairly and with respect, regardless of background or position",
+        ' Treats all individuals fairly and with respect, regardless of background or position',
       example:
-        "Demonstrates unbiased decision-making and avoids favoritism in interactions with team members. Treats all coworkers and suppliers respectfully, with dignity and fairness.",
+        'Demonstrates unbiased decision-making and avoids favoritism in interactions with team members. Treats all coworkers and suppliers respectfully, with dignity and fairness.',
     },
   };
 
   const CUSTOMER_SERVICE = {
     1: {
-      title: "Listening & Understanding",
-      indicator:
-        "Listens to customers and displays understanding of customer needs and concerns",
+      title: 'Listening & Understanding',
+      indicator: 'Listens to customers and displays understanding of customer needs and concerns',
       example:
         "Repeats or summarizes customer concerns to ensure complete understanding before responding. Expresses genuine concern and seeks to understand the customer's perspective.",
     },
     2: {
-      title: "Problem-Solving for Customer Satisfaction",
-      indicator:
-        "Proactively identifies and solves customer problems to ensure satisfaction",
+      title: 'Problem-Solving for Customer Satisfaction',
+      indicator: 'Proactively identifies and solves customer problems to ensure satisfaction',
       example:
-        "Takes initiative to resolve issues and prevent future challenges for the customer. Offers alternative solutions when standard resolutions are not enough.",
+        'Takes initiative to resolve issues and prevent future challenges for the customer. Offers alternative solutions when standard resolutions are not enough.',
     },
     3: {
-      title: " Product Knowledge for Customer Support (L.E.A.D.E.R.)",
-      indicator:
-        " Possesses comprehensive product knowledge to assist customers effectively",
+      title: ' Product Knowledge for Customer Support (L.E.A.D.E.R.)',
+      indicator: ' Possesses comprehensive product knowledge to assist customers effectively',
       example:
-        "Demonstrates a deep understanding of products and/or services, enabling accurate and helpful guidance. Suggests the most suitable product or service based on customer requirements.",
+        'Demonstrates a deep understanding of products and/or services, enabling accurate and helpful guidance. Suggests the most suitable product or service based on customer requirements.',
     },
     4: {
-      title: "Positive and Professional Attitude (L.E.A.D.E.R.)",
+      title: 'Positive and Professional Attitude (L.E.A.D.E.R.)',
       indicator:
-        " Maintains a positive and professional demeanor, particularly during customer interactions",
+        ' Maintains a positive and professional demeanor, particularly during customer interactions',
       example:
-        "Represents the organization positively. Remains courteous and patient, even with challenging customers or in stressful situations.",
+        'Represents the organization positively. Remains courteous and patient, even with challenging customers or in stressful situations.',
     },
     5: {
-      title: "Timely Resolution of Customer Issues (L.E.A.D.E.R.)",
-      indicator: "Resolves customer issues promptly and efficiently",
+      title: 'Timely Resolution of Customer Issues (L.E.A.D.E.R.)',
+      indicator: 'Resolves customer issues promptly and efficiently',
       example:
-        "Addresses and resolves customer complaints or concerns within established timeframes. Ensures follow-ups are conducted for unresolved issues until completion.",
+        'Addresses and resolves customer complaints or concerns within established timeframes. Ensures follow-ups are conducted for unresolved issues until completion.',
     },
   };
 
   const MANAGERIAL = {
     1: {
-      title: "Leadership",
-      indicator: "Guides the team to meet goals and improve performance",
+      title: 'Leadership',
+      indicator: 'Guides the team to meet goals and improve performance',
       example:
-        " Encourages the team to complete a critical project ahead of the deadline while maintaining quality.",
+        ' Encourages the team to complete a critical project ahead of the deadline while maintaining quality.',
     },
     2: {
-      title: " Motivation",
-      indicator:
-        " Keeps the team engaged and focused on achieving goals and targets",
-      example:
-        " Recognizes and rewards team achievements to maintain high morale and engagement.",
+      title: ' Motivation',
+      indicator: ' Keeps the team engaged and focused on achieving goals and targets',
+      example: ' Recognizes and rewards team achievements to maintain high morale and engagement.',
     },
     3: {
-      title: "Decision-Making",
-      indicator:
-        " Makes timely and informed decisions that benefit the department or company",
+      title: 'Decision-Making',
+      indicator: ' Makes timely and informed decisions that benefit the department or company',
       example:
-        " Evaluates a situation, assesses needs, considers alternatives, and implements solutions that benefit the team and the company.",
+        ' Evaluates a situation, assesses needs, considers alternatives, and implements solutions that benefit the team and the company.',
     },
     4: {
-      title: "Planning & Resource Management",
-      indicator:
-        " Creates detailed plans and allocates resources, time, and budget efficiently",
+      title: 'Planning & Resource Management',
+      indicator: ' Creates detailed plans and allocates resources, time, and budget efficiently',
       example:
-        "Develops a timeline for team deliverables, ensuring tasks are assigned based on workload and skills.",
+        'Develops a timeline for team deliverables, ensuring tasks are assigned based on workload and skills.',
     },
     5: {
-      title: "Performance Feedback",
-      indicator:
-        "Regularly monitors performance and gives constructive feedback",
+      title: 'Performance Feedback',
+      indicator: 'Regularly monitors performance and gives constructive feedback',
       example:
-        " Holds one-on-one meetings to discuss individual performance and offer guidance for improvement.",
+        ' Holds one-on-one meetings to discuss individual performance and offer guidance for improvement.',
     },
     6: {
-      title: "Conflict Resolution",
-      indicator: " Resolves disagreements professionally and fairly",
+      title: 'Conflict Resolution',
+      indicator: ' Resolves disagreements professionally and fairly',
       example:
-        " Mediates conflict between team members, ensuring a collaborative solution that benefits the group.",
+        ' Mediates conflict between team members, ensuring a collaborative solution that benefits the group.',
     },
   };
 
@@ -1620,16 +1574,10 @@ export default function Basic_B_View({
                 <div className="relative">
                   <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <img
-                      src="/smct.png"
-                      alt="SMCT Logo"
-                      className="h-8 w-8 object-contain"
-                    />
+                    <img src="/smct.png" alt="SMCT Logo" className="h-8 w-8 object-contain" />
                   </div>
                 </div>
-                <p className="text-lg font-medium text-gray-800">
-                  Approving evaluation...
-                </p>
+                <p className="text-lg font-medium text-gray-800">Approving evaluation...</p>
                 <p className="text-sm text-gray-500 text-center">
                   Please wait while we process your approval
                 </p>
@@ -1653,9 +1601,7 @@ export default function Basic_B_View({
                     </svg>
                   </div>
                 </div>
-                <p className="text-lg font-medium text-gray-800">
-                  Evaluation Approved!
-                </p>
+                <p className="text-lg font-medium text-gray-800">Evaluation Approved!</p>
                 <p className="text-sm text-gray-500 text-center">
                   The evaluation has been successfully approved
                 </p>
@@ -1719,9 +1665,7 @@ export default function Basic_B_View({
 
           <div ref={printContentRef} className="space-y-8">
             <div className="border-b border-gray-200 pb-4 no-print">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Evaluation Details
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-900">Evaluation Details</h2>
             </div>
 
             <div className="space-y-8">
@@ -1750,29 +1694,25 @@ export default function Basic_B_View({
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
                                 submission.reviewTypeProbationary === 3
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              3 months
-                            </span>
+                            <span className="text-sm text-gray-700">3 months</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
                                 submission.reviewTypeProbationary === 5
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              5 months
-                            </span>
+                            <span className="text-sm text-gray-700">5 months</span>
                           </div>
                         </div>
                       </div>
@@ -1786,95 +1726,79 @@ export default function Basic_B_View({
                           <div className="flex items-center gap-1.5">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                submission.reviewTypeRegular === "Q1"
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                submission.reviewTypeRegular === 'Q1'
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Q1 review
-                            </span>
+                            <span className="text-sm text-gray-700">Q1 review</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                submission.reviewTypeRegular === "Q2"
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                submission.reviewTypeRegular === 'Q2'
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Q2 review
-                            </span>
+                            <span className="text-sm text-gray-700">Q2 review</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                submission.reviewTypeRegular === "Q3"
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                submission.reviewTypeRegular === 'Q3'
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Q3 review
-                            </span>
+                            <span className="text-sm text-gray-700">Q3 review</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                submission.reviewTypeRegular === "Q4"
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                submission.reviewTypeRegular === 'Q4'
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Q4 review
-                            </span>
+                            <span className="text-sm text-gray-700">Q4 review</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Row 3: Others */}
                       <div className="flex items-start gap-3">
-                        <h5 className="font-medium text-gray-800 min-w-[120px] text-sm">
-                          Others
-                        </h5>
+                        <h5 className="font-medium text-gray-800 min-w-[120px] text-sm">Others</h5>
                         <div className="flex flex-row gap-2 flex-wrap">
                           <div className="flex items-center gap-1.5">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
                                 submission.reviewTypeOthersImprovement
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                  ? 'bg-green-500'
+                                  : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Performance Improvement
-                            </span>
+                            <span className="text-sm text-gray-700">Performance Improvement</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                submission.reviewTypeOthersCustom
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
+                                submission.reviewTypeOthersCustom ? 'bg-green-500' : 'bg-gray-300'
                               }`}
                             >
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="text-sm text-gray-700">
-                              Others:
-                            </span>
+                            <span className="text-sm text-gray-700">Others:</span>
                           </div>
                           {submission.reviewTypeOthersCustom && (
                             <div className="ml-2 p-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-700">
@@ -1895,92 +1819,77 @@ export default function Basic_B_View({
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Employee Name:
                       </Label>
                       <p
                         className="font-semibold text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
-                        {submission?.employee?.fname &&
-                        submission?.employee?.lname
+                        {submission?.employee?.fname && submission?.employee?.lname
                           ? `${submission.employee.fname} ${submission.employee.lname}`
-                          : "Unknown Employee"}
+                          : 'Unknown Employee'}
                       </p>
                     </div>
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Employee Contact:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
                         {submission.evaluator.contact}
                       </p>
                     </div>
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Position:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
-                        {submission?.employee?.positions?.label ||
-                          "Not specified"}
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
+                        {submission?.employee?.positions?.label || 'Not specified'}
                       </p>
                     </div>
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Branch:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
-                        {submission?.employee?.branches?.[0]?.branch_name ||
-                          "Not specified"}
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
+                        {submission?.employee?.branches?.[0]?.branch_name || 'Not specified'}
                       </p>
                     </div>
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Date Hired:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
                         {(() => {
                           const dateHired =
                             submission?.employee?.date_hired ||
                             submission?.employee?.dateHired ||
                             submission?.employee?.hireDate ||
                             (submission as any)?.hireDate;
-                          if (!dateHired) return "Not specified";
+                          if (!dateHired) return 'Not specified';
                           try {
                             const date = new Date(dateHired);
-                            if (isNaN(date.getTime())) return "Not specified";
-                            return date.toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
+                            if (isNaN(date.getTime())) return 'Not specified';
+                            return date.toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
                             });
                           } catch {
-                            return "Not specified";
+                            return 'Not specified';
                           }
                         })()}
                       </p>
@@ -1988,65 +1897,49 @@ export default function Basic_B_View({
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Immediate Supervisor:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
-                        {submission.evaluator.fname +
-                          " " +
-                          submission.evaluator.lname}
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
+                        {submission.evaluator.fname + ' ' + submission.evaluator.lname}
                       </p>
                     </div>
                     <div className="print-info-row">
                       <Label
                         className="font-medium text-black block mb-1 print-label"
-                        style={{ fontSize: "11px" }}
+                        style={{ fontSize: '11px' }}
                       >
                         Performance Coverage:
                       </Label>
-                      <p
-                        className="text-gray-900 print-value"
-                        style={{ fontSize: "11px" }}
-                      >
+                      <p className="text-gray-900 print-value" style={{ fontSize: '11px' }}>
                         {submission.coverageFrom && submission.coverageTo ? (
                           <>
                             <span className="screen-date">
-                              {`${new Date(
-                                submission.coverageFrom,
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })} - ${new Date(
-                                submission.coverageTo,
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
+                              {`${new Date(submission.coverageFrom).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })} - ${new Date(submission.coverageTo).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
                               })}`}
                             </span>
                             <span className="print-date">
-                              {`${new Date(
-                                submission.coverageFrom,
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })} - ${new Date(
-                                submission.coverageTo,
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
+                              {`${new Date(submission.coverageFrom).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })} - ${new Date(submission.coverageTo).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
                               })}`}
                             </span>
                           </>
                         ) : (
-                          "Not specified"
+                          'Not specified'
                         )}
                       </p>
                     </div>
@@ -2064,9 +1957,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Demonstrates understanding of job responsibilities.
-                      Applies knowledge to tasks and projects. Stays updated in
-                      relevant areas.
+                      Demonstrates understanding of job responsibilities. Applies knowledge to tasks
+                      and projects. Stays updated in relevant areas.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2097,8 +1989,7 @@ export default function Basic_B_View({
                               score: number;
                               comment: string;
                             }) => {
-                              const indicators =
-                                JOB_KNOWLEDGE[item.question_number];
+                              const indicators = JOB_KNOWLEDGE[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2117,18 +2008,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.comment || ""}
+                                    {item.comment || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2147,10 +2038,9 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Accuracy and precision in completing tasks. Attention to
-                      detail. Consistency in delivering high-quality results.
-                      Timely completion of tasks and projects. Effective use of
-                      resources. Ability to meet deadlines.
+                      Accuracy and precision in completing tasks. Attention to detail. Consistency
+                      in delivering high-quality results. Timely completion of tasks and projects.
+                      Effective use of resources. Ability to meet deadlines.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2177,23 +2067,11 @@ export default function Basic_B_View({
                         <tbody>
                           {submission.quality_of_works.map(
                             (item: {
-                              question_number:
-                                | 1
-                                | 2
-                                | 3
-                                | 4
-                                | 5
-                                | 6
-                                | 7
-                                | 8
-                                | 9
-                                | 10
-                                | 11;
+                              question_number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
                               score: number;
                               comment: string;
                             }) => {
-                              const indicators =
-                                QUALITY_OF_WORK[item.question_number];
+                              const indicators = QUALITY_OF_WORK[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2207,23 +2085,23 @@ export default function Basic_B_View({
                                     {indicators.example}
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-center font-medium">
-                                    {item.score === 0 ? "-" : item.score}
+                                    {item.score === 0 ? '-' : item.score}
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.comment || ""}
+                                    {item.comment || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2242,9 +2120,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Flexibility in handling change. Ability to work
-                      effectively in diverse situations. Resilience in the face
-                      of challenges.
+                      Flexibility in handling change. Ability to work effectively in diverse
+                      situations. Resilience in the face of challenges.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2275,8 +2152,7 @@ export default function Basic_B_View({
                               score: number;
                               comment: string;
                             }) => {
-                              const indicators =
-                                ADAPTABILITY[item.question_number];
+                              const indicators = ADAPTABILITY[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2295,18 +2171,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.comment || ""}
+                                    {item.comment || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2325,8 +2201,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Ability to work well with others. Contribution to team
-                      goals and projects. Supportiveness of team members.
+                      Ability to work well with others. Contribution to team goals and projects.
+                      Supportiveness of team members.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2376,18 +2252,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.comment || ""}
+                                    {item.comment || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2406,8 +2282,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Consistency in attendance and punctuality. Meeting
-                      commitments and fulfilling responsibilities.
+                      Consistency in attendance and punctuality. Meeting commitments and fulfilling
+                      responsibilities.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2438,8 +2314,7 @@ export default function Basic_B_View({
                               score: number;
                               comment: string;
                             }) => {
-                              const indicators =
-                                RELIABILITY[item.question_number];
+                              const indicators = RELIABILITY[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2458,18 +2333,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.comment || ""}
+                                    {item.comment || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2488,9 +2363,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Complies with company policies and ethical standards.
-                      Accountability for one's actions. Professionalism in
-                      interactions with coworkers and clients.
+                      Complies with company policies and ethical standards. Accountability for one's
+                      actions. Professionalism in interactions with coworkers and clients.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2540,18 +2414,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.explanation || ""}
+                                    {item.explanation || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2570,8 +2444,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Customer satisfaction. Responsiveness to customer needs.
-                      Professional and positive interactions with customers.
+                      Customer satisfaction. Responsiveness to customer needs. Professional and
+                      positive interactions with customers.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2602,8 +2476,7 @@ export default function Basic_B_View({
                               score: number;
                               explanation: string;
                             }) => {
-                              const indicators =
-                                CUSTOMER_SERVICE[item.question_number];
+                              const indicators = CUSTOMER_SERVICE[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2622,18 +2495,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.explanation || ""}
+                                    {item.explanation || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2652,9 +2525,8 @@ export default function Basic_B_View({
                   </CardHeader>
                   <CardContent className="p-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Leadership capabilities. Team management and development.
-                      Decision-making and strategic thinking. Performance
-                      management and coaching.
+                      Leadership capabilities. Team management and development. Decision-making and
+                      strategic thinking. Performance management and coaching.
                     </p>
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse border border-gray-300">
@@ -2685,8 +2557,7 @@ export default function Basic_B_View({
                               score: number;
                               explanation: string;
                             }) => {
-                              const indicators =
-                                MANAGERIAL[item.question_number];
+                              const indicators = MANAGERIAL[item.question_number];
 
                               return (
                                 <tr key={item.question_number}>
@@ -2705,18 +2576,18 @@ export default function Basic_B_View({
                                   <td className="border border-gray-300 px-4 py-3 text-center">
                                     <div
                                       className={`px-2 py-1 rounded text-sm font-medium ${ratingBG(
-                                        item.score,
+                                        item.score
                                       )}`}
                                     >
                                       {rating(item.score)}
                                     </div>
                                   </td>
                                   <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700 bg-yellow-50">
-                                    {item.explanation || ""}
+                                    {item.explanation || ''}
                                   </td>
                                 </tr>
                               );
-                            },
+                            }
                           )}
                         </tbody>
                       </table>
@@ -2767,45 +2638,37 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.job_knowledge.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.job_knowledge.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.job_knowledge.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.job_knowledge.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.job_knowledge.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.job_knowledge.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.job_knowledge.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      },
-                                    ),
+                                    submission.job_knowledge.map((item: any) => {
+                                      return item.score;
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -2814,11 +2677,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.job_knowledge.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.job_knowledge.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.15
                                   ).toFixed(2)}
                                 </td>
@@ -2835,45 +2696,37 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.quality_of_works.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.quality_of_works.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.quality_of_works.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.quality_of_works.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.quality_of_works.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.quality_of_works.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.quality_of_works.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      },
-                                    ),
+                                    submission.quality_of_works.map((item: any) => {
+                                      return item.score;
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -2882,11 +2735,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.quality_of_works.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.quality_of_works.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.25
                                   ).toFixed(2)}
                                 </td>
@@ -2903,34 +2754,28 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.adaptability.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.adaptability.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.adaptability.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.adaptability.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.adaptability.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.adaptability.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
@@ -2939,7 +2784,7 @@ export default function Basic_B_View({
                                   {calculateScore(
                                     submission.adaptability.map((item: any) => {
                                       return item.score;
-                                    }),
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -2948,11 +2793,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.adaptability.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.adaptability.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.03
                                   ).toFixed(2)}
                                 </td>
@@ -2969,34 +2812,28 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.teamworks.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.teamworks.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.teamworks.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.teamworks.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.teamworks.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.teamworks.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
@@ -3005,7 +2842,7 @@ export default function Basic_B_View({
                                   {calculateScore(
                                     submission.teamworks.map((item: any) => {
                                       return item.score;
-                                    }),
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -3016,7 +2853,7 @@ export default function Basic_B_View({
                                     calculateScore(
                                       submission.teamworks.map((item: any) => {
                                         return item.score;
-                                      }),
+                                      })
                                     ) * 0.1
                                   ).toFixed(2)}
                                 </td>
@@ -3033,45 +2870,37 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.reliabilities.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.reliabilities.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.reliabilities.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.reliabilities.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.reliabilities.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.reliabilities.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.reliabilities.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      },
-                                    ),
+                                    submission.reliabilities.map((item: any) => {
+                                      return item.score;
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -3080,11 +2909,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.reliabilities.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.reliabilities.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.1
                                   ).toFixed(2)}
                                 </td>
@@ -3101,34 +2928,28 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.ethicals.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.ethicals.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.ethicals.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.ethicals.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.ethicals.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.ethicals.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
@@ -3137,7 +2958,7 @@ export default function Basic_B_View({
                                   {calculateScore(
                                     submission.ethicals.map((item: any) => {
                                       return item.score;
-                                    }),
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -3148,7 +2969,7 @@ export default function Basic_B_View({
                                     calculateScore(
                                       submission.ethicals.map((item: any) => {
                                         return item.score;
-                                      }),
+                                      })
                                     ) * 0.02
                                   ).toFixed(2)}
                                 </td>
@@ -3165,45 +2986,37 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.customer_services.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.customer_services.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.customer_services.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.customer_services.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.customer_services.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.customer_services.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.customer_services.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      },
-                                    ),
+                                    submission.customer_services.map((item: any) => {
+                                      return item.score;
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -3212,11 +3025,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.customer_services.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.customer_services.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.15
                                   ).toFixed(2)}
                                 </td>
@@ -3233,45 +3044,37 @@ export default function Basic_B_View({
                                       className={`px-2 py-1 rounded text-sm font-bold screen-rating-badge ${getRatingColorForLabel(
                                         getRatingLabel(
                                           calculateScore(
-                                            submission.managerial_skills.map(
-                                              (item: any) => {
-                                                return item.score;
-                                              },
-                                            ),
-                                          ),
-                                        ),
+                                            submission.managerial_skills.map((item: any) => {
+                                              return item.score;
+                                            })
+                                          )
+                                        )
                                       )}`}
                                     >
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.managerial_skills.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.managerial_skills.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                     <span className="print-rating-text">
                                       {getRatingLabel(
                                         calculateScore(
-                                          submission.managerial_skills.map(
-                                            (item: any) => {
-                                              return item.score;
-                                            },
-                                          ),
-                                        ),
+                                          submission.managerial_skills.map((item: any) => {
+                                            return item.score;
+                                          })
+                                        )
                                       )}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {calculateScore(
-                                    submission.managerial_skills.map(
-                                      (item: any) => {
-                                        return item.score;
-                                      },
-                                    ),
+                                    submission.managerial_skills.map((item: any) => {
+                                      return item.score;
+                                    })
                                   ).toFixed(2)}
                                 </td>
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
@@ -3280,11 +3083,9 @@ export default function Basic_B_View({
                                 <td className="border-2 border-gray-400 px-4 py-3 text-center font-bold text-base">
                                   {(
                                     calculateScore(
-                                      submission.managerial_skills.map(
-                                        (item: any) => {
-                                          return item.score;
-                                        },
-                                      ),
+                                      submission.managerial_skills.map((item: any) => {
+                                        return item.score;
+                                      })
                                     ) * 0.2
                                   ).toFixed(2)}
                                 </td>
@@ -3312,16 +3113,14 @@ export default function Basic_B_View({
                             <div className="text-4xl font-bold text-gray-700">
                               {finalPercentage.toFixed(2)}%
                             </div>
-                            <div className="text-base text-gray-500 mt-1">
-                              Performance Score
-                            </div>
+                            <div className="text-base text-gray-500 mt-1">Performance Score</div>
                           </div>
                           <div
                             className={`px-8 py-4 rounded-lg font-bold text-white text-xl ${
-                              finalIsPass ? "bg-green-600" : "bg-red-600"
+                              finalIsPass ? 'bg-green-600' : 'bg-red-600'
                             }`}
                           >
-                            {finalIsPass ? "PASS" : "FAIL"}
+                            {finalIsPass ? 'PASS' : 'FAIL'}
                           </div>
                         </div>
                       </div>
@@ -3338,12 +3137,10 @@ export default function Basic_B_View({
                       Priority Areas for Improvement
                     </h4>
                     <p className="text-sm text-gray-600 mb-4 print-priority-description">
-                      This section identifies key areas the employee can focus
-                      on for development in the upcoming quarter. These can be
-                      specific skills, behaviors, or work outputs that will
-                      contribute to better overall performance and align with
-                      branch or company goals. Keep the feedback clear, helpful,
-                      and easy to act on.
+                      This section identifies key areas the employee can focus on for development in
+                      the upcoming quarter. These can be specific skills, behaviors, or work outputs
+                      that will contribute to better overall performance and align with branch or
+                      company goals. Keep the feedback clear, helpful, and easy to act on.
                     </p>
                     <div className="space-y-3">
                       {[1, 2, 3].map((idx) => {
@@ -3360,10 +3157,10 @@ export default function Basic_B_View({
                           >
                             <div className="print-priority-row">
                               <span className="font-medium text-sm print-priority-label">
-                                {idx}.{" "}
+                                {idx}.{' '}
                               </span>
                               <p className="text-sm text-gray-700 print-priority-value min-h-[18px]">
-                                {value || ""}
+                                {value || ''}
                               </p>
                             </div>
                           </div>
@@ -3383,7 +3180,7 @@ export default function Basic_B_View({
                     </h4>
                     <div className="p-3 bg-yellow-50 border border-gray-300 rounded-md print-remarks-box min-h-[72px]">
                       <p className="text-sm text-gray-700 whitespace-pre-wrap min-h-[52px]">
-                        {submission.remarks || ""}
+                        {submission.remarks || ''}
                       </p>
                     </div>
                   </CardContent>
@@ -3398,10 +3195,9 @@ export default function Basic_B_View({
                       Acknowledgement
                     </h4>
                     <p className="text-sm text-gray-600 mb-4 print-acknowledgement-description">
-                      I hereby acknowledge that the Evaluator has explained to
-                      me, to the best of their ability, and in a manner I fully
-                      understand, my performance and respective rating on this
-                      performance evaluation.
+                      I hereby acknowledge that the Evaluator has explained to me, to the best of
+                      their ability, and in a manner I fully understand, my performance and
+                      respective rating on this performance evaluation.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print-acknowledgement">
                       {/* Employee Section */}
@@ -3413,10 +3209,9 @@ export default function Basic_B_View({
                             <div className="print-signature-line"></div>
                             {/* Name as background text - always show */}
                             <span className="text-md text-gray-900 font-bold">
-                              {submission?.employee?.fname &&
-                              submission?.employee?.lname
+                              {submission?.employee?.fname && submission?.employee?.lname
                                 ? `${submission.employee.fname} ${submission.employee.lname}`
-                                : "Employee Name"}
+                                : 'Employee Name'}
                             </span>
                             {/* Signature overlay - centered and overlapping */}
                             {signatureLoading ? (
@@ -3427,18 +3222,17 @@ export default function Basic_B_View({
                               <div className="absolute top-7 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-red-500">
                                 Error loading signature
                               </div>
-                            ) : submission.status === "completed" ? (
+                            ) : submission.status === 'completed' ? (
                               submission.employee?.signature && (
                                 <img
                                   src={
-                                    CONFIG.API_URL_STORAGE +
-                                      "/" +
-                                      submission.employee?.signature || ""
+                                    CONFIG.API_URL_STORAGE + '/' + submission.employee?.signature ||
+                                    ''
                                   }
                                   alt="Employee Signature"
                                   className="absolute top-7 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-h-16 max-w-full object-contain"
                                   onError={(e) => {
-                                    e.currentTarget.style.display = "none";
+                                    e.currentTarget.style.display = 'none';
                                   }}
                                 />
                               )
@@ -3455,7 +3249,7 @@ export default function Basic_B_View({
                         {showApprovalButton && (
                           <div className="mt-6 space-y-4 no-print">
                             {/* Approve Button - Only show if not approved */}
-                            {submission.status === "pending" && (
+                            {submission.status === 'pending' && (
                               <div className="space-y-3">
                                 <div className="flex justify-center">
                                   <Button
@@ -3469,13 +3263,12 @@ export default function Basic_B_View({
                                         Approving...
                                       </>
                                     ) : (
-                                      "✓ Approve Evaluation"
+                                      '✓ Approve Evaluation'
                                     )}
                                   </Button>
                                 </div>
                                 <p className="text-xs text-gray-500 text-center">
-                                  Click to acknowledge and approve this
-                                  evaluation
+                                  Click to acknowledge and approve this evaluation
                                 </p>
                                 {approvalError && (
                                   <p className="text-xs text-center text-red-600 bg-red-50 p-3 rounded">
@@ -3486,44 +3279,44 @@ export default function Basic_B_View({
                             )}
 
                             {/* Approved Status - Only show if approved */}
-                            {computedIsApproved &&
-                              submission.status === "completed" && (
-                                <div className="space-y-3 px-4 md:px-0">
-                                  <div className="flex items-center justify-center space-x-2">
-                                    <Badge className="bg-green-100 text-green-800 px-4 py-2 text-sm font-medium">
-                                      ✓ Evaluation Approved
-                                    </Badge>
-                                  </div>
-                                  <p className="text-xs text-gray-500 text-center">
-                                    Approved on{" "}
-                                    {submission.employeeApprovedAt
-                                      ? new Date(
-                                          submission.employeeApprovedAt,
-                                        ).toLocaleDateString("en-US", {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                        })
-                                      : "Unknown date"}
-                                  </p>
+                            {computedIsApproved && submission.status === 'completed' && (
+                              <div className="space-y-3 px-4 md:px-0">
+                                <div className="flex items-center justify-center space-x-2">
+                                  <Badge className="bg-green-100 text-green-800 px-4 py-2 text-sm font-medium">
+                                    ✓ Evaluation Approved
+                                  </Badge>
                                 </div>
-                              )}
+                                <p className="text-xs text-gray-500 text-center">
+                                  Approved on{' '}
+                                  {submission.employeeApprovedAt
+                                    ? new Date(submission.employeeApprovedAt).toLocaleDateString(
+                                        'en-US',
+                                        {
+                                          year: 'numeric',
+                                          month: 'long',
+                                          day: 'numeric',
+                                        }
+                                      )
+                                    : 'Unknown date'}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         )}
 
                         {/* Employee Date */}
                         <div className="text-center">
                           <p className="text-xs text-gray-500 mt-1 print-date-value">
-                            {submission.employeeApprovedAt ||
-                            submission.employeeApprovedAt
-                              ? new Date(
-                                  submission.employeeApprovedAt,
-                                ).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })
-                              : "Not approved yet"}
+                            {submission.employeeApprovedAt || submission.employeeApprovedAt
+                              ? new Date(submission.employeeApprovedAt).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  }
+                                )
+                              : 'Not approved yet'}
                           </p>
                         </div>
                       </div>
@@ -3537,22 +3330,17 @@ export default function Basic_B_View({
                             <div className="print-signature-line"></div>
                             {/* Name as background text - always show */}
                             <span className="text-md text-gray-900 font-bold">
-                              {submission?.evaluator.fname +
-                                " " +
-                                submission.evaluator.lname || "Evaluator Name"}
+                              {submission?.evaluator.fname + ' ' + submission.evaluator.lname ||
+                                'Evaluator Name'}
                             </span>
                             {/* Signature overlay - automatically show when signature exists */}
                             {submission.evaluator.signature ? (
                               <img
-                                src={
-                                  CONFIG.API_URL_STORAGE +
-                                  "/" +
-                                  submission.evaluator.signature
-                                }
+                                src={CONFIG.API_URL_STORAGE + '/' + submission.evaluator.signature}
                                 alt="Evaluator Signature"
                                 className="absolute top-7 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-h-16 max-w-full object-contain"
                                 onError={(e) => {
-                                  e.currentTarget.style.display = "none";
+                                  e.currentTarget.style.display = 'none';
                                 }}
                               />
                             ) : (
@@ -3570,14 +3358,15 @@ export default function Basic_B_View({
                         <div className="text-center">
                           <p className="text-xs text-gray-500 mt-1">
                             {submission.evaluatorApprovedAt
-                              ? new Date(
-                                  submission.evaluatorApprovedAt,
-                                ).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })
-                              : "Not specified"}
+                              ? new Date(submission.evaluatorApprovedAt).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  }
+                                )
+                              : 'Not specified'}
                           </p>
                         </div>
                       </div>
@@ -3587,15 +3376,13 @@ export default function Basic_B_View({
                       <p className="text-xs text-gray-700 leading-relaxed">
                         <strong>CONFIDENTIALITY NOTICE ver.042225:</strong>
                         <br />
-                        This document, including any attachments, contains
-                        confidential and/or privileged information intended
-                        solely for internal use within the company. It is the
-                        intellectual property of SMCT Group of Companies,
-                        including its subsidiaries, businesses, and trade names.
-                        Unauthorized use, copying, distribution, or disclosure
-                        of this document, its contents, or any part thereof is
-                        strictly prohibited without the express written
-                        permission of SMCT Group of Companies.
+                        This document, including any attachments, contains confidential and/or
+                        privileged information intended solely for internal use within the company.
+                        It is the intellectual property of SMCT Group of Companies, including its
+                        subsidiaries, businesses, and trade names. Unauthorized use, copying,
+                        distribution, or disclosure of this document, its contents, or any part
+                        thereof is strictly prohibited without the express written permission of
+                        SMCT Group of Companies.
                       </p>
                     </div>
                     {/* Date section */}
@@ -3608,16 +3395,16 @@ export default function Basic_B_View({
                           ? new Date(
                               submission.employeeApprovedAt ||
                                 submission.evaluatorApprovedAt ||
-                                submission.created_at,
-                            ).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
+                                submission.created_at
+                            ).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
                             })
-                          : new Date().toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
+                          : new Date().toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
                             })}
                       </span>
                     </div>
@@ -3628,10 +3415,9 @@ export default function Basic_B_View({
             {/* Print Footer */}
             <div className="print-footer">
               <p className="text-xs text-gray-700">
-                CONFIDENTIALITY NOTICE ver.042225: This document and its
-                contents are confidential and the intellectual property of SMCT
-                Group of Companies and its subsidiaries. Unauthorized use,
-                copying, distribution or disclosure is prohibited.
+                CONFIDENTIALITY NOTICE ver.042225: This document and its contents are confidential
+                and the intellectual property of SMCT Group of Companies and its subsidiaries.
+                Unauthorized use, copying, distribution or disclosure is prohibited.
               </p>
             </div>
           </div>

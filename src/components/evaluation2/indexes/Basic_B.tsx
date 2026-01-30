@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -818,7 +818,7 @@ export default function Basic_B_EvaluationForm({
               variant="destructive"
               disabled={isCancelling}
               className={`px-4 flex items-center gap-2 cursor-pointer hover:scale-110 transition-transform duration-200
-    ${isCancelling ? "opacity-70 cursor-not-allowed" : ""}`}
+                          ${isCancelling ? "opacity-70 cursor-not-allowed" : ""}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

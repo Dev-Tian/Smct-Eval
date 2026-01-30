@@ -1,37 +1,31 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { AlertTriangle } from "lucide-react";
-import WelcomeStep from "../WelcomeStep";
+} from '@/components/ui/dialog';
+import { AlertTriangle } from 'lucide-react';
+import WelcomeStep from '../WelcomeStep';
 
-import { apiService } from "@/lib/apiService";
-import { useAuth, User } from "../../../contexts/UserContext";
-import Step1 from "../Step1";
-import Step3 from "../Step3";
-import Step4 from "../Step4";
-import Step5 from "../Step5";
-import Step6 from "../Step6";
-import { EvaluationPayload } from "../types";
-import Step2_HO from "../Step2_HO";
-import RnF_HO_Overall from "../overall/RnF_HO_Overall";
-import Step8 from "../Step8";
-import Basic_HO_Overall from "../overall/Basic_HO_Overall";
+import { apiService } from '@/lib/apiService';
+import { User } from '../../../contexts/UserContext';
+import Step1 from '../Step1';
+import Step3 from '../Step3';
+import Step4 from '../Step4';
+import Step5 from '../Step5';
+import Step6 from '../Step6';
+import { EvaluationPayload } from '../types';
+import Step2_HO from '../Step2_HO';
+import Step8 from '../Step8';
+import Basic_HO_Overall from '../overall/Basic_HO_Overall';
 
 interface EvaluationFormProps {
   employee?: User | null;
@@ -48,84 +42,84 @@ export default function Basic_HO_EvaluationForm({
   const [welcomeAnimationKey, setWelcomeAnimationKey] = useState(0);
 
   const defaultSteps = [
-    { id: 1, title: "Employee Information / Job Knowledge", component: Step1 },
-    { id: 2, title: "Quality of Work", component: Step2_HO },
-    { id: 3, title: "Adaptability", component: Step3 },
-    { id: 4, title: "Teamwork", component: Step4 },
-    { id: 5, title: "Reliability", component: Step5 },
-    { id: 6, title: "Ethical & Professional Behavior", component: Step6 },
-    { id: 7, title: "Managerial Skills", component: Step8 },
-    { id: 8, title: "Overall Assessment", component: Basic_HO_Overall },
+    { id: 1, title: 'Employee Information / Job Knowledge', component: Step1 },
+    { id: 2, title: 'Quality of Work', component: Step2_HO },
+    { id: 3, title: 'Adaptability', component: Step3 },
+    { id: 4, title: 'Teamwork', component: Step4 },
+    { id: 5, title: 'Reliability', component: Step5 },
+    { id: 6, title: 'Ethical & Professional Behavior', component: Step6 },
+    { id: 7, title: 'Managerial Skills', component: Step8 },
+    { id: 8, title: 'Overall Assessment', component: Basic_HO_Overall },
   ];
 
   // Check if evaluator's branch is HO (Head Office)
 
   const [form, setForm] = useState<EvaluationPayload>({
     rating: 0,
-    coverageFrom: "",
-    coverageTo: "",
-    reviewTypeProbationary: "",
-    reviewTypeRegular: "",
+    coverageFrom: '',
+    coverageTo: '',
+    reviewTypeProbationary: '',
+    reviewTypeRegular: '',
     reviewTypeOthersImprovement: false,
-    reviewTypeOthersCustom: "",
-    priorityArea1: "",
-    priorityArea2: "",
-    priorityArea3: "",
-    remarks: "",
+    reviewTypeOthersCustom: '',
+    priorityArea1: '',
+    priorityArea2: '',
+    priorityArea3: '',
+    remarks: '',
     jobKnowledgeScore1: 0,
     jobKnowledgeScore2: 0,
     jobKnowledgeScore3: 0,
-    jobKnowledgeComments1: "",
-    jobKnowledgeComments2: "",
-    jobKnowledgeComments3: "",
+    jobKnowledgeComments1: '',
+    jobKnowledgeComments2: '',
+    jobKnowledgeComments3: '',
     qualityOfWorkScore1: 0,
     qualityOfWorkScore2: 0,
     qualityOfWorkScore3: 0,
     qualityOfWorkScore4: 0,
-    qualityOfWorkComments1: "",
-    qualityOfWorkComments2: "",
-    qualityOfWorkComments3: "",
-    qualityOfWorkComments4: "",
+    qualityOfWorkComments1: '',
+    qualityOfWorkComments2: '',
+    qualityOfWorkComments3: '',
+    qualityOfWorkComments4: '',
     adaptabilityScore1: 0,
     adaptabilityScore2: 0,
     adaptabilityScore3: 0,
-    adaptabilityComments1: "",
-    adaptabilityComments2: "",
-    adaptabilityComments3: "",
+    adaptabilityComments1: '',
+    adaptabilityComments2: '',
+    adaptabilityComments3: '',
     teamworkScore1: 0,
     teamworkScore2: 0,
     teamworkScore3: 0,
-    teamworkComments1: "",
-    teamworkComments2: "",
-    teamworkComments3: "",
+    teamworkComments1: '',
+    teamworkComments2: '',
+    teamworkComments3: '',
     reliabilityScore1: 0,
     reliabilityScore2: 0,
     reliabilityScore3: 0,
     reliabilityScore4: 0,
-    reliabilityComments1: "",
-    reliabilityComments2: "",
-    reliabilityComments3: "",
-    reliabilityComments4: "",
+    reliabilityComments1: '',
+    reliabilityComments2: '',
+    reliabilityComments3: '',
+    reliabilityComments4: '',
     ethicalScore1: 0,
     ethicalScore2: 0,
     ethicalScore3: 0,
     ethicalScore4: 0,
-    ethicalExplanation1: "",
-    ethicalExplanation2: "",
-    ethicalExplanation3: "",
-    ethicalExplanation4: "",
+    ethicalExplanation1: '',
+    ethicalExplanation2: '',
+    ethicalExplanation3: '',
+    ethicalExplanation4: '',
     managerialSkillsScore1: 0,
     managerialSkillsScore2: 0,
     managerialSkillsScore3: 0,
     managerialSkillsScore4: 0,
     managerialSkillsScore5: 0,
     managerialSkillsScore6: 0,
-    managerialSkillsExplanation1: "",
-    managerialSkillsExplanation2: "",
-    managerialSkillsExplanation3: "",
-    managerialSkillsExplanation4: "",
-    managerialSkillsExplanation5: "",
-    managerialSkillsExplanation6: "",
+    managerialSkillsExplanation1: '',
+    managerialSkillsExplanation2: '',
+    managerialSkillsExplanation3: '',
+    managerialSkillsExplanation4: '',
+    managerialSkillsExplanation5: '',
+    managerialSkillsExplanation6: '',
   });
   const [isCancelling, setIsCancelling] = useState(false);
 
@@ -168,8 +162,7 @@ export default function Basic_HO_EvaluationForm({
           form.reviewTypeProbationary ||
           form.reviewTypeRegular ||
           form.reviewTypeOthersImprovement ||
-          (form.reviewTypeOthersCustom &&
-            form.reviewTypeOthersCustom.trim() !== "");
+          (form.reviewTypeOthersCustom && form.reviewTypeOthersCustom.trim() !== '');
 
         // Check if all job knowledge scores are filled
         const hasJobKnowledgeScores =
@@ -183,9 +176,9 @@ export default function Basic_HO_EvaluationForm({
         // Check if basic employee information is filled
         const hasBasicInfo =
           form.coverageFrom &&
-          form.coverageFrom !== "" &&
+          form.coverageFrom !== '' &&
           form.coverageTo &&
-          form.coverageTo !== "";
+          form.coverageTo !== '';
 
         // Check if coverage dates are valid (coverageFrom must be before coverageTo and not before hireDate)
         const hasValidCoverageDates = (() => {
@@ -193,13 +186,13 @@ export default function Basic_HO_EvaluationForm({
           try {
             // Convert to date strings in YYYY-MM-DD format for reliable comparison
             const fromDateStr =
-              typeof form.coverageFrom === "string"
+              typeof form.coverageFrom === 'string'
                 ? form.coverageFrom
-                : new Date(form.coverageFrom).toISOString().split("T")[0];
+                : new Date(form.coverageFrom).toISOString().split('T')[0];
             const toDateStr =
-              typeof form.coverageTo === "string"
+              typeof form.coverageTo === 'string'
                 ? form.coverageTo
-                : new Date(form.coverageTo).toISOString().split("T")[0];
+                : new Date(form.coverageTo).toISOString().split('T')[0];
 
             // Validate date strings are in correct format
             if (
@@ -219,14 +212,10 @@ export default function Basic_HO_EvaluationForm({
             // Check if coverageFrom is not before date hired
             if (employee?.date_hired) {
               const hireDateStr =
-                typeof employee?.date_hired === "string"
+                typeof employee?.date_hired === 'string'
                   ? employee?.date_hired
-                  : new Date(employee?.date_hired).toISOString().split("T")[0];
-              if (
-                hireDateStr &&
-                hireDateStr.length === 10 &&
-                fromDateStr < hireDateStr
-              ) {
+                  : new Date(employee?.date_hired).toISOString().split('T')[0];
+              if (hireDateStr && hireDateStr.length === 10 && fromDateStr < hireDateStr) {
                 return false;
               }
             }
@@ -236,12 +225,7 @@ export default function Basic_HO_EvaluationForm({
           }
         })();
 
-        return (
-          hasReviewType &&
-          hasJobKnowledgeScores &&
-          hasBasicInfo &&
-          hasValidCoverageDates
-        );
+        return hasReviewType && hasJobKnowledgeScores && hasBasicInfo && hasValidCoverageDates;
       case 2: // Quality of Work
         return (
           form.qualityOfWorkScore1 &&
@@ -323,16 +307,15 @@ export default function Basic_HO_EvaluationForm({
           !form.reviewTypeProbationary &&
           !form.reviewTypeRegular &&
           !form.reviewTypeOthersImprovement &&
-          (!form.reviewTypeOthersCustom ||
-            form.reviewTypeOthersCustom.trim() === "")
+          (!form.reviewTypeOthersCustom || form.reviewTypeOthersCustom.trim() === '')
         ) {
-          return "Please select at least one review type";
+          return 'Please select at least one review type';
         }
 
-        if (!form.coverageFrom || form.coverageFrom === "") {
+        if (!form.coverageFrom || form.coverageFrom === '') {
           return "Please select Performance Coverage 'From' date";
         }
-        if (!form.coverageTo || form.coverageTo === "") {
+        if (!form.coverageTo || form.coverageTo === '') {
           return "Please select Performance Coverage 'To' date";
         }
         // Check if coverage dates are valid (coverageFrom must be before coverageTo and not before hireDate)
@@ -340,20 +323,15 @@ export default function Basic_HO_EvaluationForm({
           try {
             // Convert to date strings in YYYY-MM-DD format for reliable comparison
             const fromDateStr =
-              typeof form.coverageFrom === "string"
+              typeof form.coverageFrom === 'string'
                 ? form.coverageFrom
-                : new Date(form.coverageFrom).toISOString().split("T")[0];
+                : new Date(form.coverageFrom).toISOString().split('T')[0];
             const toDateStr =
-              typeof form.coverageTo === "string"
+              typeof form.coverageTo === 'string'
                 ? form.coverageTo
-                : new Date(form.coverageTo).toISOString().split("T")[0];
+                : new Date(form.coverageTo).toISOString().split('T')[0];
 
-            if (
-              fromDateStr &&
-              toDateStr &&
-              fromDateStr.length === 10 &&
-              toDateStr.length === 10
-            ) {
+            if (fromDateStr && toDateStr && fromDateStr.length === 10 && toDateStr.length === 10) {
               // Check if fromDate is before toDate (string comparison works for YYYY-MM-DD format)
               if (fromDateStr >= toDateStr) {
                 return "Performance Coverage 'From' date must be earlier than 'To' date";
@@ -361,22 +339,16 @@ export default function Basic_HO_EvaluationForm({
               // Check if coverageFrom is before date hired
               if (employee?.date_hired) {
                 const hireDateStr =
-                  typeof employee?.date_hired === "string"
+                  typeof employee?.date_hired === 'string'
                     ? employee?.date_hired
-                    : new Date(employee?.date_hired)
-                        .toISOString()
-                        .split("T")[0];
-                if (
-                  hireDateStr &&
-                  hireDateStr.length === 10 &&
-                  fromDateStr < hireDateStr
-                ) {
-                  return "Performance Coverage cannot start before Date Hired";
+                    : new Date(employee?.date_hired).toISOString().split('T')[0];
+                if (hireDateStr && hireDateStr.length === 10 && fromDateStr < hireDateStr) {
+                  return 'Performance Coverage cannot start before Date Hired';
                 }
               }
             }
           } catch (error) {
-            return "Please enter valid Performance Coverage dates";
+            return 'Please enter valid Performance Coverage dates';
           }
         }
         if (
@@ -387,14 +359,14 @@ export default function Basic_HO_EvaluationForm({
           !form.jobKnowledgeScore1 ||
           form.jobKnowledgeScore3 === 0
         ) {
-          return "Please complete all job knowledge scores";
+          return 'Please complete all job knowledge scores';
         }
 
-        return "Please complete all required fields";
+        return 'Please complete all required fields';
       case 8: // Overall Assessment
-        return "Please complete all required fields";
+        return 'Please complete all required fields';
       default:
-        return "Please complete all scores for this step";
+        return 'Please complete all scores for this step';
     }
   };
 
@@ -442,21 +414,19 @@ export default function Basic_HO_EvaluationForm({
       setShowSuccessDialog(true);
     } catch (clientError) {
       console.log(
-        "Client data service storage failed, but localStorage storage succeeded:",
-        clientError,
+        'Client data service storage failed, but localStorage storage succeeded:',
+        clientError
       );
     }
   };
 
   // Get current step info
-  const currentStepInfo =
-    currentStep > 0 ? defaultSteps[currentStep - 1] : null;
+  const currentStepInfo = currentStep > 0 ? defaultSteps[currentStep - 1] : null;
   const isLastStep = currentStep === defaultSteps.length;
   // Check if current step is Overall Assessment (any variant)
   const isOverallAssessmentStep =
     isLastStep ||
-    (currentStep > 0 &&
-      defaultSteps[currentStep - 1]?.title === "Overall Assessment");
+    (currentStep > 0 && defaultSteps[currentStep - 1]?.title === 'Overall Assessment');
 
   return (
     <>
@@ -555,15 +525,13 @@ export default function Basic_HO_EvaluationForm({
                           <div
                             className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold transition-all duration-200 relative z-10 ${
                               index + 1 === currentStep
-                                ? "bg-blue-500 text-white shadow-md scale-110"
+                                ? 'bg-blue-500 text-white shadow-md scale-110'
                                 : index + 1 < currentStep
-                                  ? "bg-green-500 text-white"
-                                  : "bg-gray-200 text-gray-500"
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-gray-200 text-gray-500'
                             }`}
                           >
-                            {index === defaultSteps.length - 1
-                              ? "End"
-                              : step.id}
+                            {index === defaultSteps.length - 1 ? 'End' : step.id}
                           </div>
 
                           {/* Connecting Line */}
@@ -572,13 +540,10 @@ export default function Basic_HO_EvaluationForm({
                               <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
                               <div
                                 className={`absolute inset-0 rounded-full transition-all duration-500 ${
-                                  index + 1 < currentStep
-                                    ? "bg-green-500"
-                                    : "bg-gray-200"
+                                  index + 1 < currentStep ? 'bg-green-500' : 'bg-gray-200'
                                 }`}
                                 style={{
-                                  width:
-                                    index + 1 < currentStep ? "100%" : "0%",
+                                  width: index + 1 < currentStep ? '100%' : '0%',
                                 }}
                               ></div>
                             </div>
@@ -591,8 +556,8 @@ export default function Basic_HO_EvaluationForm({
                   <div className="text-center">
                     <span className="text-sm font-medium text-gray-700">
                       {isOverallAssessmentStep
-                        ? `End of ${defaultSteps.length} steps: ${currentStepInfo?.title || "Overall Assessment"}`
-                        : `Step ${currentStep} of ${defaultSteps.length}: ${currentStepInfo?.title || "Welcome"}`}
+                        ? `End of ${defaultSteps.length} steps: ${currentStepInfo?.title || 'Overall Assessment'}`
+                        : `Step ${currentStep} of ${defaultSteps.length}: ${currentStepInfo?.title || 'Welcome'}`}
                     </span>
                   </div>
                 </CardContent>
@@ -601,10 +566,7 @@ export default function Basic_HO_EvaluationForm({
 
             {/* Step Content */}
             {currentStep === 0 ? (
-              <Card
-                key={`welcome-${welcomeAnimationKey}`}
-                className="welcome-step-animate"
-              >
+              <Card key={`welcome-${welcomeAnimationKey}`} className="welcome-step-animate">
                 <CardContent>
                   <WelcomeStep
                     data={form}
@@ -621,9 +583,9 @@ export default function Basic_HO_EvaluationForm({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                      {isOverallAssessmentStep ? "End" : currentStep}
+                      {isOverallAssessmentStep ? 'End' : currentStep}
                     </span>
-                    {currentStepInfo?.title || "Step"}
+                    {currentStepInfo?.title || 'Step'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -663,7 +625,7 @@ export default function Basic_HO_EvaluationForm({
                         data: form,
                         updateDataAction: updateDataAction,
                         employee: employee,
-                        evaluationType: "basicHo",
+                        evaluationType: 'basicHo',
                       };
 
                       return <StepComponent {...stepProps} />;
@@ -701,9 +663,7 @@ export default function Basic_HO_EvaluationForm({
 
                 <div className="flex flex-col gap-2">
                   <TooltipProvider>
-                    {currentStep >= 1 &&
-                    !isOverallAssessmentStep &&
-                    !isCurrentStepComplete() ? (
+                    {currentStep >= 1 && !isOverallAssessmentStep && !isCurrentStepComplete() ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -748,7 +708,7 @@ export default function Basic_HO_EvaluationForm({
         <DialogContent
           className="max-w-md m-8"
           style={{
-            animation: "dialogPopup 0.3s ease-out",
+            animation: 'dialogPopup 0.3s ease-out',
           }}
         >
           <DialogHeader>
@@ -759,8 +719,8 @@ export default function Basic_HO_EvaluationForm({
           </DialogHeader>
           <div className="py-3 bg-red-50 p-4 mx-2 my-2">
             <p className="text-gray-600">
-              Are you sure you want to cancel this evaluation? All progress will
-              be lost and cannot be recovered.
+              Are you sure you want to cancel this evaluation? All progress will be lost and cannot
+              be recovered.
             </p>
           </div>
           <DialogFooter className="flex gap-3">
@@ -779,7 +739,7 @@ export default function Basic_HO_EvaluationForm({
               variant="destructive"
               disabled={isCancelling}
               className={`px-4 flex items-center gap-2 cursor-pointer hover:scale-110 transition-transform duration-200
-    ${isCancelling ? "opacity-70 cursor-not-allowed" : ""}`}
+                          ${isCancelling ? 'opacity-70 cursor-not-allowed' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -797,70 +757,70 @@ export default function Basic_HO_EvaluationForm({
 
                   setForm({
                     rating: 0,
-                    coverageFrom: "",
-                    coverageTo: "",
-                    reviewTypeProbationary: "",
-                    reviewTypeRegular: "",
+                    coverageFrom: '',
+                    coverageTo: '',
+                    reviewTypeProbationary: '',
+                    reviewTypeRegular: '',
                     reviewTypeOthersImprovement: false,
-                    reviewTypeOthersCustom: "",
-                    priorityArea1: "",
-                    priorityArea2: "",
-                    priorityArea3: "",
-                    remarks: "",
+                    reviewTypeOthersCustom: '',
+                    priorityArea1: '',
+                    priorityArea2: '',
+                    priorityArea3: '',
+                    remarks: '',
                     jobKnowledgeScore1: 0,
                     jobKnowledgeScore2: 0,
                     jobKnowledgeScore3: 0,
-                    jobKnowledgeComments1: "",
-                    jobKnowledgeComments2: "",
-                    jobKnowledgeComments3: "",
+                    jobKnowledgeComments1: '',
+                    jobKnowledgeComments2: '',
+                    jobKnowledgeComments3: '',
                     qualityOfWorkScore1: 0,
                     qualityOfWorkScore2: 0,
                     qualityOfWorkScore3: 0,
                     qualityOfWorkScore4: 0,
-                    qualityOfWorkComments1: "",
-                    qualityOfWorkComments2: "",
-                    qualityOfWorkComments3: "",
-                    qualityOfWorkComments4: "",
+                    qualityOfWorkComments1: '',
+                    qualityOfWorkComments2: '',
+                    qualityOfWorkComments3: '',
+                    qualityOfWorkComments4: '',
                     adaptabilityScore1: 0,
                     adaptabilityScore2: 0,
                     adaptabilityScore3: 0,
-                    adaptabilityComments1: "",
-                    adaptabilityComments2: "",
-                    adaptabilityComments3: "",
+                    adaptabilityComments1: '',
+                    adaptabilityComments2: '',
+                    adaptabilityComments3: '',
                     teamworkScore1: 0,
                     teamworkScore2: 0,
                     teamworkScore3: 0,
-                    teamworkComments1: "",
-                    teamworkComments2: "",
-                    teamworkComments3: "",
+                    teamworkComments1: '',
+                    teamworkComments2: '',
+                    teamworkComments3: '',
                     reliabilityScore1: 0,
                     reliabilityScore2: 0,
                     reliabilityScore3: 0,
                     reliabilityScore4: 0,
-                    reliabilityComments1: "",
-                    reliabilityComments2: "",
-                    reliabilityComments3: "",
-                    reliabilityComments4: "",
+                    reliabilityComments1: '',
+                    reliabilityComments2: '',
+                    reliabilityComments3: '',
+                    reliabilityComments4: '',
                     ethicalScore1: 0,
                     ethicalScore2: 0,
                     ethicalScore3: 0,
                     ethicalScore4: 0,
-                    ethicalExplanation1: "",
-                    ethicalExplanation2: "",
-                    ethicalExplanation3: "",
-                    ethicalExplanation4: "",
+                    ethicalExplanation1: '',
+                    ethicalExplanation2: '',
+                    ethicalExplanation3: '',
+                    ethicalExplanation4: '',
                     managerialSkillsScore1: 0,
                     managerialSkillsScore2: 0,
                     managerialSkillsScore3: 0,
                     managerialSkillsScore4: 0,
                     managerialSkillsScore5: 0,
                     managerialSkillsScore6: 0,
-                    managerialSkillsExplanation1: "",
-                    managerialSkillsExplanation2: "",
-                    managerialSkillsExplanation3: "",
-                    managerialSkillsExplanation4: "",
-                    managerialSkillsExplanation5: "",
-                    managerialSkillsExplanation6: "",
+                    managerialSkillsExplanation1: '',
+                    managerialSkillsExplanation2: '',
+                    managerialSkillsExplanation3: '',
+                    managerialSkillsExplanation4: '',
+                    managerialSkillsExplanation5: '',
+                    managerialSkillsExplanation6: '',
                   });
                 } finally {
                   setIsCancelling(false);
@@ -873,7 +833,7 @@ export default function Basic_HO_EvaluationForm({
                   Cancelling...
                 </>
               ) : (
-                "Cancel Evaluation"
+                'Cancel Evaluation'
               )}
             </Button>
           </DialogFooter>
@@ -881,14 +841,11 @@ export default function Basic_HO_EvaluationForm({
       </Dialog>
 
       {/* Success Dialog */}
-      <Dialog
-        open={showSuccessDialog}
-        onOpenChangeAction={setShowSuccessDialog}
-      >
+      <Dialog open={showSuccessDialog} onOpenChangeAction={setShowSuccessDialog}>
         <DialogContent
           className="max-w-md m-8 success-dialog"
           style={{
-            animation: "dialogPopup 0.3s ease-out",
+            animation: 'dialogPopup 0.3s ease-out',
           }}
         >
           <DialogHeader>
@@ -900,9 +857,9 @@ export default function Basic_HO_EvaluationForm({
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                   style={{
-                    strokeDasharray: "20",
-                    strokeDashoffset: "20",
-                    animation: "drawCheck 0.6s ease-in-out 0.3s forwards",
+                    strokeDasharray: '20',
+                    strokeDashoffset: '20',
+                    animation: 'drawCheck 0.6s ease-in-out 0.3s forwards',
                   }}
                 >
                   <path
@@ -926,17 +883,16 @@ export default function Basic_HO_EvaluationForm({
             </div>
             <div className="text-sm text-gray-600 text-center">
               <p>
-                <strong>Employee:</strong>{" "}
-                {employee?.fname + " " + employee?.lname}
+                <strong>Employee:</strong> {employee?.fname + ' ' + employee?.lname}
               </p>
               <p>
-                <strong>Submitted:</strong>{" "}
-                {new Date().toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                <strong>Submitted:</strong>{' '}
+                {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
               </p>
             </div>

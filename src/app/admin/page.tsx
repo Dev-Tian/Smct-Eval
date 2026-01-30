@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -12,14 +12,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import clientDataService from "@/lib/apiService";
-import EvaluationsPagination from "@/components/paginationComponent";
-import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
-import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
-import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
-import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import clientDataService from '@/lib/apiService';
+import EvaluationsPagination from '@/components/paginationComponent';
+import ViewDesignator from '@/components/evaluation2/viewResults/router';
 
 interface Review {
   id: number;
@@ -44,13 +41,12 @@ interface DashboardTotals {
 
 export default function OverviewTab() {
   const [evaluations, setEvaluations] = useState<Review[]>([]);
-  const [dashboardTotals, setDashboardTotals] =
-    useState<DashboardTotals | null>(null);
+  const [dashboardTotals, setDashboardTotals] = useState<DashboardTotals | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [isViewResultsModalOpen, setIsViewResultsModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -63,12 +59,12 @@ export default function OverviewTab() {
       const response = await clientDataService.getSubmissions(
         searchValue,
         currentPage,
-        itemsPerPage,
+        itemsPerPage
       );
 
       // Add safety checks to prevent "Cannot read properties of undefined" error
       if (!response) {
-        console.error("API response is undefined");
+        console.error('API response is undefined');
         setEvaluations([]);
         setOverviewTotal(0);
         setTotalPages(1);
@@ -81,7 +77,7 @@ export default function OverviewTab() {
       setTotalPages(response.last_page || 1);
       setPerPage(response.per_page || itemsPerPage);
     } catch (error) {
-      console.error("Error loading evaluations:", error);
+      console.error('Error loading evaluations:', error);
       // Set default values on error to prevent crashes
       setEvaluations([]);
       setOverviewTotal(0);
@@ -106,10 +102,10 @@ export default function OverviewTab() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      searchTerm === "" ? currentPage : setCurrentPage(1);
+      searchTerm === '' ? currentPage : setCurrentPage(1);
       setDebouncedSearchTerm(searchTerm);
       // Reset to page 1 when search term changes (if there's a value)
-      if (searchTerm.trim() !== "") {
+      if (searchTerm.trim() !== '') {
         setCurrentPage(1);
       }
     }, 500);
@@ -128,7 +124,7 @@ export default function OverviewTab() {
         const getTotals = await clientDataService.adminDashboard();
         setDashboardTotals(getTotals);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       } finally {
         // If this was a page change, ensure minimum display time (2 seconds)
         if (pageChangeStartTimeRef.current !== null) {
@@ -153,7 +149,7 @@ export default function OverviewTab() {
       await new Promise((resolve) => setTimeout(resolve, 300));
       await loadEvaluations(debouncedSearchTerm);
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      console.error('Error refreshing data:', error);
     } finally {
       setRefreshing(false);
     }
@@ -166,10 +162,10 @@ export default function OverviewTab() {
   };
 
   const getQuarterColor = (quarter: string): string => {
-    if (quarter.includes("Q1")) return "bg-blue-100 text-blue-800";
-    if (quarter.includes("Q2")) return "bg-green-100 text-green-800";
-    if (quarter.includes("Q3")) return "bg-yellow-100 text-yellow-800";
-    return "bg-purple-100 text-purple-800";
+    if (quarter.includes('Q1')) return 'bg-blue-100 text-blue-800';
+    if (quarter.includes('Q2')) return 'bg-green-100 text-green-800';
+    if (quarter.includes('Q3')) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-purple-100 text-purple-800';
   };
 
   const handleViewEvaluation = async (review: Review) => {
@@ -180,10 +176,10 @@ export default function OverviewTab() {
         setSelectedSubmission(submission);
         setIsViewResultsModalOpen(true);
       } else {
-        console.error("Submission not found for review ID:", review.id);
+        console.error('Submission not found for review ID:', review.id);
       }
     } catch (error) {
-      console.error("Error fetching submission details:", error);
+      console.error('Error fetching submission details:', error);
     }
   };
 
@@ -192,14 +188,10 @@ export default function OverviewTab() {
       <div className="flex gap-4 mb-5">
         <Card className="w-1/4">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Total Users
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-900">
-              {dashboardTotals?.total_users}
-            </div>
+            <div className="text-3xl font-bold text-gray-900">{dashboardTotals?.total_users}</div>
             <p className="text-sm text-gray-500 mt-1">
               {dashboardTotals?.total_active_users} active
             </p>
@@ -214,9 +206,7 @@ export default function OverviewTab() {
 
         <Card className="w-1/4">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Evaluations
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Evaluations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-gray-900">
@@ -237,21 +227,16 @@ export default function OverviewTab() {
           {/* Table Header Section */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Recent Evaluation Records
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Recent Evaluation Records</h2>
               {(() => {
                 const now = new Date();
                 const newCount = evaluations.filter((review) => {
                   const hoursDiff =
-                    (now.getTime() - new Date(review.created_at).getTime()) /
-                    (1000 * 60 * 60);
+                    (now.getTime() - new Date(review.created_at).getTime()) / (1000 * 60 * 60);
                   return hoursDiff <= 24;
                 }).length;
                 return newCount > 0 ? (
-                  <Badge className="bg-yellow-500 text-white animate-pulse">
-                    {newCount} NEW
-                  </Badge>
+                  <Badge className="bg-yellow-500 text-white animate-pulse">{newCount} NEW</Badge>
                 ) : null;
               })()}
               <Badge variant="outline" className="text-xs font-normal">
@@ -281,7 +266,7 @@ export default function OverviewTab() {
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => setSearchTerm("")}
+                    onClick={() => setSearchTerm('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 transition-colors"
                     aria-label="Clear search"
                   >
@@ -325,32 +310,22 @@ export default function OverviewTab() {
           {/* Indicator Legend */}
           <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
             <div className="flex flex-wrap gap-4 text-xs">
-              <span className="text-sm font-medium text-gray-700 mr-2">
-                Indicators:
-              </span>
+              <span className="text-sm font-medium text-gray-700 mr-2">Indicators:</span>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-yellow-100 border-l-2 border-l-yellow-500 rounded"></div>
-                <Badge className="bg-yellow-200 text-yellow-800 text-xs">
-                  New
-                </Badge>
+                <Badge className="bg-yellow-200 text-yellow-800 text-xs">New</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-blue-50 border-l-2 border-l-blue-500 rounded"></div>
-                <Badge className="bg-blue-300 text-blue-800 text-xs">
-                  Recent
-                </Badge>
+                <Badge className="bg-blue-300 text-blue-800 text-xs">Recent</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-red-50 border-l-2 border-l-red-500 rounded"></div>
-                <Badge className="bg-orange-300 text-orange-800 text-xs">
-                  Pending
-                </Badge>
+                <Badge className="bg-orange-300 text-orange-800 text-xs">Pending</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-50 border-l-2 border-l-green-500 rounded"></div>
-                <Badge className="bg-green-500 text-white text-xs">
-                  Completed
-                </Badge>
+                <Badge className="bg-green-500 text-white text-xs">Completed</Badge>
               </div>
             </div>
           </div>
@@ -360,8 +335,8 @@ export default function OverviewTab() {
             <div
               className="relative max-h-[600px] overflow-y-auto overflow-x-auto"
               style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "#cbd5e1 #f1f5f9",
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#cbd5e1 #f1f5f9',
               }}
             >
               {refreshing && ( // Only show spinner for initial refresh
@@ -370,11 +345,7 @@ export default function OverviewTab() {
                     <div className="relative">
                       <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <img
-                          src="/smct.png"
-                          alt="SMCT Logo"
-                          className="h-10 w-10 object-contain"
-                        />
+                        <img src="/smct.png" alt="SMCT Logo" className="h-10 w-10 object-contain" />
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 font-medium">
@@ -431,19 +402,17 @@ export default function OverviewTab() {
                             alt="No data"
                             className="w-25 h-25 object-contain"
                             style={{
-                              imageRendering: "auto",
-                              willChange: "auto",
-                              transform: "translateZ(0)",
-                              backfaceVisibility: "hidden",
-                              WebkitBackfaceVisibility: "hidden",
+                              imageRendering: 'auto',
+                              willChange: 'auto',
+                              transform: 'translateZ(0)',
+                              backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
                             }}
                           />
                           <div className="text-gray-500">
                             {searchTerm ? (
                               <>
-                                <p className="text-base font-medium mb-1">
-                                  No results found
-                                </p>
+                                <p className="text-base font-medium mb-1">No results found</p>
                                 <p className="text-sm text-gray-400">
                                   Try adjusting your search or filters
                                 </p>
@@ -454,8 +423,7 @@ export default function OverviewTab() {
                                   No evaluation records to display
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                  Records will appear here when evaluations are
-                                  submitted
+                                  Records will appear here when evaluations are submitted
                                 </p>
                               </>
                             )}
@@ -468,27 +436,26 @@ export default function OverviewTab() {
                       const submittedDate = new Date(review.created_at);
                       const now = new Date();
                       const hoursDiff =
-                        (now.getTime() - submittedDate.getTime()) /
-                        (1000 * 60 * 60);
+                        (now.getTime() - submittedDate.getTime()) / (1000 * 60 * 60);
                       const isNew = hoursDiff <= 24;
                       const isRecent = hoursDiff > 24 && hoursDiff <= 168; // 7 days
-                      const isCompleted = review.status === "completed";
-                      const isPending = review.status === "pending";
+                      const isCompleted = review.status === 'completed';
+                      const isPending = review.status === 'pending';
 
                       // Determine row background color
-                      let rowClassName = "hover:bg-gray-100 transition-colors";
+                      let rowClassName = 'hover:bg-gray-100 transition-colors';
                       if (isCompleted) {
                         rowClassName =
-                          "bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 transition-colors";
+                          'bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 transition-colors';
                       } else if (isNew) {
                         rowClassName =
-                          "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-500 transition-colors";
+                          'bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-500 transition-colors';
                       } else if (isRecent) {
                         rowClassName =
-                          "bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500 transition-colors";
+                          'bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500 transition-colors';
                       } else if (isPending) {
                         rowClassName =
-                          "bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 transition-colors";
+                          'bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 transition-colors';
                       }
 
                       return (
@@ -497,9 +464,7 @@ export default function OverviewTab() {
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-medium text-gray-900">
-                                  {review.employee?.fname +
-                                    " " +
-                                    review.employee?.lname}
+                                  {review.employee?.fname + ' ' + review.employee?.lname}
                                 </span>
                                 {isNew && (
                                   <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 font-semibold">
@@ -530,52 +495,44 @@ export default function OverviewTab() {
                           </TableCell>
                           <TableCell className="px-6 py-3">
                             <div className="font-medium text-gray-900">
-                              {review.evaluator?.fname +
-                                " " +
-                                review.evaluator?.lname}
+                              {review.evaluator?.fname + ' ' + review.evaluator?.lname}
                             </div>
                           </TableCell>
                           <TableCell className="px-6 py-3">
                             <Badge
                               className={getQuarterColor(
-                                String(
-                                  review.reviewTypeRegular ||
-                                    review.reviewTypeProbationary,
-                                ),
+                                String(review.reviewTypeRegular || review.reviewTypeProbationary)
                               )}
                             >
                               {review.reviewTypeRegular ||
                                 (review.reviewTypeProbationary
-                                  ? "M" + review.reviewTypeProbationary
-                                  : "") ||
-                                "Others"}
+                                  ? 'M' + review.reviewTypeProbationary
+                                  : '') ||
+                                'Others'}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
-                            {new Date(review.created_at).toLocaleString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
+                            {new Date(review.created_at).toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </TableCell>
                           <TableCell className="px-6 py-3">
                             <Badge
                               className={
-                                review.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : review.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                                review.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : review.status === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-yellow-100 text-yellow-800'
                               }
                             >
-                              {review.status === "completed"
+                              {review.status === 'completed'
                                 ? `✓ ${review.status}`
-                                : review.status === "pending"
+                                : review.status === 'pending'
                                   ? `⏳ ${review.status}`
                                   : review.status}
                             </Badge>
@@ -612,57 +569,18 @@ export default function OverviewTab() {
         </div>
 
         {/* View Results Modal */}
-        {selectedSubmission &&
-          selectedSubmission.evaluationType === "BranchRankNFile" && (
-            <RnF_B_View
-              isOpen={isViewResultsModalOpen}
-              onCloseAction={() => {
-                setIsViewResultsModalOpen(false);
-                setSelectedSubmission(null);
-              }}
-              submission={selectedSubmission}
-              showApprovalButton={false}
-            />
-          )}
-
-        {selectedSubmission &&
-          selectedSubmission.evaluationType === "BranchBasic" && (
-            <Basic_B_View
-              isOpen={isViewResultsModalOpen}
-              onCloseAction={() => {
-                setIsViewResultsModalOpen(false);
-                setSelectedSubmission(null);
-              }}
-              submission={selectedSubmission}
-              showApprovalButton={false}
-            />
-          )}
-
-        {selectedSubmission &&
-          selectedSubmission.evaluationType === "HoRankNFile" && (
-            <RnF_HO_View
-              isOpen={isViewResultsModalOpen}
-              onCloseAction={() => {
-                setIsViewResultsModalOpen(false);
-                setSelectedSubmission(null);
-              }}
-              submission={selectedSubmission}
-              showApprovalButton={false}
-            />
-          )}
-
-        {selectedSubmission &&
-          selectedSubmission.evaluationType === "HoBasic" && (
-            <Basic_HO_View
-              isOpen={isViewResultsModalOpen}
-              onCloseAction={() => {
-                setIsViewResultsModalOpen(false);
-                setSelectedSubmission(null);
-              }}
-              submission={selectedSubmission}
-              showApprovalButton={false}
-            />
-          )}
+        {selectedSubmission && (
+          <ViewDesignator
+            submission={selectedSubmission}
+            isOpen={isViewResultsModalOpen}
+            showApprovalButton={false}
+            onCloseAction={() => {
+              handleRefresh();
+              setIsViewResultsModalOpen(false);
+              setSelectedSubmission(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

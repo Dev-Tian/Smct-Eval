@@ -21,18 +21,10 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  getQuarterFromEvaluationData,
-  getQuarterColor,
-} from "@/lib/quarterUtils";
 import apiService from "@/lib/apiService";
 import { Progress } from "@/components/ui/progress";
 import EvaluationsPagination from "@/components/paginationComponent";
-import { set } from "date-fns";
-import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
-import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
-import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
-import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
+import ViewDesignator from "@/components/evaluation2/viewResults/router";
 
 interface Review {
   id: number;
@@ -660,57 +652,18 @@ export default function OverviewTab() {
               )}
 
               {/* View Results Modal */}
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "BranchRankNFile" && (
-                  <RnF_B_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={false}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "BranchBasic" && (
-                  <Basic_B_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={false}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "HoRankNFile" && (
-                  <RnF_HO_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={false}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "HoBasic" && (
-                  <Basic_HO_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={false}
-                  />
-                )}
+              {selectedSubmission && (
+                <ViewDesignator
+                  submission={selectedSubmission}
+                  isOpen={isViewResultsModalOpen}
+                  showApprovalButton={false}
+                  onCloseAction={() => {
+                    setIsRefreshing(true);
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                />
+              )}
             </>
           )}
         </CardContent>

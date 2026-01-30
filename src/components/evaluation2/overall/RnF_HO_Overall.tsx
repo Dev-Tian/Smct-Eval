@@ -12,18 +12,13 @@ import {
   Check,
   X,
   AlertTriangle,
-  Printer,
-  Edit,
-  CheckCircle,
   AlertCircle,
-  Send,
-  User,
+  Send
 } from "lucide-react";
 
 import { format } from "date-fns";
 import { useToast } from "@/hooks/useToast";
 import {
-  getQuarterlyReviewStatus,
   getCurrentYear,
 } from "@/lib/quarterlyReviewUtils";
 import { useAuth, User as UserType } from "@/contexts/UserContext";
@@ -2187,7 +2182,7 @@ export default function RnF_HO_Overall({
         <Button
           onClick={handlePrevious}
           variant="outline"
-          className="px-8 py-3 text-lg cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200"
+          className="px-8 py-3 text-lg bg-blue-500 text-white hover:bg-blue-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200"
           size="lg"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

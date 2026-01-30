@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -18,15 +12,15 @@ import {
   TableHeader,
   TableRow,
   TableCell,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -34,16 +28,16 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
-import EditUserModal from "@/components/EditUserModal";
-import AddEmployeeModal from "@/components/AddEmployeeModal";
-import { toastMessages } from "@/lib/toastMessages";
-import apiService from "@/lib/apiService";
-import { useDialogAnimation } from "@/hooks/useDialogAnimation";
-import EvaluationsPagination from "@/components/paginationComponent";
-import ViewEmployeeModal from "@/components/ViewEmployeeModal";
-import { User } from "@/contexts/UserContext";
+} from '@/components/ui/dialog';
+import { Loader2, Plus } from 'lucide-react';
+import EditUserModal from '@/components/EditUserModal';
+import AddEmployeeModal from '@/components/AddEmployeeModal';
+import { toastMessages } from '@/lib/toastMessages';
+import apiService from '@/lib/apiService';
+import { useDialogAnimation } from '@/hooks/useDialogAnimation';
+import EvaluationsPagination from '@/components/paginationComponent';
+import ViewEmployeeModal from '@/components/ViewEmployeeModal';
+import { User } from '@/contexts/UserContext';
 
 interface Employee {
   id: number;
@@ -75,7 +69,7 @@ export default function UserManagementTab() {
   const [pendingRegistrations, setPendingRegistrations] = useState<User[]>([]);
 
   const [activeRegistrations, setActiveRegistrations] = useState<User[]>([]);
-  const [tab, setTab] = useState<"active" | "new">("active");
+  const [tab, setTab] = useState<'active' | 'new'>('active');
   const [roles, setRoles] = useState<RoleType[]>([]);
   const [activeTotalItems, setActiveTotalItems] = useState(0);
   const [pendingTotalItems, setPendingTotalItems] = useState(0);
@@ -99,18 +93,15 @@ export default function UserManagementTab() {
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
 
   //filters for active users
-  const [activeSearchTerm, setActiveSearchTerm] = useState("");
-  const [debouncedActiveSearchTerm, setDebouncedActiveSearchTerm] =
-    useState(activeSearchTerm);
-  const [roleFilter, setRoleFilter] = useState("0"); // Default to "All Roles"
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
+  const [debouncedActiveSearchTerm, setDebouncedActiveSearchTerm] = useState(activeSearchTerm);
+  const [roleFilter, setRoleFilter] = useState('0'); // Default to "All Roles"
   const [debouncedRoleFilter, setDebouncedRoleFilter] = useState(roleFilter);
   //filters for pending users
-  const [pendingSearchTerm, setPendingSearchTerm] = useState("");
-  const [debouncedPendingSearchTerm, setDebouncedPendingSearchTerm] =
-    useState(pendingSearchTerm);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [debouncedStatusFilter, setDebouncedStatusFilter] =
-    useState(statusFilter);
+  const [pendingSearchTerm, setPendingSearchTerm] = useState('');
+  const [debouncedPendingSearchTerm, setDebouncedPendingSearchTerm] = useState(pendingSearchTerm);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState(statusFilter);
   //pagination
   const [currentPageActive, setCurrentPageActive] = useState(1);
   const [currentPagePending, setCurrentPagePending] = useState(1);
@@ -126,10 +117,7 @@ export default function UserManagementTab() {
   // Track when page change started for pending users
   const pendingPageChangeStartTimeRef = useRef<number | null>(null);
 
-  const loadPendingUsers = async (
-    searchValue: string,
-    statusFilter: string
-  ) => {
+  const loadPendingUsers = async (searchValue: string, statusFilter: string) => {
     try {
       const response = await apiService.getPendingRegistrations(
         searchValue,
@@ -143,7 +131,7 @@ export default function UserManagementTab() {
       setTotalPendingPages(response.last_page);
       setPerPage(response.per_page);
     } catch (error) {
-      console.error("Error loading pending users:", error);
+      console.error('Error loading pending users:', error);
     } finally {
       // If this was a page change, ensure minimum display time (2 seconds)
       if (pendingPageChangeStartTimeRef.current !== null) {
@@ -176,7 +164,7 @@ export default function UserManagementTab() {
       setTotalActivePages(response.last_page);
       setPerPage(response.per_page);
     } catch (error) {
-      console.error("Error loading active users:", error);
+      console.error('Error loading active users:', error);
     } finally {
       // If this was a page change, ensure minimum display time (2 seconds)
       if (activePageChangeStartTimeRef.current !== null) {
@@ -210,7 +198,7 @@ export default function UserManagementTab() {
         await loadActiveUsers(activeSearchTerm, roleFilter);
         await loadPendingUsers(pendingSearchTerm, statusFilter);
       } catch (error) {
-        console.error("Error refreshing data:", error);
+        console.error('Error refreshing data:', error);
         setRefresh(false);
       } finally {
         setRefresh(false);
@@ -221,10 +209,10 @@ export default function UserManagementTab() {
 
   useEffect(() => {
     const load = async () => {
-      if (tab === "active") {
+      if (tab === 'active') {
         await loadActiveUsers(activeSearchTerm, roleFilter);
       }
-      if (tab === "new") {
+      if (tab === 'new') {
         await loadPendingUsers(pendingSearchTerm, statusFilter);
       }
     };
@@ -235,8 +223,8 @@ export default function UserManagementTab() {
   //mount every activeSearchTerm changes and RoleFilter
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (tab === "active") {
-        activeSearchTerm === "" ? currentPageActive : setCurrentPageActive(1);
+      if (tab === 'active') {
+        activeSearchTerm === '' ? currentPageActive : setCurrentPageActive(1);
         setDebouncedActiveSearchTerm(activeSearchTerm);
         setDebouncedRoleFilter(roleFilter);
       }
@@ -248,7 +236,7 @@ export default function UserManagementTab() {
   // Fetch API whenever debounced active search term changes
   useEffect(() => {
     const fetchData = async () => {
-      if (tab === "active") {
+      if (tab === 'active') {
         await loadActiveUsers(debouncedActiveSearchTerm, debouncedRoleFilter);
       }
     };
@@ -259,10 +247,8 @@ export default function UserManagementTab() {
   //mount every pendingSearchTerm changes and statusFilter
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (tab === "new") {
-        pendingSearchTerm === ""
-          ? currentPagePending
-          : setCurrentPagePending(1);
+      if (tab === 'new') {
+        pendingSearchTerm === '' ? currentPagePending : setCurrentPagePending(1);
         setDebouncedPendingSearchTerm(pendingSearchTerm);
         setDebouncedStatusFilter(statusFilter);
       }
@@ -274,11 +260,8 @@ export default function UserManagementTab() {
   // Fetch API whenever debounced pending search term changes
   useEffect(() => {
     const fetchData = async () => {
-      if (tab === "new") {
-        await loadPendingUsers(
-          debouncedPendingSearchTerm,
-          debouncedStatusFilter
-        );
+      if (tab === 'new') {
+        await loadPendingUsers(debouncedPendingSearchTerm, debouncedStatusFilter);
       }
     };
 
@@ -289,10 +272,10 @@ export default function UserManagementTab() {
   const refreshUserData = async (showLoading = false) => {
     try {
       setRefresh(true);
-      if (tab === "new") {
+      if (tab === 'new') {
         await loadPendingUsers(pendingSearchTerm, statusFilter);
       }
-      if (tab === "active") {
+      if (tab === 'active') {
         await loadActiveUsers(activeSearchTerm, roleFilter);
       }
 
@@ -300,10 +283,10 @@ export default function UserManagementTab() {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
     } catch (error) {
-      console.error("❌ Error refreshing user data:", error);
+      console.error('❌ Error refreshing user data:', error);
       toastMessages.generic.error(
-        "Refresh Failed",
-        "Failed to refresh user data. Please try again."
+        'Refresh Failed',
+        'Failed to refresh user data. Please try again.'
       );
     } finally {
       setRefresh(false);
@@ -332,15 +315,10 @@ export default function UserManagementTab() {
       Object.keys(updatedUser).forEach((key) => {
         if (updatedUser[key] !== undefined && updatedUser[key] !== null) {
           // Skip these keys - we'll append them with _id suffix separately
-          if (
-            key === "position" ||
-            key === "branch" ||
-            key === "role" ||
-            key === "department"
-          ) {
+          if (key === 'position' || key === 'branch' || key === 'role' || key === 'department') {
             return;
           }
-          if (key === "avatar" && updatedUser[key] instanceof File) {
+          if (key === 'avatar' && updatedUser[key] instanceof File) {
             formData.append(key, updatedUser[key]);
           } else {
             formData.append(key, String(updatedUser[key]));
@@ -350,25 +328,26 @@ export default function UserManagementTab() {
 
       // Append position as position_id if it exists
       if (updatedUser.position !== undefined && updatedUser.position !== null) {
-        formData.append("position_id", String(updatedUser.position));
+        formData.append('position_id', String(updatedUser.position));
       }
 
       // Append branch as branch_id if it exists
       if (updatedUser.branch !== undefined && updatedUser.branch !== null) {
-        formData.append("branch_id", String(updatedUser.branch));
+        formData.append('branch_id', String(updatedUser.branch));
       }
 
       // Append role as roles if it exists
       if (updatedUser.role !== undefined && updatedUser.role !== null) {
-        formData.append("roles", String(updatedUser.role));
+        formData.append('roles', String(updatedUser.role));
       }
 
       // Append department as department_id if it exists
-      if (
-        updatedUser.department !== undefined &&
-        updatedUser.department !== null
-      ) {
-        formData.append("department_id", String(updatedUser.department));
+      if (updatedUser.branch !== undefined && updatedUser.branch === 126) {
+        formData.append('department_id', String(updatedUser.department));
+      }
+
+      if (updatedUser.branch !== undefined && updatedUser.branch !== 126) {
+        formData.append('department_id', '');
       }
 
       await apiService.updateEmployee(formData, updatedUser.id);
@@ -383,10 +362,7 @@ export default function UserManagementTab() {
     } catch (error: any) {
       if (error.response?.data?.errors) {
         Object.keys(error.response.data.errors).forEach((field) => {
-          toastMessages.generic.error(
-            "Update Failed",
-            error.response.data.errors[field][0]
-          );
+          toastMessages.generic.error('Update Failed', error.response.data.errors[field][0]);
         });
       }
     }
@@ -412,47 +388,38 @@ export default function UserManagementTab() {
 
       toastMessages.user.deleted(employee.fname);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error('Error deleting user:', error);
       setDeletingUserId(null);
-      toastMessages.generic.error(
-        "Error",
-        "Failed to delete user. Please try again."
-      );
+      toastMessages.generic.error('Error', 'Failed to delete user. Please try again.');
     } finally {
       setEmployeeToDelete(null);
     }
   };
 
-  const handleApproveRegistration = async (
-    registrationId: number,
-    registrationName: string
-  ) => {
+  const handleApproveRegistration = async (registrationId: number, registrationName: string) => {
     try {
       await apiService.approveRegistration(registrationId);
       await loadPendingUsers(pendingSearchTerm, statusFilter);
       toastMessages.user.approved(registrationName);
     } catch (error) {
-      console.error("Error approving registration:", error);
+      console.error('Error approving registration:', error);
       toastMessages.generic.error(
-        "Approval Error",
-        "An error occurred while approving the registration. Please try again."
+        'Approval Error',
+        'An error occurred while approving the registration. Please try again.'
       );
     }
   };
 
-  const handleRejectRegistration = async (
-    registrationId: number,
-    registrationName: string
-  ) => {
+  const handleRejectRegistration = async (registrationId: number, registrationName: string) => {
     try {
       await apiService.rejectRegistration(registrationId);
       await loadPendingUsers(pendingSearchTerm, statusFilter);
       toastMessages.user.rejected(registrationName);
     } catch (error) {
-      console.error("Error rejecting registration:", error);
+      console.error('Error rejecting registration:', error);
       toastMessages.generic.error(
-        "Rejection Error",
-        "An error occurred while rejecting the registration. Please try again."
+        'Rejection Error',
+        'An error occurred while rejecting the registration. Please try again.'
       );
     }
   };
@@ -461,25 +428,22 @@ export default function UserManagementTab() {
     try {
       // Convert plain object to FormData - matching register page pattern
       const formDataToUpload = new FormData();
-      formDataToUpload.append("fname", newUser.fname);
-      formDataToUpload.append("lname", newUser.lname);
-      formDataToUpload.append("username", newUser.username);
+      formDataToUpload.append('fname', newUser.fname);
+      formDataToUpload.append('lname', newUser.lname);
+      formDataToUpload.append('username', newUser.username);
       // Remove dash from employee_id before sending (keep only numbers)
-      formDataToUpload.append(
-        "employee_id",
-        newUser.employee_id.replace(/-/g, "")
-      );
-      formDataToUpload.append("email", newUser.email);
-      formDataToUpload.append("contact", newUser.contact);
+      formDataToUpload.append('employee_id', newUser.employee_id.replace(/-/g, ''));
+      formDataToUpload.append('email', newUser.email);
+      formDataToUpload.append('contact', newUser.contact);
       if (newUser.date_hired) {
-        formDataToUpload.append("date_hired", newUser.date_hired);
+        formDataToUpload.append('date_hired', newUser.date_hired);
       }
-      formDataToUpload.append("position_id", String(newUser.position_id));
-      formDataToUpload.append("branch_id", String(newUser.branch_id));
-      formDataToUpload.append("department_id", String(newUser.department_id));
-      formDataToUpload.append("password", newUser.password);
+      formDataToUpload.append('position_id', String(newUser.position_id));
+      formDataToUpload.append('branch_id', String(newUser.branch_id));
+      formDataToUpload.append('department_id', String(newUser.department_id));
+      formDataToUpload.append('password', newUser.password);
       // role_id is only for admin/HR adding users (not in register)
-      formDataToUpload.append("role_id", String(newUser.role_id));
+      formDataToUpload.append('role_id', String(newUser.role_id));
 
       const addUser = await apiService.addUser(formDataToUpload);
 
@@ -488,11 +452,11 @@ export default function UserManagementTab() {
       toastMessages.user.created(newUser.fname);
       setIsAddUserModalOpen(false);
     } catch (error: any) {
-      console.error("Error adding user:", error);
-      console.error("Error response:", error.response?.data);
+      console.error('Error adding user:', error);
+      console.error('Error response:', error.response?.data);
       toastMessages.generic.error(
-        "Add Failed",
-        error.response?.data?.message || "Failed to add user. Please try again."
+        'Add Failed',
+        error.response?.data?.message || 'Failed to add user. Please try again.'
       );
       throw error;
     }
@@ -514,23 +478,22 @@ export default function UserManagementTab() {
 
   // Get role color based on role name
   const getRoleColor = (roleName: string | undefined): string => {
-    if (!roleName)
-      return "bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-300";
+    if (!roleName) return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-300';
 
     const role = roleName.toLowerCase();
-    if (role === "admin") {
-      return "bg-red-100 text-red-800 hover:bg-red-200 border-red-300";
-    } else if (role === "hr") {
-      return "bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300";
-    } else if (role === "evaluator") {
-      return "bg-green-100 text-green-800 hover:bg-green-200 border-green-300";
+    if (role === 'admin') {
+      return 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300';
+    } else if (role === 'hr') {
+      return 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300';
+    } else if (role === 'evaluator') {
+      return 'bg-green-100 text-green-800 hover:bg-green-200 border-green-300';
     } else {
-      return "bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-300";
+      return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-300';
     }
   };
 
   // Handle tab change with refresh
-  const handleTabChange = async (tab: "active" | "new") => {
+  const handleTabChange = async (tab: 'active' | 'new') => {
     try {
       setTab(tab);
       await refreshUserData(true);
@@ -552,16 +515,16 @@ export default function UserManagementTab() {
           {/* Tab Navigation */}
           <div className="flex space-x-1 mb-6">
             <Button
-              variant={tab === "active" ? "default" : "outline"}
-              onClick={() => handleTabChange("active")}
+              variant={tab === 'active' ? 'default' : 'outline'}
+              onClick={() => handleTabChange('active')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <span>👥</span>
               Active Users ({activeTotalItems})
             </Button>
             <Button
-              variant={tab === "new" ? "default" : "outline"}
-              onClick={() => handleTabChange("new")}
+              variant={tab === 'new' ? 'default' : 'outline'}
+              onClick={() => handleTabChange('new')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <span>🆕</span>
@@ -572,7 +535,7 @@ export default function UserManagementTab() {
       </Card>
 
       {/* Active Users Tab */}
-      {tab === "active" && (
+      {tab === 'active' && (
         <Card className="mt-4">
           <CardHeader>
             <CardTitle>Approved Registrations</CardTitle>
@@ -603,7 +566,7 @@ export default function UserManagementTab() {
                     />
                     {activeSearchTerm && (
                       <button
-                        onClick={() => setActiveSearchTerm("")}
+                        onClick={() => setActiveSearchTerm('')}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 transition-colors"
                         aria-label="Clear search"
                       >
@@ -622,10 +585,7 @@ export default function UserManagementTab() {
                       </button>
                     )}
                   </div>
-                  <Select
-                    value={roleFilter}
-                    onValueChange={(value) => setRoleFilter(value)}
-                  >
+                  <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value)}>
                     <SelectTrigger className="w-48 cursor-pointer">
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
@@ -646,15 +606,11 @@ export default function UserManagementTab() {
                     variant="outline"
                     onClick={() => refreshUserData(true)}
                     disabled={refresh}
-                    className="flex items-center bg-blue-500 text-white hover:bg-blue-700 hover:text-white gap-2 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="flex items-center bg-blue-500 text-white hover:bg-blue-700 hover:text-white gap-2 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     {refresh ? (
                       <>
-                        <svg
-                          className="animate-spin h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                           <circle
                             className="opacity-25"
                             cx="12"
@@ -664,7 +620,7 @@ export default function UserManagementTab() {
                             strokeWidth="4"
                           ></circle>
                           <path
-                            className="opacity-75 hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                            className="opacity-75 hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                             fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
@@ -692,7 +648,7 @@ export default function UserManagementTab() {
                   </Button>
                   <Button
                     onClick={() => setIsAddUserModalOpen(true)}
-                    className="flex items-center bg-blue-600 text-white hover:bg-green-700 hover:text-white gap-2 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="flex items-center bg-blue-600 text-white hover:bg-green-700 hover:text-white gap-2 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <Plus className="h-5 w-5 font-bold " />
                     Add User
@@ -703,9 +659,7 @@ export default function UserManagementTab() {
               {/* Role and Status Color Indicators */}
               <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-700">
-                    Role Indicators:
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">Role Indicators:</span>
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge
                       variant="outline"
@@ -734,27 +688,25 @@ export default function UserManagementTab() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-700">
-                    Status Indicators:
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">Status Indicators:</span>
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge
                       variant="outline"
                       className="bg-green-100 text-green-800 hover:bg-green-200 border-green-300"
                     >
-                      ✨ New Added 
+                      ✨ New Added
                     </Badge>
                     <Badge
                       variant="outline"
                       className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300"
                     >
-                      🕐 Recently Added 
+                      🕐 Recently Added
                     </Badge>
                     <Badge
                       variant="outline"
                       className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300"
                     >
-                      ✏️ Recently Updated 
+                      ✏️ Recently Updated
                     </Badge>
                   </div>
                 </div>
@@ -803,29 +755,24 @@ export default function UserManagementTab() {
                       Array.isArray(activeRegistrations) &&
                       activeRegistrations.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="text-center py-8 text-gray-500"
-                        >
+                        <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                           <div className="flex flex-col items-center justify-center gap-4">
                             <img
                               src="/not-found.gif"
                               alt="No data"
                               className="w-25 h-25 object-contain"
                               style={{
-                                imageRendering: "auto",
-                                willChange: "auto",
-                                transform: "translateZ(0)",
-                                backfaceVisibility: "hidden",
-                                WebkitBackfaceVisibility: "hidden",
+                                imageRendering: 'auto',
+                                willChange: 'auto',
+                                transform: 'translateZ(0)',
+                                backfaceVisibility: 'hidden',
+                                WebkitBackfaceVisibility: 'hidden',
                               }}
                             />
                             <div className="text-gray-500">
                               {activeSearchTerm ? (
                                 <>
-                                  <p className="text-base font-medium mb-1">
-                                    No results found
-                                  </p>
+                                  <p className="text-base font-medium mb-1">No results found</p>
                                   <p className="text-sm text-gray-400">
                                     Try adjusting your search or filters
                                   </p>
@@ -836,8 +783,7 @@ export default function UserManagementTab() {
                                     No evaluation records to display
                                   </p>
                                   <p className="text-sm text-gray-400">
-                                    Records will appear here when evaluations
-                                    are submitted
+                                    Records will appear here when evaluations are submitted
                                   </p>
                                 </>
                               )}
@@ -862,9 +808,7 @@ export default function UserManagementTab() {
 
                         if (createdDate !== null) {
                           const now = new Date();
-                          const minutesDiff =
-                            (now.getTime() - createdDate.getTime()) /
-                            (1000 * 60);
+                          const minutesDiff = (now.getTime() - createdDate.getTime()) / (1000 * 60);
                           const hoursDiff = minutesDiff / 60;
                           isNew = hoursDiff <= 30;
                           isRecentlyAdded = hoursDiff > 30 && hoursDiff <= 40;
@@ -874,11 +818,9 @@ export default function UserManagementTab() {
                         if (updatedDate !== null && createdDate !== null) {
                           const now = new Date();
                           const updatedMinutesDiff =
-                            (now.getTime() - updatedDate.getTime()) /
-                            (1000 * 60);
+                            (now.getTime() - updatedDate.getTime()) / (1000 * 60);
                           const createdMinutesDiff =
-                            (now.getTime() - createdDate.getTime()) /
-                            (1000 * 60);
+                            (now.getTime() - createdDate.getTime()) / (1000 * 60);
                           // Only show as updated if updated_at is different from created_at
                           // and the update was within 30 minutes
                           if (
@@ -894,14 +836,14 @@ export default function UserManagementTab() {
                             key={employee.id}
                             className={
                               isDeleting
-                                ? "animate-slide-out-right bg-red-100 border-l-4 border-l-red-600"
+                                ? 'animate-slide-out-right bg-red-100 border-l-4 border-l-red-600'
                                 : isRecentlyUpdated
-                                ? "bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100"
-                                : isNew
-                                ? "bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100"
-                                : isRecentlyAdded
-                                ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
-                                : "hover:bg-gray-50"
+                                  ? 'bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100'
+                                  : isNew
+                                    ? 'bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100'
+                                    : isRecentlyAdded
+                                      ? 'bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100'
+                                      : 'hover:bg-gray-50'
                             }
                           >
                             {isDeleting ? (
@@ -933,9 +875,7 @@ export default function UserManagementTab() {
                               <>
                                 <TableCell className="font-medium">
                                   <div className="flex items-center gap-2">
-                                    <span>
-                                      {employee.fname + " " + employee.lname}
-                                    </span>
+                                    <span>{employee.fname + ' ' + employee.lname}</span>
                                     {isRecentlyUpdated && (
                                       <Badge className="bg-yellow-500 text-white text-xs px-2 py-0.5 font-semibold">
                                         ✏️ Updated
@@ -954,14 +894,12 @@ export default function UserManagementTab() {
                                   </div>
                                 </TableCell>
                                 <TableCell>{employee.email}</TableCell>
-                                <TableCell>
-                                  {employee.positions?.label || "N/A"}
-                                </TableCell>
+                                <TableCell>{employee.positions?.label || 'N/A'}</TableCell>
                                 <TableCell>
                                   {(employee.branches &&
                                     Array.isArray(employee.branches) &&
                                     employee.branches[0]?.branch_name) ||
-                                    "N/A"}
+                                    'N/A'}
                                 </TableCell>
                                 <TableCell>
                                   <Badge
@@ -975,7 +913,7 @@ export default function UserManagementTab() {
                                     {(employee.roles &&
                                       Array.isArray(employee.roles) &&
                                       employee.roles[0]?.name) ||
-                                      "N/A"}
+                                      'N/A'}
                                   </Badge>
                                 </TableCell>
                                 <TableCell>
@@ -983,7 +921,7 @@ export default function UserManagementTab() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="text-white hover:text-green-700 hover:bg-green-200 bg-green-600 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                      className="text-white hover:text-green-700 hover:bg-green-200 bg-green-600 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                       onClick={() => {
                                         setEmployeeToView(employee);
                                         setIsViewEmployeeModalOpen(true);
@@ -995,7 +933,7 @@ export default function UserManagementTab() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="text-white hover:text-blue-700 hover:bg-blue-200 bg-blue-600 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                      className="text-white hover:text-blue-700 hover:bg-blue-200 bg-blue-600 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                       onClick={() => openEditModal(employee)}
                                       disabled={deletingUserId !== null}
                                     >
@@ -1004,7 +942,7 @@ export default function UserManagementTab() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                        className="text-white hover:text-red-700 hover:bg-red-200 bg-red-600 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                      className="text-white hover:text-red-700 hover:bg-red-200 bg-red-600 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                       onClick={() => openDeleteModal(employee)}
                                       disabled={deletingUserId !== null}
                                     >
@@ -1022,7 +960,7 @@ export default function UserManagementTab() {
                 </Table>
               </div>
               <div>
-                {tab === "active" && (
+                {tab === 'active' && (
                   <div>
                     <EvaluationsPagination
                       currentPage={currentPageActive}
@@ -1040,14 +978,12 @@ export default function UserManagementTab() {
       )}
 
       {/* New Registrations Tab Content */}
-      {tab === "new" && (
+      {tab === 'new' && (
         <div className="relative mt-4">
           <Card className="mt-4">
             <CardHeader>
               <CardTitle>New Registrations</CardTitle>
-              <CardDescription>
-                Review and approve new user registrations
-              </CardDescription>
+              <CardDescription>Review and approve new user registrations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1075,7 +1011,7 @@ export default function UserManagementTab() {
 
                       {pendingSearchTerm && (
                         <button
-                          onClick={() => setPendingSearchTerm("")}
+                          onClick={() => setPendingSearchTerm('')}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 transition-colors"
                           aria-label="Clear search"
                         >
@@ -1094,18 +1030,13 @@ export default function UserManagementTab() {
                         </button>
                       )}
                     </div>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={(value) => setStatusFilter(value)}
-                    >
+                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
                       <SelectTrigger className="w-48 cursor-pointer">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">All Status</SelectItem>
-                        <SelectItem value="pending">
-                          Pending Verification
-                        </SelectItem>
+                        <SelectItem value="pending">Pending Verification</SelectItem>
                         <SelectItem value="declined">Rejected</SelectItem>
                       </SelectContent>
                     </Select>
@@ -1115,15 +1046,11 @@ export default function UserManagementTab() {
                       variant="outline"
                       onClick={() => refreshUserData(true)}
                       disabled={refresh}
-                      className="flex items-center gap-2 cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="flex items-center gap-2 cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       {refresh ? (
                         <>
-                          <svg
-                            className="animate-spin h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                             <circle
                               className="opacity-25"
                               cx="12"
@@ -1164,9 +1091,7 @@ export default function UserManagementTab() {
 
                 {/* Status Color Indicator */}
                 <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-                  <span className="text-sm font-medium text-gray-700">
-                    Status Indicators:
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">Status Indicators:</span>
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge
                       variant="outline"
@@ -1196,15 +1121,13 @@ export default function UserManagementTab() {
                         <TableHead className="px-6 py-3">Name</TableHead>
                         <TableHead className="px-6 py-3">Email</TableHead>
                         <TableHead className="px-6 py-3">Position</TableHead>
-                        <TableHead className="px-6 py-3">
-                          Registration Date
-                        </TableHead>
+                        <TableHead className="px-6 py-3">Registration Date</TableHead>
                         <TableHead className="px-6 py-3">Status</TableHead>
                         <TableHead className="px-6 py-3">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                      {refresh || isPageLoading ? ( 
+                      {refresh || isPageLoading ? (
                         Array.from({ length: itemsPerPage }).map((_, index) => (
                           <TableRow key={`skeleton-${index}`}>
                             <TableCell className="px-6 py-3">
@@ -1232,29 +1155,24 @@ export default function UserManagementTab() {
                         ))
                       ) : pendingRegistrations.length === 0 ? (
                         <TableRow>
-                          <TableCell
-                            colSpan={6}
-                            className="text-center py-8 text-gray-500"
-                          >
+                          <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                             <div className="flex flex-col items-center justify-center gap-4">
                               <img
                                 src="/not-found.gif"
                                 alt="No data"
                                 className="w-25 h-25 object-contain"
                                 style={{
-                                  imageRendering: "auto",
-                                  willChange: "auto",
-                                  transform: "translateZ(0)",
-                                  backfaceVisibility: "hidden",
-                                  WebkitBackfaceVisibility: "hidden",
+                                  imageRendering: 'auto',
+                                  willChange: 'auto',
+                                  transform: 'translateZ(0)',
+                                  backfaceVisibility: 'hidden',
+                                  WebkitBackfaceVisibility: 'hidden',
                                 }}
                               />
                               <div className="text-gray-500">
                                 {pendingSearchTerm ? (
                                   <>
-                                    <p className="text-base font-medium mb-1">
-                                      No results found
-                                    </p>
+                                    <p className="text-base font-medium mb-1">No results found</p>
                                     <p className="text-sm text-gray-400">
                                       Try adjusting your search or filters
                                     </p>
@@ -1282,30 +1200,27 @@ export default function UserManagementTab() {
                           const registrationDate = new Date(account.created_at);
                           const now = new Date();
                           const hoursDiff =
-                            (now.getTime() - registrationDate.getTime()) /
-                            (1000 * 60 * 60);
+                            (now.getTime() - registrationDate.getTime()) / (1000 * 60 * 60);
                           const isNew = hoursDiff <= 24;
                           const isRecent = hoursDiff > 24 && hoursDiff <= 48;
-                          const isRejected = account.is_active === "declined";
+                          const isRejected = account.is_active === 'declined';
 
                           return (
                             <TableRow
                               key={account.id}
                               className={
                                 isRejected
-                                  ? "bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100"
+                                  ? 'bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100'
                                   : isNew
-                                  ? "bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100"
-                                  : isRecent
-                                  ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100"
-                                  : "hover:bg-gray-50"
+                                    ? 'bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100'
+                                    : isRecent
+                                      ? 'bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100'
+                                      : 'hover:bg-gray-50'
                               }
                             >
                               <TableCell className="px-6 py-3 font-medium">
                                 <div className="flex items-center gap-2">
-                                  <span>
-                                    {account.fname + " " + account.lname}
-                                  </span>
+                                  <span>{account.fname + ' ' + account.lname}</span>
                                   {!isRejected && isNew && (
                                     <Badge className="bg-yellow-500 text-white text-xs px-2 py-0.5 font-semibold">
                                       ⚡ New
@@ -1318,38 +1233,34 @@ export default function UserManagementTab() {
                                   )}
                                 </div>
                               </TableCell>
+                              <TableCell className="px-6 py-3">{account.email}</TableCell>
                               <TableCell className="px-6 py-3">
-                                {account.email}
+                                {account.positions?.label || 'N/A'}
                               </TableCell>
                               <TableCell className="px-6 py-3">
-                                {account.positions?.label || "N/A"}
-                              </TableCell>
-                              <TableCell className="px-6 py-3">
-                                {new Date(
-                                  account.created_at
-                                ).toLocaleDateString()}
+                                {new Date(account.created_at).toLocaleDateString()}
                               </TableCell>
                               <TableCell className="px-6 py-3">
                                 <Badge
                                   className={
-                                    account.is_active === "declined"
-                                      ? "bg-red-100 text-red-800 hover:bg-red-200"
-                                      : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                                    account.is_active === 'declined'
+                                      ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                                   }
                                 >
-                                  {account.is_active === "declined"
-                                    ? "REJECTED"
-                                    : "PENDING VERIFICATION"}
+                                  {account.is_active === 'declined'
+                                    ? 'REJECTED'
+                                    : 'PENDING VERIFICATION'}
                                 </Badge>
                               </TableCell>
                               <TableCell className="px-6 py-3">
                                 <div className="flex space-x-2">
-                                  {account.is_active === "pending" && (
+                                  {account.is_active === 'pending' && (
                                     <>
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-white bg-green-500 hover:text-white hover:bg-green-600 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                        className="text-white bg-green-500 hover:text-white hover:bg-green-600 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                         onClick={() =>
                                           handleApproveRegistration(
                                             Number(account.id),
@@ -1362,7 +1273,7 @@ export default function UserManagementTab() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-white bg-red-500 hover:bg-red-600 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                        className="text-white bg-red-500 hover:bg-red-600 hover:text-white cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                         onClick={() =>
                                           handleRejectRegistration(
                                             Number(account.id),
@@ -1374,20 +1285,42 @@ export default function UserManagementTab() {
                                       </Button>
                                     </>
                                   )}
-                                  {account.is_active === "declined" && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
-                                      onClick={() =>
-                                        handleApproveRegistration(
-                                          Number(account.id),
-                                          account.fname
-                                        )
-                                      }
-                                    >
-                                      Approve
-                                    </Button>
+                                  {account.is_active === 'declined' && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
+                                        onClick={() =>
+                                          handleApproveRegistration(
+                                            Number(account.id),
+                                            account.fname
+                                          )
+                                        }
+                                      >
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        key={account.id}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-200 cursor-pointer shadow-lg hover:scale-120 transition-transform duration-200"
+                                        onClick={() => openDeleteModal(account)}
+                                        disabled={
+                                          deletingUserId !== null && deletingUserId === account.id
+                                        }
+                                      >
+                                        {deletingUserId !== null &&
+                                        deletingUserId === account.id ? (
+                                          <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Deleting...
+                                          </>
+                                        ) : (
+                                          <> Delete</>
+                                        )}
+                                      </Button>
+                                    </>
                                   )}
                                 </div>
                               </TableCell>
@@ -1399,7 +1332,7 @@ export default function UserManagementTab() {
                   </Table>
                 </div>
                 <div>
-                  {tab === "new" && (
+                  {tab === 'new' && (
                     <div>
                       <EvaluationsPagination
                         currentPage={currentPagePending}
@@ -1445,8 +1378,8 @@ export default function UserManagementTab() {
               Delete Employee
             </DialogTitle>
             <DialogDescription className="text-red-700">
-              This action cannot be undone. Are you sure you want to permanently
-              delete {employeeToDelete?.fname}?
+              This action cannot be undone. Are you sure you want to permanently delete{' '}
+              {employeeToDelete?.fname}?
             </DialogDescription>
           </DialogHeader>
 
@@ -1454,11 +1387,7 @@ export default function UserManagementTab() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path
                       fillRule="evenodd"
                       d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -1467,9 +1396,7 @@ export default function UserManagementTab() {
                   </svg>
                 </div>
                 <div className="text-sm text-red-700">
-                  <p className="font-medium">
-                    Warning: This will permanently delete:
-                  </p>
+                  <p className="font-medium">Warning: This will permanently delete:</p>
                   <ul className="mt-2 list-disc list-inside space-y-1">
                     <li>Employee profile and data</li>
                     <li>All evaluation records</li>
@@ -1485,19 +1412,18 @@ export default function UserManagementTab() {
                 <p className="font-medium">Employee Details:</p>
                 <div className="mt-2 space-y-1">
                   <p>
-                    <span className="font-medium">Name:</span>{" "}
-                    {employeeToDelete?.fname + " " + employeeToDelete?.lname}
+                    <span className="font-medium">Name:</span>{' '}
+                    {employeeToDelete?.fname + ' ' + employeeToDelete?.lname}
                   </p>
                   <p>
-                    <span className="font-medium">Email:</span>{" "}
-                    {employeeToDelete?.email}
+                    <span className="font-medium">Email:</span> {employeeToDelete?.email}
                   </p>
                   <p>
-                    <span className="font-medium">Position:</span>{" "}
+                    <span className="font-medium">Position:</span>{' '}
                     {employeeToDelete?.positions.label}
                   </p>
                   <p>
-                    <span className="font-medium">Branch:</span>{" "}
+                    <span className="font-medium">Branch:</span>{' '}
                     {employeeToDelete?.branches?.branch_name}
                   </p>
                 </div>
@@ -1513,12 +1439,12 @@ export default function UserManagementTab() {
                   setIsDeleteModalOpen(false);
                   setEmployeeToDelete(null);
                 }}
-                className="text-white bg-red-600 hover:text-white hover:bg-red-500 hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                className="text-white bg-red-600 hover:text-white hover:bg-red-500 hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
-                className="bg-blue-600 hover:bg-red-700 text-white hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                className="bg-blue-600 hover:bg-red-700 text-white hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                 onClick={() => handleDeleteEmployee(employeeToDelete)}
               >
                 ❌ Delete Permanently

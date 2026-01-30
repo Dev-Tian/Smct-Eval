@@ -54,13 +54,14 @@ export default function EvaluationTypeModal({
         </DialogHeader>
 
         <h1 className="text-center mt-5 font-bold ">
-          {employee.branches[0]?.id === 126 ||
-          employee.branches[0]?.name === "HEAD OFFICE"
+          {employee?.branches[0]?.id === 126 ||
+          employee?.branches[0]?.name === "HEAD OFFICE"
             ? "FOR HEAD OFFICE"
             : "FOR BRANCH"}
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 px-2">
           {/* Employee Evaluation Option */}
+
           <Card
             className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-500 group"
             onClick={handleSelectEmployee}
@@ -84,8 +85,8 @@ export default function EvaluationTypeModal({
                     <li>• Rank and File I & II</li>
                     <li>
                       •{" "}
-                      {employee.branches[0]?.id === 126 ||
-                      employee.branches[0]?.name === "HEAD OFFICE"
+                      {employee?.branches[0]?.id === 126 ||
+                      employee?.branches[0]?.name === "HEAD OFFICE"
                         ? "6"
                         : "7"}{" "}
                       evaluation steps
@@ -131,8 +132,8 @@ export default function EvaluationTypeModal({
                     <li>• Head Office (HO) Evaluation</li>
                     <li>
                       •{" "}
-                      {employee.branches[0]?.id === 126 ||
-                      employee.branches[0]?.name === "HEAD OFFICE"
+                      {employee?.branches[0]?.id === 126 ||
+                      employee?.branches[0]?.name === "HEAD OFFICE"
                         ? "7"
                         : "8"}{" "}
                       evaluation steps

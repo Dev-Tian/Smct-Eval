@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -21,13 +21,12 @@ import { AlertTriangle } from "lucide-react";
 import WelcomeStep from "../WelcomeStep";
 
 import { apiService } from "@/lib/apiService";
-import { useAuth, User } from "../../../contexts/UserContext";
+import { User } from "../../../contexts/UserContext";
 import Step1 from "../Step1";
 import Step3 from "../Step3";
 import Step4 from "../Step4";
 import Step5 from "../Step5";
 import Step6 from "../Step6";
-import Step7 from "../Step7";
 import { EvaluationPayload } from "../types";
 import Step2_HO from "../Step2_HO";
 import RnF_HO_Overall from "../overall/RnF_HO_Overall";
@@ -750,7 +749,7 @@ export default function RnF_HO_EvaluationForm({
               variant="destructive"
               disabled={isCancelling}
               className={`px-4 flex items-center gap-2 cursor-pointer hover:scale-110 transition-transform duration-200
-    ${isCancelling ? "opacity-70 cursor-not-allowed" : ""}`}
+                          ${isCancelling ? "opacity-70 cursor-not-allowed" : ""}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

@@ -12,18 +12,13 @@ import {
   Check,
   X,
   AlertTriangle,
-  Printer,
-  Edit,
-  CheckCircle,
   AlertCircle,
-  Send,
-  User,
+  Send
 } from "lucide-react";
 
 import { format } from "date-fns";
 import { useToast } from "@/hooks/useToast";
 import {
-  getQuarterlyReviewStatus,
   getCurrentYear,
 } from "@/lib/quarterlyReviewUtils";
 import { useAuth, User as UserType } from "@/contexts/UserContext";
@@ -292,34 +287,6 @@ export default function RnF_B_Overall({
   // Auto-save function with indicator
   const [showAutoSaveIndicator, setShowAutoSaveIndicator] =
     React.useState(false);
-
-  // const autoSave = () => {
-  //   try {
-  //     const evaluationData = {
-  //       ...data,
-  //       lastSaved: new Date().toISOString(),
-  //       employeeName: data.employeeName || "Unknown Employee",
-  //     };
-
-  //     localStorage.setItem(
-  //       "evaluation_autosave",
-  //       JSON.stringify(evaluationData)
-  //     );
-  //     console.log("Auto-saved evaluation data");
-
-  //     // Show auto-save indicator
-  //     setShowAutoSaveIndicator(true);
-  //     setTimeout(() => setShowAutoSaveIndicator(false), 2000);
-  //   } catch (error) {
-  //     console.error("Auto-save failed:", error);
-  //   }
-  // };
-
-  // Auto-save every 30 seconds (but don't load auto-saved data on mount)
-  // useEffect(() => {
-  //   const interval = setInterval(autoSave, 30000);
-  //   return () => clearInterval(interval);
-  // }, [data]);
 
   return (
     <div className="space-y-6">
@@ -2573,7 +2540,7 @@ export default function RnF_B_Overall({
         <Button
           onClick={handlePrevious}
           variant="outline"
-          className="px-8 py-3 text-lg cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200"
+          className="px-8 py-3 text-lg bg-blue-500 text-white hover:bg-blue-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200"
           size="lg"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

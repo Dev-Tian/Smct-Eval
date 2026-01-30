@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, {
   createContext,
@@ -7,12 +7,12 @@ import React, {
   useEffect,
   useCallback,
   ReactNode,
-} from "react";
+} from 'react';
 
-import RealLoadingScreen from "@/components/RealLoadingScreen";
-import { toastMessages } from "@/lib/toastMessages";
-import { apiService } from "@/lib/apiService";
-import { useRouter } from "next/navigation";
+import RealLoadingScreen from '@/components/RealLoadingScreen';
+import { toastMessages } from '@/lib/toastMessages';
+import { apiService } from '@/lib/apiService';
+import { useRouter } from 'next/navigation';
 
 export interface User {
   id?: string | number;
@@ -55,7 +55,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within UserProvider");
+  if (!context) throw new Error('useUser must be used within UserProvider');
   return context;
 };
 
@@ -88,7 +88,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return;
       }
       // Only log non-401 errors
-      console.error("Error refreshing user:", error);
+      console.error('Error refreshing user:', error);
     }
   }, []); // Empty dependency array since apiService is stable
 
@@ -112,7 +112,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           // Don't log 401 errors as they're expected when not authenticated
         } else {
           // Only log non-401 errors
-          console.error("Error during session restoration:", error);
+          console.error('Error during session restoration:', error);
         }
       } finally {
         if (isMounted) {
@@ -159,7 +159,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       await refreshUser();
       return res;
     } catch (err: any) {
-      return { error: err.response?.data?.message || "Login failed" };
+      return { error: err.response?.data?.message || 'Login failed' };
     } finally {
       setIsLoading(false);
     }
@@ -167,15 +167,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   // ⬇ Logout using Sanctum
   const logout = async () => {
-    toastMessages.generic.info("Logging out...", "See you soon!");
-    setShowLogoutLoading(true);
-
     try {
       await apiService.logout();
+      toastMessages.generic.info('Logging out...', 'See you soon!');
+      setShowLogoutLoading(true);
       await refreshUser();
-      router.push("/");
+      router.push('/');
     } catch (e) {
-      console.error("Logout failed:", e);
+      console.error('Logout failed:', e);
     } finally {
       setShowLogoutLoading(false);
     }

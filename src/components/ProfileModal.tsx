@@ -1,23 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { UserProfile } from "./ProfileCard";
-import { User, Save, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { UserProfile } from './ProfileCard';
+import { User, Save, X } from 'lucide-react';
 // Removed profileService import - we'll use UserContext directly
-import SignaturePad, { SignaturePadRef } from "@/components/SignaturePad";
-import { useToast } from "@/hooks/useToast";
-import LoadingAnimation from "@/components/LoadingAnimation";
-import apiService from "@/lib/apiService";
-import { dataURLtoFile } from "../utils/data-url-to-file";
+import SignaturePad, { SignaturePadRef } from '@/components/SignaturePad';
+import { useToast } from '@/hooks/useToast';
+import LoadingAnimation from '@/components/LoadingAnimation';
+import apiService from '@/lib/apiService';
+import { dataURLtoFile } from '../utils/data-url-to-file';
 
-import { useAuth } from "@/contexts/UserContext";
+import { useAuth } from '@/contexts/UserContext';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -35,19 +30,14 @@ interface Account {
   signature?: string | null;
 }
 
-export default function ProfileModal({
-  isOpen,
-  onClose,
-  profile,
-  onSave,
-}: ProfileModalProps) {
+export default function ProfileModal({ isOpen, onClose, profile, onSave }: ProfileModalProps) {
   const [formData, setFormData] = useState<Account | null>({
-    username: "",
-    email: "",
-    current_password: "",
-    new_password: "",
-    confirm_password: "",
-    signature: "",
+    username: '',
+    email: '',
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
+    signature: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,7 +46,7 @@ export default function ProfileModal({
   const [open, setOpen] = useState(false);
   const signaturePadRef = useRef<SignaturePadRef>(null);
   const initializedProfileIdRef = useRef<string | number | null>(null); // Track which profile ID we've initialized
-  
+
   // Reset form data when modal opens or profile changes
   useEffect(() => {
     // Only initialize when modal opens and we haven't initialized yet, or when profile ID changes
@@ -65,13 +55,13 @@ export default function ProfileModal({
       if (initializedProfileIdRef.current !== profile.id) {
         setFormData((prev) => ({
           ...prev,
-          username: profile?.username || "",
-          email: profile?.email || "",
+          username: profile?.username || '',
+          email: profile?.email || '',
         }));
         initializedProfileIdRef.current = profile.id; // Store profile ID to track changes
       }
     }
-    
+
     // Reset initialization flag when modal closes
     if (!isOpen) {
       initializedProfileIdRef.current = null;
@@ -84,33 +74,25 @@ export default function ProfileModal({
     // Current password validation removed - no uppercase/lowercase/number requirements
 
     if (formData?.new_password && String(formData?.new_password).length < 8) {
-      newErrors.new_password = "Password must be at least 8 characters";
+      newErrors.new_password = 'Password must be at least 8 characters';
     } else if (
       formData?.new_password &&
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.new_password)
     ) {
-      newErrors.new_password =
-        "Password must contain uppercase, lowercase, and number";
+      newErrors.new_password = 'Password must contain uppercase, lowercase, and number';
     }
 
-    if (
-      formData?.confirm_password &&
-      String(formData?.confirm_password).length < 8
-    ) {
-      newErrors.confirm_password = "Password must be at least 8 characters";
+    if (formData?.confirm_password && String(formData?.confirm_password).length < 8) {
+      newErrors.confirm_password = 'Password must be at least 8 characters';
     } else if (
       formData?.confirm_password &&
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.confirm_password)
     ) {
-      newErrors.confirm_password =
-        "Password must contain uppercase, lowercase, and number";
+      newErrors.confirm_password = 'Password must contain uppercase, lowercase, and number';
     }
 
-    if (
-      formData?.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData?.email)
-    ) {
-      newErrors.email = "Please enter a valid email address";
+    if (formData?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData?.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     setErrors(newErrors);
@@ -130,41 +112,36 @@ export default function ProfileModal({
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const formDataToUpload = new FormData();
-      formDataToUpload.append("username", formData?.username || "");
-      formDataToUpload.append("email", formData?.email || "");
-      formDataToUpload.append(
-        "current_password",
-        formData?.current_password || ""
-      );
-      formDataToUpload.append("new_password", formData?.new_password || "");
-      formDataToUpload.append(
-        "confirm_password",
-        formData?.confirm_password || ""
-      );
+      formDataToUpload.append('username', formData?.username || '');
+      formDataToUpload.append('email', formData?.email || '');
+      formDataToUpload.append('current_password', formData?.current_password || '');
+      formDataToUpload.append('new_password', formData?.new_password || '');
+      formDataToUpload.append('confirm_password', formData?.confirm_password || '');
       // Get the current signature from SignaturePad (may be local, not in formData yet)
-      const currentSignature = signaturePadRef.current?.getSignature() || formData?.signature || null;
-      console.log("test", currentSignature);
+      const currentSignature =
+        signaturePadRef.current?.getSignature() || formData?.signature || null;
+      console.log('test', currentSignature);
 
       if (currentSignature) {
-        const signature = dataURLtoFile(currentSignature, "signature.png");
+        const signature = dataURLtoFile(currentSignature, 'signature.png');
         if (signature) {
-          formDataToUpload.append("signature", signature);
+          formDataToUpload.append('signature', signature);
         }
-      } else if (currentSignature === null || currentSignature === "") {
-        formDataToUpload.append("signature", "");
+      } else if (currentSignature === null || currentSignature === '') {
+        formDataToUpload.append('signature', '');
       }
 
       await apiService.updateEmployee_auth(formDataToUpload);
 
       // Show success toast
-      success("Profile updated successfully!");
+      success('Profile updated successfully!');
 
       // Refresh user profile to get updated data (only once, after successful save)
       // Use a small delay to ensure the API has processed the update
       setTimeout(() => {
         refreshUser();
       }, 100);
-      
+
       // Reset initialization flag so form reloads with new data next time
       initializedProfileIdRef.current = null;
       onClose();
@@ -201,7 +178,7 @@ export default function ProfileModal({
       // After successful reset request, wait for admin approval
       // Don't enable Clear Signature yet - user must wait for approval
       success(
-        "Signature reset request submitted successfully! Please wait for admin approval. You will be able to clear your signature once approved."
+        'Signature reset request submitted successfully! Please wait for admin approval. You will be able to clear your signature once approved.'
       );
       // Refresh user after a small delay to get updated requestSignatureReset status
       // This is needed for the SignaturePad polling to work correctly
@@ -209,10 +186,9 @@ export default function ProfileModal({
         refreshUser();
       }, 100);
     } catch (error: any) {
-      console.error("Error requesting signature reset:", error);
+      console.error('Error requesting signature reset:', error);
       const errorMessage =
-        error.response?.data?.message ||
-        "Failed to request signature reset. Please try again.";
+        error.response?.data?.message || 'Failed to request signature reset. Please try again.';
       setErrors((prev) => ({
         ...prev,
         general: errorMessage,
@@ -270,7 +246,7 @@ export default function ProfileModal({
               <div className="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden">
                 <img
                   src="/user.png"
-                  alt={profile?.fname[0] || "Profile"}
+                  alt={profile?.fname[0] || 'Profile'}
                   className="h-25 w-25 rounded-full object-cover"
                 />
               </div>
@@ -278,9 +254,7 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <p className="text-sm text-gray-600 mt-10">
-              This fields is read only :
-            </p>
+            <p className="text-sm text-gray-600 mt-10">This fields is read only :</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               {/* Name */}
               <div className="space-y-1.5">
@@ -302,28 +276,17 @@ export default function ProfileModal({
                 <Label htmlFor="contact" className="text-sm font-medium">
                   Contact
                 </Label>
-                <Input
-                  id="contact"
-                  type="number"
-                  value={profile?.contact || ""}
-                  readOnly
-                />
+                <Input id="contact" type="number" value={profile?.contact || ''} readOnly />
               </div>
 
               {/* Role/Position */}
-              {profile?.roles[0].name !== "admin" && (
+              {profile?.roles[0].name !== 'admin' && (
                 <>
                   <div className="space-y-1.5">
-                    <Label
-                      htmlFor="roleOrPosition"
-                      className="text-sm font-medium"
-                    >
+                    <Label htmlFor="roleOrPosition" className="text-sm font-medium">
                       Position
                     </Label>
-                    <Input
-                      value={profile?.positions?.label || "Not Assigned "}
-                      readOnly
-                    />
+                    <Input value={profile?.positions?.label || 'Not Assigned '} readOnly />
                   </div>
 
                   <div className="space-y-1.5">
@@ -331,9 +294,7 @@ export default function ProfileModal({
                       Department
                     </Label>
                     <Input
-                      value={
-                        profile?.departments?.department_name || "Not Assigned "
-                      }
+                      value={profile?.departments?.department_name || 'Not Assigned '}
                       readOnly
                     />
                   </div>
@@ -342,12 +303,7 @@ export default function ProfileModal({
                     <Label htmlFor="branch" className="text-sm font-medium">
                       Branch
                     </Label>
-                    <Input
-                      value={
-                        profile?.branches[0]?.branch_name || "Not Assigned "
-                      }
-                      readOnly
-                    />
+                    <Input value={profile?.branches[0]?.branch_name || 'Not Assigned '} readOnly />
                   </div>
                 </>
               )}
@@ -364,7 +320,7 @@ export default function ProfileModal({
 
             <div
               className={`${
-                open ? "max-h-[30vh]" : "max-h-0"
+                open ? 'max-h-[30vh]' : 'max-h-0'
               } overflow-hidden transition-all duration-400 mt-2`}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -375,7 +331,7 @@ export default function ProfileModal({
                   </Label>
                   <Input
                     id="username"
-                    value={formData?.username || ""}
+                    value={formData?.username || ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -383,9 +339,7 @@ export default function ProfileModal({
                       })
                     }
                   />
-                  {errors.username && (
-                    <p className="text-sm text-red-500">{errors.username}</p>
-                  )}
+                  {errors.username && <p className="text-sm text-red-500">{errors.username}</p>}
                 </div>
 
                 {/* Email */}
@@ -395,7 +349,7 @@ export default function ProfileModal({
                   </Label>
                   <Input
                     id="email"
-                    value={formData?.email || ""}
+                    value={formData?.email || ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -403,16 +357,12 @@ export default function ProfileModal({
                       })
                     }
                   />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email}</p>
-                  )}
+                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                 </div>
 
                 {/* Current Password */}
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium">
-                    Current Password
-                  </Label>
+                  <Label className="text-sm font-medium">Current Password</Label>
                   <Input
                     id="current_password"
                     type="password"
@@ -425,9 +375,7 @@ export default function ProfileModal({
                     }
                   />
                   {errors.current_password && (
-                    <p className="text-sm text-red-500">
-                      {errors.current_password}
-                    </p>
+                    <p className="text-sm text-red-500">{errors.current_password}</p>
                   )}
                 </div>
 
@@ -448,15 +396,11 @@ export default function ProfileModal({
                     }
                   />
                   {errors.new_password && (
-                    <p className="text-sm text-red-500">
-                      {errors.new_password}
-                    </p>
+                    <p className="text-sm text-red-500">{errors.new_password}</p>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium">
-                    Confirm Password
-                  </Label>
+                  <Label className="text-sm font-medium">Confirm Password</Label>
                   <Input
                     id="confirm_password"
                     type="password"
@@ -469,9 +413,7 @@ export default function ProfileModal({
                     }
                   />
                   {errors.confirm_password && (
-                    <p className="text-sm text-red-500">
-                      {errors.confirm_password}
-                    </p>
+                    <p className="text-sm text-red-500">{errors.confirm_password}</p>
                   )}
                 </div>
               </div>
@@ -480,7 +422,7 @@ export default function ProfileModal({
 
           {/* Digital Signature */}
           <Label htmlFor="signature" className="text-sm font-medium">
-            Digital Signature{" "}
+            Digital Signature{' '}
           </Label>
           <div className="space-y-2">
             <SignaturePad
@@ -498,17 +440,16 @@ export default function ProfileModal({
               hasError={false}
               onRequestReset={handleRequestReset}
             />
-            {errors.signature && (
-              <p className="text-sm text-red-500">{errors.signature}</p>
-            )}
+            {errors.signature && <p className="text-sm text-red-500">{errors.signature}</p>}
           </div>
           <p className="text-sm text-gray-500">
             Update your digital signature for official documents and approvals.
-            
-           
           </p>
-          <p className="text-sm text-gray-700"><span className="font-bold">Note:</span> If you are unsure about your new signature, 
-          please do not click Save yet. Clearing your signature will reset it to the default signature</p>
+          <p className="text-sm text-gray-700">
+            <span className="font-bold">Note:</span> If you are unsure about your new signature,
+            please do not click Save yet. Clearing your signature will reset it to the default
+            signature
+          </p>
 
           {/* General Error */}
           {errors.general && (
@@ -516,7 +457,6 @@ export default function ProfileModal({
               <p className="text-sm text-red-600">{errors.general}</p>
             </div>
           )}
-
         </form>
       </DialogContent>
     </Dialog>

@@ -1,23 +1,22 @@
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 // Common toast messages for the Pro-Eval system
 export const toastMessages = {
   // Authentication
   login: {
     success: (username: string) =>
-      toast.success("Login Successful!", {
+      toast.success('Login Successful!', {
         description: `Welcome back, ${username}!`,
         duration: 3000,
       }),
     error: (message: string) =>
-      toast.error("Login Failed", {
+      toast.error('Login Failed', {
         description: message,
         duration: 4000,
       }),
     networkError: () =>
-      toast.error("Connection Error", {
-        description:
-          "Unable to connect to the server. Please check your internet connection.",
+      toast.error('Connection Error', {
+        description: 'Unable to connect to the server. Please check your internet connection.',
         duration: 5000,
       }),
   },
@@ -25,47 +24,47 @@ export const toastMessages = {
   // User Management
   user: {
     created: (username: string) =>
-      toast.success("User Created", {
+      toast.success('User Created', {
         description: `${username} has been successfully created.`,
         duration: 3000,
       }),
     updated: (username: string) =>
-      toast.success("User Updated", {
+      toast.success('User Updated', {
         description: `${username}'s information has been updated.`,
         duration: 3000,
       }),
     deleted: (username: string) =>
-      toast.success("User Deleted", {
+      toast.success('User Deleted', {
         description: `${username} has been removed from the system.`,
         duration: 3000,
       }),
     approved: (username: string) =>
-      toast.success("User Approved", {
+      toast.success('User Approved', {
         description: `${username} can now access the system.`,
         duration: 3000,
       }),
     rejected: (username: string) =>
-      toast.warning("User Rejected", {
+      toast.warning('User Rejected', {
         description: `${username}'s registration has been rejected.`,
         duration: 4000,
       }),
     reinstated: (username: string) =>
-      toast.success("User Reinstated", {
+      toast.success('User Reinstated', {
         description: `${username} has been reinstated and can access the system again.`,
         duration: 3000,
       }),
     suspended: (username: string) =>
-      toast.warning("User Suspended", {
+      toast.warning('User Suspended', {
         description: `${username} has been suspended and cannot access the system.`,
         duration: 4000,
       }),
     activated: (username: string) =>
-      toast.success("User Activated", {
+      toast.success('User Activated', {
         description: `${username}'s account has been activated.`,
         duration: 3000,
       }),
     deactivated: (username: string) =>
-      toast.warning("User Deactivated", {
+      toast.warning('User Deactivated', {
         description: `${username}'s account has been deactivated.`,
         duration: 4000,
       }),
@@ -74,28 +73,28 @@ export const toastMessages = {
   // Evaluation System
   evaluation: {
     saved: () =>
-      toast.success("Evaluation Saved", {
-        description: "Your evaluation has been saved successfully.",
+      toast.success('Evaluation Saved', {
+        description: 'Your evaluation has been saved successfully.',
         duration: 3000,
       }),
     submitted: () =>
-      toast.success("Evaluation Submitted", {
-        description: "Your evaluation has been submitted for review.",
+      toast.success('Evaluation Submitted', {
+        description: 'Your evaluation has been submitted for review.',
         duration: 3000,
       }),
     completed: (employeeName: string) =>
-      toast.success("Evaluation Completed", {
+      toast.success('Evaluation Completed', {
         description: `Evaluation for ${employeeName} has been completed.`,
         duration: 3000,
       }),
     deleted: (employeeName: string) =>
-      toast.success("Evaluation Deleted", {
+      toast.success('Evaluation Deleted', {
         description: `Evaluation for ${employeeName} has been deleted.`,
         duration: 3000,
       }),
     error: () =>
-      toast.error("Evaluation Error", {
-        description: "Failed to save evaluation. Please try again.",
+      toast.error('Evaluation Error', {
+        description: 'Failed to save evaluation. Please try again.',
         duration: 4000,
       }),
   },
@@ -103,17 +102,17 @@ export const toastMessages = {
   // File Operations
   file: {
     uploaded: (filename: string) =>
-      toast.success("File Uploaded", {
+      toast.success('File Uploaded', {
         description: `${filename} has been uploaded successfully.`,
         duration: 3000,
       }),
     uploadError: () =>
-      toast.error("Upload Failed", {
-        description: "Failed to upload file. Please try again.",
+      toast.error('Upload Failed', {
+        description: 'Failed to upload file. Please try again.',
         duration: 4000,
       }),
     deleted: (filename: string) =>
-      toast.success("File Deleted", {
+      toast.success('File Deleted', {
         description: `${filename} has been removed.`,
         duration: 3000,
       }),
@@ -122,23 +121,23 @@ export const toastMessages = {
   // System Operations
   system: {
     dataRefreshed: () =>
-      toast.info("Data Refreshed", {
-        description: "Latest data has been loaded.",
+      toast.info('Data Refreshed', {
+        description: 'Latest data has been loaded.',
         duration: 2000,
       }),
     settingsSaved: () =>
-      toast.success("Settings Saved", {
-        description: "Your preferences have been updated.",
+      toast.success('Settings Saved', {
+        description: 'Your preferences have been updated.',
         duration: 3000,
       }),
     exportStarted: () =>
-      toast.info("Export Started", {
-        description: "Your data export is being prepared...",
+      toast.info('Export Started', {
+        description: 'Your data export is being prepared...',
         duration: 3000,
       }),
     exportCompleted: () =>
-      toast.success("Export Completed", {
-        description: "Your data has been exported successfully.",
+      toast.success('Export Completed', {
+        description: 'Your data has been exported successfully.',
         duration: 3000,
       }),
   },
@@ -146,18 +145,18 @@ export const toastMessages = {
   // Form Operations
   form: {
     saved: () =>
-      toast.success("Form Saved", {
-        description: "Your changes have been saved.",
+      toast.success('Form Saved', {
+        description: 'Your changes have been saved.',
         duration: 2000,
       }),
     validationError: () =>
-      toast.error("Validation Error", {
-        description: "Please check all required fields.",
+      toast.error('Validation Error', {
+        description: 'Please check all required fields.',
         duration: 4000,
       }),
     reset: () =>
-      toast.info("Form Reset", {
-        description: "Form has been reset to original values.",
+      toast.info('Form Reset', {
+        description: 'Form has been reset to original values.',
         duration: 2000,
       }),
   },
@@ -165,16 +164,16 @@ export const toastMessages = {
   // Loading States
   loading: {
     saving: () =>
-      toast.loading("Saving...", {
-        description: "Please wait while we save your changes.",
+      toast.loading('Saving...', {
+        description: 'Please wait while we save your changes.',
       }),
     loading: () =>
-      toast.loading("Loading...", {
-        description: "Please wait while we fetch your data.",
+      toast.loading('Loading...', {
+        description: 'Please wait while we fetch your data.',
       }),
     processing: () =>
-      toast.loading("Processing...", {
-        description: "Please wait while we process your request.",
+      toast.loading('Processing...', {
+        description: 'Please wait while we process your request.',
       }),
   },
 

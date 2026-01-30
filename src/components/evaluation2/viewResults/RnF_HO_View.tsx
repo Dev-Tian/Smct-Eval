@@ -96,26 +96,6 @@ const getRatingColorForLabel = (rating: string) => {
   }
 };
 
-// Function to get quarter from date
-const getQuarterFromDate = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Unknown";
-
-    const month = date.getMonth() + 1; // getMonth() returns 0-11
-    const year = date.getFullYear();
-
-    if (month >= 1 && month <= 3) return `Q1 ${year}`;
-    if (month >= 4 && month <= 6) return `Q2 ${year}`;
-    if (month >= 7 && month <= 9) return `Q3 ${year}`;
-    if (month >= 10 && month <= 12) return `Q4 ${year}`;
-
-    return "Unknown";
-  } catch (error) {
-    return "Unknown";
-  }
-};
-
 export default function RnF_HO_View({
   isOpen,
   onCloseAction,
@@ -136,13 +116,6 @@ export default function RnF_HO_View({
   const [signatureError, setSignatureError] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-
-  // Fetch employee signature for this evaluation
-  // const {
-  //   signature: employeeSignature,
-  //   loading: signatureLoading,
-  //   error: signatureError,
-  // } = useemployee.signatureByEvaluation(submission?.id || null);
 
   // Update currentApprovalData when approvalData prop changes
   useEffect(() => {

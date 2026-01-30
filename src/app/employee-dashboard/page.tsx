@@ -24,12 +24,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiService } from "@/lib/apiService";
 import EvaluationsPagination from "@/components/paginationComponent";
 import { useAuth } from "../../contexts/UserContext";
-import { toast } from "sonner";
 import { toastMessages } from "@/lib/toastMessages";
-import RnF_B_View from "@/components/evaluation2/viewResults/RnF_B_View";
-import Basic_B_View from "@/components/evaluation2/viewResults/Basic_B_View";
-import RnF_HO_View from "@/components/evaluation2/viewResults/RnF_HO_View";
-import Basic_HO_View from "@/components/evaluation2/viewResults/Basic_HO_View";
+import ViewDesignator from "@/components/evaluation2/viewResults/router";
 
 interface Review {
   id: number;
@@ -743,7 +739,11 @@ export default function OverviewTab() {
                               <span className="font-medium">
                                 {new Date(
                                   submission.created_at,
-                                ).toLocaleDateString()}
+                                ).toLocaleDateString("en-us", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                })}
                               </span>
                               <span className="text-xs text-gray-500">
                                 {getTimeAgo(submission.created_at)}
@@ -812,61 +812,18 @@ export default function OverviewTab() {
               )}
 
               {/* View Results Modal */}
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "BranchRankNFile" && (
-                  <RnF_B_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={true}
-                    onApprove={(id) => handleApprove(id)}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "BranchBasic" && (
-                  <Basic_B_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={true}
-                    onApprove={(id) => handleApprove(id)}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "HoRankNFile" && (
-                  <RnF_HO_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={true}
-                    onApprove={(id) => handleApprove(id)}
-                  />
-                )}
-
-              {selectedSubmission &&
-                selectedSubmission.evaluationType === "HoBasic" && (
-                  <Basic_HO_View
-                    isOpen={isViewResultsModalOpen}
-                    onCloseAction={() => {
-                      setIsViewResultsModalOpen(false);
-                      setSelectedSubmission(null);
-                    }}
-                    submission={selectedSubmission}
-                    showApprovalButton={true}
-                    onApprove={(id) => handleApprove(id)}
-                  />
-                )}
+              {selectedSubmission && (
+                <ViewDesignator
+                  submission={selectedSubmission}
+                  isOpen={isViewResultsModalOpen}
+                  showApprovalButton={true}
+                  onCloseAction={() => {
+                    loadApprovedEvaluations(searchTerm);
+                    setIsViewResultsModalOpen(false);
+                    setSelectedSubmission(null);
+                  }}
+                />
+              )}
             </>
           )}
         </CardContent>
