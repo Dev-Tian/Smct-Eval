@@ -724,12 +724,6 @@ export default function UserManagementTab() {
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge
                       variant="outline"
-                      className="bg-red-700 text-white hover:bg-red-700 border-red-300"
-                    >
-                      Admin
-                    </Badge>
-                    <Badge
-                      variant="outline"
                       className="bg-blue-700 text-white hover:bg-blue-700 border-blue-300"
                     >
                       HR
@@ -1330,6 +1324,9 @@ export default function UserManagementTab() {
                                         variant="ghost"
                                         size="sm"
                                         className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
+                                        disabled={
+                                          deletingUserId !== null && deletingUserId === account.id
+                                        }
                                         onClick={() =>
                                           handleApproveRegistration(
                                             Number(account.id),

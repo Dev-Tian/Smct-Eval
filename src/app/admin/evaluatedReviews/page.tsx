@@ -1,18 +1,12 @@
-"use client";
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton";
-import clientDataService, { apiService } from "@/lib/apiService";
-import EvaluationsPagination from "@/components/paginationComponent";
-import { useState, useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Skeleton } from '@/components/ui/skeleton';
+import clientDataService, { apiService } from '@/lib/apiService';
+import EvaluationsPagination from '@/components/paginationComponent';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -20,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -28,20 +22,21 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-import { useDialogAnimation } from "@/hooks/useDialogAnimation";
-import { toastMessages } from "@/lib/toastMessages";
-import ViewDesignator from "@/components/evaluation2/viewResults/router";
+import { useDialogAnimation } from '@/hooks/useDialogAnimation';
+import { toastMessages } from '@/lib/toastMessages';
+import ViewDesignator from '@/components/evaluation2/viewResults/router';
+import debounce from 'lodash.debounce';
 interface Review {
   id: number;
   employee: any;
@@ -56,169 +51,92 @@ interface Review {
 export default function OverviewTab() {
   const [evaluations, setEvaluations] = useState<Review[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(false);
   //filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [quarterFilter, setQuarterFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  //debounce filters
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [debouncedStatusFilter, setDebouncedStatusFilter] =
-    useState(statusFilter);
-  const [debouncedQuarterFilter, setDebouncedQuarterFilter] =
-    useState(quarterFilter);
-  const [debouncedYearFilter, setDebouncedYearFilter] = useState(yearFilter);
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [quarterFilter, setQuarterFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+  //selected data
   const [isViewResultsModalOpen, setIsViewResultsModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
+  // pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [overviewTotal, setOverviewTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
   const dialogAnimationClass = useDialogAnimation({ duration: 0.4 });
+  //filter data
   const [years, setYears] = useState<any[]>([]);
 
-  const loadEvaluations = async (
-    searchValue: string,
-    status: string,
-    quarter: string,
-    year: string,
-  ) => {
-    try {
-      const response = await clientDataService.getSubmissions(
-        searchValue,
-        currentPage,
-        itemsPerPage,
-        status,
-        quarter,
-        year,
-      );
+  const loadEvaluations = useMemo(
+    () =>
+      debounce(
+        async (
+          searchValue: string,
+          status: string,
+          quarter: string,
+          year: string,
+          currentPage: number
+        ) => {
+          try {
+            setRefreshing(true);
+            const response = await clientDataService.getSubmissions(
+              searchValue,
+              currentPage,
+              itemsPerPage,
+              status,
+              quarter,
+              year
+            );
 
-      // Add safety checks to prevent "Cannot read properties of undefined" error
-      if (!response) {
-        console.error("API response is undefined");
-        setEvaluations([]);
-        setOverviewTotal(0);
-        setTotalPages(1);
-        setPerPage(itemsPerPage);
-        return;
-      }
-
-      setEvaluations(response.data || []);
-      setOverviewTotal(response.total || 0);
-      setTotalPages(response.last_page || 1);
-      setPerPage(response.per_page || itemsPerPage);
-    } catch (error) {
-      console.error("Error loading evaluations:", error);
-      // Set default values on error to prevent crashes
-      setEvaluations([]);
-      setOverviewTotal(0);
-      setTotalPages(1);
-      setPerPage(itemsPerPage);
-    }
-  };
+            setEvaluations(response.data);
+            setOverviewTotal(response.total);
+            setTotalPages(response.last_page);
+            setRefreshing(false);
+          } catch (error) {
+            setRefreshing(false);
+            console.error('Error loading evaluations:', error);
+            // Set default values on error to prevent crashes
+            setEvaluations([]);
+            setOverviewTotal(0);
+            setTotalPages(0);
+          }
+        },
+        1000
+      ),
+    []
+  );
 
   useEffect(() => {
     const mount = async () => {
-      setRefreshing(true);
       try {
         const years = await apiService.getAllYears();
         setYears(years);
-        await loadEvaluations(
-          searchTerm,
-          statusFilter,
-          quarterFilter,
-          yearFilter,
-        );
       } catch (error) {
         console.log(error);
-        setRefreshing(false);
-      } finally {
-        setRefreshing(false);
       }
     };
     mount();
   }, []);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      // Always reset to page 1 when any filter changes (search, status, quarter, or year)
-      // This ensures global search behavior - always start from page 1 when filtering
-      setCurrentPage(1);
-      setDebouncedSearchTerm(searchTerm);
-      setDebouncedStatusFilter(statusFilter);
-      setDebouncedQuarterFilter(quarterFilter);
-      setDebouncedYearFilter(yearFilter);
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [searchTerm, statusFilter, quarterFilter, yearFilter]);
-
-  // Track when page change started
-  const pageChangeStartTimeRef = useRef<number | null>(null);
-
-  // Fetch API whenever debounced search term changes
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await loadEvaluations(
-          debouncedSearchTerm,
-          debouncedStatusFilter,
-          debouncedQuarterFilter,
-          debouncedYearFilter,
-        );
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        // If this was a page change, ensure minimum display time (2 seconds)
-        if (pageChangeStartTimeRef.current !== null) {
-          const elapsed = Date.now() - pageChangeStartTimeRef.current;
-          const minDisplayTime = 2000; // 2 seconds
-          const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
-          setTimeout(() => {
-            setIsPageLoading(false);
-            pageChangeStartTimeRef.current = null;
-          }, remainingTime);
-        }
-      }
+    loadEvaluations(searchTerm, statusFilter, quarterFilter, yearFilter, currentPage);
+    return () => {
+      loadEvaluations.cancel();
     };
-
-    fetchData();
-  }, [
-    debouncedSearchTerm,
-    currentPage,
-    debouncedStatusFilter,
-    debouncedQuarterFilter,
-    debouncedYearFilter,
-  ]);
+  }, [searchTerm, statusFilter, quarterFilter, yearFilter, currentPage]);
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      await loadEvaluations(
-        debouncedSearchTerm,
-        debouncedStatusFilter,
-        debouncedQuarterFilter,
-        debouncedYearFilter,
-      );
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-    } finally {
-      setRefreshing(false);
-    }
+    loadEvaluations(searchTerm, statusFilter, quarterFilter, yearFilter, currentPage);
   };
 
   const getQuarterColor = (quarter: string): string => {
-    if (quarter.includes("Q1")) return "bg-blue-100 text-blue-800";
-    if (quarter.includes("Q2")) return "bg-green-100 text-green-800";
-    if (quarter.includes("Q3")) return "bg-yellow-100 text-yellow-800";
-    return "bg-purple-100 text-purple-800";
+    if (quarter.includes('Q1')) return 'bg-blue-100 text-blue-800';
+    if (quarter.includes('Q2')) return 'bg-green-100 text-green-800';
+    if (quarter.includes('Q3')) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-purple-100 text-purple-800';
   };
 
   const handleViewEvaluation = async (review: Review) => {
@@ -229,10 +147,10 @@ export default function OverviewTab() {
         setSelectedSubmission(submission);
         setIsViewResultsModalOpen(true);
       } else {
-        console.error("Submission not found for review ID:", review.id);
+        console.error('Submission not found for review ID:', review.id);
       }
     } catch (error) {
-      console.error("Error fetching submission details:", error);
+      console.error('Error fetching submission details:', error);
     }
   };
 
@@ -241,10 +159,10 @@ export default function OverviewTab() {
       await clientDataService.deleteSubmission(submission.id);
       await handleRefresh();
       toastMessages.evaluation.deleted(
-        submission.employee?.fname + " " + submission.employee?.lname,
+        submission.employee?.fname + ' ' + submission.employee?.lname
       );
     } catch (error) {
-      console.error("Error deleting submission:", error);
+      console.error('Error deleting submission:', error);
     } finally {
       setReviewToDelete(null);
       setIsDeleteModalOpen(false);
@@ -257,14 +175,15 @@ export default function OverviewTab() {
   };
 
   // Group evaluations by year with safety check to prevent "Cannot read properties of undefined (reading 'reduce')" error
-  const groupedByYear = (
-    evaluations && Array.isArray(evaluations) ? evaluations : []
-  ).reduce((acc: any, item) => {
-    const year = new Date(item.created_at).getFullYear();
-    acc[year] = acc[year] || [];
-    acc[year].push(item);
-    return acc;
-  }, {});
+  const groupedByYear = (evaluations && Array.isArray(evaluations) ? evaluations : []).reduce(
+    (acc: any, item) => {
+      const year = new Date(item.created_at).getFullYear();
+      acc[year] = acc[year] || [];
+      acc[year].push(item);
+      return acc;
+    },
+    {}
+  );
 
   return (
     <div className="relative ">
@@ -277,9 +196,7 @@ export default function OverviewTab() {
                 {overviewTotal} Total Records
               </Badge>
             </CardTitle>
-            <CardDescription>
-              Complete evaluation history with advanced filtering
-            </CardDescription>
+            <CardDescription>Complete evaluation history with advanced filtering</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -310,7 +227,7 @@ export default function OverviewTab() {
                     />
                     {searchTerm && (
                       <button
-                        onClick={() => setSearchTerm("")}
+                        onClick={() => setSearchTerm('')}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 transition-colors"
                         aria-label="Clear search"
                       >
@@ -334,43 +251,27 @@ export default function OverviewTab() {
 
               {/* Approval Status Filter */}
               <div className="w-full md:w-48">
-                <Label
-                  htmlFor="records-approval-status"
-                  className="text-sm font-medium"
-                >
+                <Label htmlFor="records-approval-status" className="text-sm font-medium">
                   Approval Status
                 </Label>
-                <Select
-                  value={statusFilter}
-                  onValueChange={(value) => setStatusFilter(value)}
-                >
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
                   <SelectTrigger className="w-48 cursor-pointer">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">All Status</SelectItem>
-                    <SelectItem value="pending">
-                      Pending Verification
-                    </SelectItem>
-                    <SelectItem value="completed">
-                      All parties approved
-                    </SelectItem>
+                    <SelectItem value="pending">Pending Verification</SelectItem>
+                    <SelectItem value="completed">All parties approved</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Quarter Filter */}
               <div className="w-full md:w-48">
-                <Label
-                  htmlFor="records-quarter"
-                  className="text-sm font-medium"
-                >
+                <Label htmlFor="records-quarter" className="text-sm font-medium">
                   Quarter
                 </Label>
-                <Select
-                  value={quarterFilter}
-                  onValueChange={(value) => setQuarterFilter(value)}
-                >
+                <Select value={quarterFilter} onValueChange={(value) => setQuarterFilter(value)}>
                   <SelectTrigger className="w-48 cursor-pointer">
                     <SelectValue placeholder="Filter by quarter" />
                   </SelectTrigger>
@@ -391,10 +292,7 @@ export default function OverviewTab() {
                 <Label htmlFor="records-year" className="text-sm font-medium">
                   Year
                 </Label>
-                <Select
-                  value={yearFilter}
-                  onValueChange={(value) => setYearFilter(value)}
-                >
+                <Select value={yearFilter} onValueChange={(value) => setYearFilter(value)}>
                   <SelectTrigger className="mt-1 cursor-pointer">
                     <SelectValue placeholder="Select a year" />
                   </SelectTrigger>
@@ -412,9 +310,7 @@ export default function OverviewTab() {
               {/* Refresh Button */}
               <div className="w-full md:w-auto flex gap-2">
                 <div className="w-full md:w-32">
-                  <Label className="text-sm font-medium opacity-0">
-                    Refresh
-                  </Label>
+                  <Label className="text-sm font-medium opacity-0">Refresh</Label>
                   {/* Refresh Button */}
                   <Button
                     onClick={handleRefresh}
@@ -450,14 +346,11 @@ export default function OverviewTab() {
                 const now = new Date();
                 const newCount = evaluations.filter((review) => {
                   const hoursDiff =
-                    (now.getTime() - new Date(review.created_at).getTime()) /
-                    (1000 * 60 * 60);
+                    (now.getTime() - new Date(review.created_at).getTime()) / (1000 * 60 * 60);
                   return hoursDiff <= 24;
                 }).length;
                 return newCount > 0 ? (
-                  <Badge className="bg-yellow-500 text-white animate-pulse">
-                    {newCount} NEW
-                  </Badge>
+                  <Badge className="bg-yellow-500 text-white animate-pulse">{newCount} NEW</Badge>
                 ) : null;
               })()}
             </div>
@@ -467,32 +360,22 @@ export default function OverviewTab() {
           {/* Indicator Legend */}
           <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
             <div className="flex flex-wrap gap-4 text-xs">
-              <span className="text-sm font-medium text-gray-700 mr-2">
-                Indicators:
-              </span>
+              <span className="text-sm font-medium text-gray-700 mr-2">Indicators:</span>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-yellow-100 border-l-2 border-l-yellow-500 rounded"></div>
-                <Badge className="bg-yellow-200 text-yellow-800 text-xs">
-                  New
-                </Badge>
+                <Badge className="bg-yellow-200 text-yellow-800 text-xs">New</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-blue-50 border-l-2 border-l-blue-500 rounded"></div>
-                <Badge className="bg-blue-300 text-blue-800 text-xs">
-                  Recent
-                </Badge>
+                <Badge className="bg-blue-300 text-blue-800 text-xs">Recent</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-red-50 border-l-2 border-l-red-500 rounded"></div>
-                <Badge className="bg-orange-300 text-orange-800 text-xs">
-                  Pending
-                </Badge>
+                <Badge className="bg-orange-300 text-orange-800 text-xs">Pending</Badge>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-50 border-l-2 border-l-green-500 rounded"></div>
-                <Badge className="bg-green-500 text-white text-xs">
-                  Completed
-                </Badge>
+                <Badge className="bg-green-500 text-white text-xs">Completed</Badge>
               </div>
             </div>
           </div>
@@ -502,8 +385,8 @@ export default function OverviewTab() {
             <div
               className="relative max-h-[600px] overflow-y-auto overflow-x-auto"
               style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "#cbd5e1 #f1f5f9",
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#cbd5e1 #f1f5f9',
               }}
             >
               {refreshing && ( // Only show spinner for initial refresh
@@ -514,16 +397,10 @@ export default function OverviewTab() {
                       <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
                       {/* Logo in center */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <img
-                          src="/smct.png"
-                          alt="SMCT Logo"
-                          className="h-10 w-10 object-contain"
-                        />
+                        <img src="/smct.png" alt="SMCT Logo" className="h-10 w-10 object-contain" />
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 font-medium">
-                      Refreshing...
-                    </p>
+                    <p className="text-sm text-gray-600 font-medium">Refreshing...</p>
                   </div>
                 </div>
               )}
@@ -543,7 +420,7 @@ export default function OverviewTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-200">
-                  {refreshing || isPageLoading ? (
+                  {refreshing ? (
                     Array.from({ length: itemsPerPage }).map((_, index) => (
                       <TableRow key={`skeleton-${index}`}>
                         <TableCell className="px-6 py-3">
@@ -587,19 +464,17 @@ export default function OverviewTab() {
                             alt="No data"
                             className="w-25 h-25 object-contain"
                             style={{
-                              imageRendering: "auto",
-                              willChange: "auto",
-                              transform: "translateZ(0)",
-                              backfaceVisibility: "hidden",
-                              WebkitBackfaceVisibility: "hidden",
+                              imageRendering: 'auto',
+                              willChange: 'auto',
+                              transform: 'translateZ(0)',
+                              backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
                             }}
                           />
                           <div className="text-gray-500">
                             {searchTerm ? (
                               <>
-                                <p className="text-base font-medium mb-1">
-                                  No results found
-                                </p>
+                                <p className="text-base font-medium mb-1">No results found</p>
                                 <p className="text-sm text-gray-400">
                                   Try adjusting your search or filters
                                 </p>
@@ -610,8 +485,7 @@ export default function OverviewTab() {
                                   No evaluation records to display
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                  Records will appear here when evaluations are
-                                  submitted
+                                  Records will appear here when evaluations are submitted
                                 </p>
                               </>
                             )}
@@ -624,27 +498,26 @@ export default function OverviewTab() {
                       const submittedDate = new Date(review.created_at);
                       const now = new Date();
                       const hoursDiff =
-                        (now.getTime() - submittedDate.getTime()) /
-                        (1000 * 60 * 60);
+                        (now.getTime() - submittedDate.getTime()) / (1000 * 60 * 60);
                       const isNew = hoursDiff <= 24;
                       const isRecent = hoursDiff > 24 && hoursDiff <= 168; // 7 days
-                      const isCompleted = review.status === "completed";
-                      const isPending = review.status === "pending";
+                      const isCompleted = review.status === 'completed';
+                      const isPending = review.status === 'pending';
 
                       // Determine row background color
-                      let rowClassName = "hover:bg-gray-100 transition-colors";
+                      let rowClassName = 'hover:bg-gray-100 transition-colors';
                       if (isCompleted) {
                         rowClassName =
-                          "bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 transition-colors";
+                          'bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 transition-colors';
                       } else if (isNew) {
                         rowClassName =
-                          "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-500 transition-colors";
+                          'bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-500 transition-colors';
                       } else if (isRecent) {
                         rowClassName =
-                          "bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500 transition-colors";
+                          'bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500 transition-colors';
                       } else if (isPending) {
                         rowClassName =
-                          "bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 transition-colors";
+                          'bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 transition-colors';
                       }
 
                       return (
@@ -653,18 +526,14 @@ export default function OverviewTab() {
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-medium text-gray-900">
-                                  {review.employee?.fname +
-                                    " " +
-                                    review.employee?.lname}
+                                  {review.employee?.fname + ' ' + review.employee?.lname}
                                 </span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="px-6 py-3">
                             <div className="font-medium text-gray-900">
-                              {review.evaluator?.fname +
-                                " " +
-                                review.evaluator?.lname}
+                              {review.evaluator?.fname + ' ' + review.evaluator?.lname}
                             </div>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
@@ -673,30 +542,24 @@ export default function OverviewTab() {
                           <TableCell className="px-6 py-3">
                             <Badge
                               className={getQuarterColor(
-                                String(
-                                  review.reviewTypeRegular ||
-                                    review.reviewTypeProbationary,
-                                ),
+                                String(review.reviewTypeRegular || review.reviewTypeProbationary)
                               )}
                             >
                               {review.reviewTypeRegular ||
                                 (review.reviewTypeProbationary
-                                  ? "M" + review.reviewTypeProbationary
-                                  : "") ||
-                                "Others"}
+                                  ? 'M' + review.reviewTypeProbationary
+                                  : '') ||
+                                'Others'}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
-                            {new Date(review.created_at).toLocaleString(
-                              undefined,
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
+                            {new Date(review.created_at).toLocaleString('en-us', {
+                              month: 'short',
+                              year: 'numeric',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
                             {review.rating}
@@ -704,26 +567,26 @@ export default function OverviewTab() {
                           <TableCell className="px-6 py-3">
                             <Badge
                               className={
-                                review.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : review.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                                review.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : review.status === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-yellow-100 text-yellow-800'
                               }
                             >
-                              {review.status === "completed"
+                              {review.status === 'completed'
                                 ? `✓ ${review.status}`
-                                : review.status === "pending"
+                                : review.status === 'pending'
                                   ? `⏳ ${review.status}`
                                   : review.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
-                            {review.status === "completed" ? (
+                            {review.status === 'completed' ? (
                               <Badge className="bg-green-100 text-green-800 text-xs">
                                 ✓ Signed
                               </Badge>
-                            ) : review.status === "pending" ? (
+                            ) : review.status === 'pending' ? (
                               <Badge className="bg-gray-100 text-gray-600 text-xs">
                                 ⏳ Pending
                               </Badge>
@@ -732,9 +595,7 @@ export default function OverviewTab() {
                             )}
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
-                            <Badge className="bg-green-100 text-green-800 text-xs">
-                              ✓ Signed
-                            </Badge>
+                            <Badge className="bg-green-100 text-green-800 text-xs">✓ Signed</Badge>
                           </TableCell>
 
                           <TableCell className="px-6 py-3">
@@ -773,12 +634,8 @@ export default function OverviewTab() {
               currentPage={currentPage}
               totalPages={totalPages}
               total={overviewTotal}
-              perPage={perPage}
-              onPageChange={(page) => {
-                setIsPageLoading(true);
-                pageChangeStartTimeRef.current = Date.now();
-                setCurrentPage(page);
-              }}
+              perPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           )}
         </div>
@@ -797,14 +654,12 @@ export default function OverviewTab() {
             <DialogHeader className="pb-4 bg-red-50 rounded-lg ">
               <DialogTitle className="text-red-800 flex items-center gap-2">
                 <span className="text-xl">⚠️</span>
-                Delete Evaluation of{" "}
-                {reviewToDelete?.employee.fname +
-                  " " +
-                  reviewToDelete?.employee.lname}
+                Delete Evaluation of{' '}
+                {reviewToDelete?.employee.fname + ' ' + reviewToDelete?.employee.lname}
               </DialogTitle>
               <DialogDescription className="text-red-700">
-                This action cannot be undone. Are you sure you want to
-                permanently delete this evaluation?
+                This action cannot be undone. Are you sure you want to permanently delete this
+                evaluation?
               </DialogDescription>
             </DialogHeader>
 
@@ -812,11 +667,7 @@ export default function OverviewTab() {
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
-                    <svg
-                      className="h-5 w-5 text-red-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -825,9 +676,7 @@ export default function OverviewTab() {
                     </svg>
                   </div>
                   <div className="text-sm text-red-700">
-                    <p className="font-medium">
-                      Warning: This will permanently delete:
-                    </p>
+                    <p className="font-medium">Warning: This will permanently delete:</p>
                     <ul className="mt-2 list-disc list-inside space-y-1">
                       <li>This evaluation record</li>
                     </ul>
@@ -840,19 +689,15 @@ export default function OverviewTab() {
                   <p className="font-medium">Evaluation Details:</p>
                   <div className="mt-2 space-y-1">
                     <p>
-                      <span className="font-medium">Employee Name:</span>{" "}
-                      {reviewToDelete?.employee.fname +
-                        " " +
-                        reviewToDelete?.employee.lname}
+                      <span className="font-medium">Employee Name:</span>{' '}
+                      {reviewToDelete?.employee.fname + ' ' + reviewToDelete?.employee.lname}
                     </p>
                     <p>
-                      <span className="font-medium">Evaluator Name:</span>{" "}
-                      {reviewToDelete?.evaluator.fname +
-                        " " +
-                        reviewToDelete?.evaluator.lname}
+                      <span className="font-medium">Evaluator Name:</span>{' '}
+                      {reviewToDelete?.evaluator.fname + ' ' + reviewToDelete?.evaluator.lname}
                     </p>
                     <p>
-                      <span className="font-medium">Branch:</span>{" "}
+                      <span className="font-medium">Branch:</span>{' '}
                       {reviewToDelete?.employee?.branch_name}
                     </p>
                   </div>

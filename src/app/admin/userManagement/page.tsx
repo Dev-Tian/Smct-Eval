@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,27 +38,7 @@ import { useDialogAnimation } from '@/hooks/useDialogAnimation';
 import EvaluationsPagination from '@/components/paginationComponent';
 import ViewEmployeeModal from '@/components/ViewEmployeeModal';
 import { User } from '@/contexts/UserContext';
-
-interface Employee {
-  id: number;
-  fname: string;
-  lname: string;
-  emp_id: number;
-  email: string;
-  positions: any;
-  departments: any;
-  branches: any;
-  hireDate: Date;
-  roles: any;
-  username: string;
-  password: string;
-  is_active: string;
-  avatar?: string | null;
-  bio?: string | null;
-  contact?: string;
-  created_at: string;
-  updated_at?: string;
-}
+import debounce from 'lodash.debounce';
 
 interface RoleType {
   id: string;
@@ -79,7 +59,6 @@ export default function UserManagementTab() {
   const [positionsData, setPositionData] = useState<any[]>([]);
   const [branchesData, setBranchesData] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(true);
-  const [isPageLoading, setIsPageLoading] = useState(false);
 
   // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -94,189 +73,127 @@ export default function UserManagementTab() {
 
   //filters for active users
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
-  const [debouncedActiveSearchTerm, setDebouncedActiveSearchTerm] = useState(activeSearchTerm);
-  const [roleFilter, setRoleFilter] = useState('0'); // Default to "All Roles"
-  const [debouncedRoleFilter, setDebouncedRoleFilter] = useState(roleFilter);
+  const [roleFilter, setRoleFilter] = useState('0');
   //filters for pending users
   const [pendingSearchTerm, setPendingSearchTerm] = useState('');
-  const [debouncedPendingSearchTerm, setDebouncedPendingSearchTerm] = useState(pendingSearchTerm);
   const [statusFilter, setStatusFilter] = useState('');
-  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState(statusFilter);
   //pagination
   const [currentPageActive, setCurrentPageActive] = useState(1);
   const [currentPagePending, setCurrentPagePending] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6);
-  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalActivePages, setTotalActivePages] = useState(1);
   const [totalPendingPages, setTotalPendingPages] = useState(1);
-  const [perPage, setPerPage] = useState(0);
 
   const [employeeToView, setEmployeeToView] = useState<User | null>(null);
   const [isViewEmployeeModalOpen, setIsViewEmployeeModalOpen] = useState(false);
 
-  // Track when page change started for pending users
-  const pendingPageChangeStartTimeRef = useRef<number | null>(null);
-
-  const loadPendingUsers = async (searchValue: string, statusFilter: string) => {
-    try {
-      const response = await apiService.getPendingRegistrations(
-        searchValue,
-        statusFilter,
-        currentPagePending,
-        itemsPerPage
-      );
-
-      setPendingRegistrations(response.data);
-      setPendingTotalItems(response.total);
-      setTotalPendingPages(response.last_page);
-      setPerPage(response.per_page);
-    } catch (error) {
-      console.error('Error loading pending users:', error);
-    } finally {
-      // If this was a page change, ensure minimum display time (2 seconds)
-      if (pendingPageChangeStartTimeRef.current !== null) {
-        const elapsed = Date.now() - pendingPageChangeStartTimeRef.current;
-        const minDisplayTime = 2000; // 2 seconds
-        const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
-        setTimeout(() => {
-          setIsPageLoading(false);
-          pendingPageChangeStartTimeRef.current = null;
-        }, remainingTime);
-      }
-    }
-  };
-
-  // Track when page change started for active users
-  const activePageChangeStartTimeRef = useRef<number | null>(null);
-
-  const loadActiveUsers = async (searchValue: string, roleFilter: string) => {
-    try {
-      const response = await apiService.getActiveRegistrations(
-        searchValue,
-        roleFilter,
-        currentPageActive,
-        itemsPerPage
-      );
-
-      setActiveRegistrations(response.data);
-      setActiveTotalItems(response.total);
-      setTotalActivePages(response.last_page);
-      setPerPage(response.per_page);
-    } catch (error) {
-      console.error('Error loading active users:', error);
-    } finally {
-      // If this was a page change, ensure minimum display time (2 seconds)
-      if (activePageChangeStartTimeRef.current !== null) {
-        const elapsed = Date.now() - activePageChangeStartTimeRef.current;
-        const minDisplayTime = 2000; // 2 seconds
-        const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
-        setTimeout(() => {
-          setIsPageLoading(false);
-          activePageChangeStartTimeRef.current = null;
-        }, remainingTime);
-      }
-    }
-  };
-
-  //render when page reload not loading not everySearch or Filters
   useEffect(() => {
     const mountData = async () => {
-      setRefresh(true);
       try {
-        const [positions, branches, departments] = await Promise.all([
+        const [positions, branches, departments, roles] = await Promise.all([
           apiService.getPositions(),
           apiService.getBranches(),
           apiService.getDepartments(),
+          apiService.getAllRoles(),
         ]);
         setPositionData(positions);
         setBranchesData(branches);
         setDepartmentData(departments);
-        const roles = await apiService.getAllRoles();
         setRoles(roles);
-        await loadActiveUsers(activeSearchTerm, roleFilter);
-        await loadPendingUsers(pendingSearchTerm, statusFilter);
       } catch (error) {
         console.error('Error refreshing data:', error);
-        setRefresh(false);
-      } finally {
-        setRefresh(false);
       }
     };
     mountData();
   }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      if (tab === 'active') {
-        await loadActiveUsers(activeSearchTerm, roleFilter);
-      }
-      if (tab === 'new') {
-        await loadPendingUsers(pendingSearchTerm, statusFilter);
-      }
-    };
+  const loadPendingUsers = useMemo(
+    () =>
+      debounce(async (searchValue: string, statusFilter: string, currentPage: number) => {
+        setRefresh(true);
+        try {
+          const response = await apiService.getPendingRegistrations(
+            searchValue,
+            statusFilter,
+            currentPage,
+            itemsPerPage
+          );
 
-    load();
+          setPendingRegistrations(response.data);
+          setPendingTotalItems(response.total);
+          setTotalPendingPages(response.last_page);
+          setRefresh(false);
+        } catch (error) {
+          setRefresh(false);
+          console.error('Error:', error);
+          setPendingRegistrations([]);
+          setPendingTotalItems(0);
+          setTotalPendingPages(0);
+          setRefresh(false);
+        }
+      }, 1000),
+    []
+  );
+
+  useEffect(() => {
+    loadPendingUsers(pendingSearchTerm, statusFilter, currentPagePending);
+    return () => {
+      loadPendingUsers.cancel();
+    };
+  }, [pendingSearchTerm, statusFilter, currentPagePending]);
+
+  const loadActiveUsers = useMemo(
+    () =>
+      debounce(async (searchValue: string, roleFilter: string, currentPage: number) => {
+        setRefresh(true);
+        try {
+          const response = await apiService.getActiveRegistrations(
+            searchValue,
+            roleFilter,
+            currentPage,
+            itemsPerPage
+          );
+
+          setActiveRegistrations(response.data);
+          setActiveTotalItems(response.total);
+          setTotalActivePages(response.last_page);
+          setRefresh(false);
+        } catch (error) {
+          setRefresh(false);
+          console.error('Error loading active users:', error);
+          setActiveRegistrations([]);
+          setActiveTotalItems(0);
+          setTotalActivePages(0);
+        }
+      }, 1000),
+    []
+  );
+
+  useEffect(() => {
+    loadActiveUsers(activeSearchTerm, roleFilter, currentPageActive);
+    return () => {
+      loadActiveUsers.cancel();
+    };
+  }, [activeSearchTerm, roleFilter, currentPageActive]);
+
+  useEffect(() => {
+    if (tab === 'active') {
+      loadActiveUsers(activeSearchTerm, roleFilter, currentPageActive);
+    }
+    if (tab === 'new') {
+      loadPendingUsers(pendingSearchTerm, statusFilter, currentPagePending);
+    }
   }, [tab]);
 
-  //mount every activeSearchTerm changes and RoleFilter
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (tab === 'active') {
-        activeSearchTerm === '' ? currentPageActive : setCurrentPageActive(1);
-        setDebouncedActiveSearchTerm(activeSearchTerm);
-        setDebouncedRoleFilter(roleFilter);
-      }
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [activeSearchTerm, roleFilter]);
-
-  // Fetch API whenever debounced active search term changes
-  useEffect(() => {
-    const fetchData = async () => {
-      if (tab === 'active') {
-        await loadActiveUsers(debouncedActiveSearchTerm, debouncedRoleFilter);
-      }
-    };
-
-    fetchData();
-  }, [debouncedActiveSearchTerm, debouncedRoleFilter, currentPageActive]);
-
-  //mount every pendingSearchTerm changes and statusFilter
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (tab === 'new') {
-        pendingSearchTerm === '' ? currentPagePending : setCurrentPagePending(1);
-        setDebouncedPendingSearchTerm(pendingSearchTerm);
-        setDebouncedStatusFilter(statusFilter);
-      }
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [pendingSearchTerm, statusFilter]);
-
-  // Fetch API whenever debounced pending search term changes
-  useEffect(() => {
-    const fetchData = async () => {
-      if (tab === 'new') {
-        await loadPendingUsers(debouncedPendingSearchTerm, debouncedStatusFilter);
-      }
-    };
-
-    fetchData();
-  }, [debouncedPendingSearchTerm, debouncedStatusFilter, currentPagePending]);
-
-  // Function to refresh user data
+  //refresh function
   const refreshUserData = async (showLoading = false) => {
     try {
       setRefresh(true);
       if (tab === 'new') {
-        await loadPendingUsers(pendingSearchTerm, statusFilter);
+        await loadPendingUsers(pendingSearchTerm, statusFilter, currentPagePending);
       }
       if (tab === 'active') {
-        await loadActiveUsers(activeSearchTerm, roleFilter);
+        await loadActiveUsers(activeSearchTerm, roleFilter, currentPageActive);
       }
 
       if (showLoading) {
@@ -383,7 +300,7 @@ export default function UserManagementTab() {
       await apiService.deleteUser(employee.id);
 
       // Refresh data first, then reset deleting state after data loads
-      await loadActiveUsers(activeSearchTerm, roleFilter);
+      refreshUserData();
       setDeletingUserId(null);
 
       toastMessages.user.deleted(employee.fname);
@@ -399,7 +316,7 @@ export default function UserManagementTab() {
   const handleApproveRegistration = async (registrationId: number, registrationName: string) => {
     try {
       await apiService.approveRegistration(registrationId);
-      await loadPendingUsers(pendingSearchTerm, statusFilter);
+      refreshUserData();
       toastMessages.user.approved(registrationName);
     } catch (error) {
       console.error('Error approving registration:', error);
@@ -413,7 +330,7 @@ export default function UserManagementTab() {
   const handleRejectRegistration = async (registrationId: number, registrationName: string) => {
     try {
       await apiService.rejectRegistration(registrationId);
-      await loadPendingUsers(pendingSearchTerm, statusFilter);
+      refreshUserData();
       toastMessages.user.rejected(registrationName);
     } catch (error) {
       console.error('Error rejecting registration:', error);
@@ -462,20 +379,6 @@ export default function UserManagementTab() {
     }
   };
 
-  // Handle page change for active users
-  const handleActivePageChange = (page: number) => {
-    setIsPageLoading(true);
-    activePageChangeStartTimeRef.current = Date.now();
-    setCurrentPageActive(page);
-  };
-
-  // Handle page change for pending users
-  const handlePendingPageChange = (page: number) => {
-    setIsPageLoading(true);
-    pendingPageChangeStartTimeRef.current = Date.now();
-    setCurrentPagePending(page);
-  };
-
   // Get role color based on role name
   const getRoleColor = (roleName: string | undefined): string => {
     if (!roleName) return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-300';
@@ -492,18 +395,6 @@ export default function UserManagementTab() {
     }
   };
 
-  // Handle tab change with refresh
-  const handleTabChange = async (tab: 'active' | 'new') => {
-    try {
-      setTab(tab);
-      await refreshUserData(true);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setRefresh(false);
-    }
-  };
-
   return (
     <div className="relative overflow-y-auto pr-2 min-h-[400px]">
       <Card>
@@ -516,7 +407,7 @@ export default function UserManagementTab() {
           <div className="flex space-x-1 mb-6">
             <Button
               variant={tab === 'active' ? 'default' : 'outline'}
-              onClick={() => handleTabChange('active')}
+              onClick={() => setTab('active')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <span>👥</span>
@@ -524,7 +415,7 @@ export default function UserManagementTab() {
             </Button>
             <Button
               variant={tab === 'new' ? 'default' : 'outline'}
-              onClick={() => handleTabChange('new')}
+              onClick={() => setTab('new')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <span>🆕</span>
@@ -663,12 +554,6 @@ export default function UserManagementTab() {
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge
                       variant="outline"
-                      className="bg-red-100 text-red-800 hover:bg-red-200 border-red-300"
-                    >
-                      Admin
-                    </Badge>
-                    <Badge
-                      variant="outline"
                       className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300"
                     >
                       HR
@@ -725,7 +610,7 @@ export default function UserManagementTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {refresh || isPageLoading ? (
+                    {refresh ? (
                       Array.from({ length: itemsPerPage }).map((_, index) => (
                         <TableRow key={`skeleton-${index}`}>
                           <TableCell className="px-6 py-3">
@@ -960,14 +845,14 @@ export default function UserManagementTab() {
                 </Table>
               </div>
               <div>
-                {tab === 'active' && (
+                {tab === 'active' && itemsPerPage <= activeTotalItems && (
                   <div>
                     <EvaluationsPagination
                       currentPage={currentPageActive}
                       totalPages={totalActivePages}
                       total={activeTotalItems}
-                      perPage={perPage}
-                      onPageChange={handleActivePageChange}
+                      perPage={itemsPerPage}
+                      onPageChange={(value) => setCurrentPageActive(value)}
                     />
                   </div>
                 )}
@@ -1127,7 +1012,7 @@ export default function UserManagementTab() {
                       </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                      {refresh || isPageLoading ? (
+                      {refresh ? (
                         Array.from({ length: itemsPerPage }).map((_, index) => (
                           <TableRow key={`skeleton-${index}`}>
                             <TableCell className="px-6 py-3">
@@ -1238,7 +1123,11 @@ export default function UserManagementTab() {
                                 {account.positions?.label || 'N/A'}
                               </TableCell>
                               <TableCell className="px-6 py-3">
-                                {new Date(account.created_at).toLocaleDateString()}
+                                {new Date(account.created_at).toLocaleDateString('en-us', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                })}
                               </TableCell>
                               <TableCell className="px-6 py-3">
                                 <Badge
@@ -1291,6 +1180,9 @@ export default function UserManagementTab() {
                                         variant="ghost"
                                         size="sm"
                                         className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
+                                        disabled={
+                                          deletingUserId !== null && deletingUserId === account.id
+                                        }
                                         onClick={() =>
                                           handleApproveRegistration(
                                             Number(account.id),
@@ -1332,14 +1224,14 @@ export default function UserManagementTab() {
                   </Table>
                 </div>
                 <div>
-                  {tab === 'new' && (
+                  {tab === 'new' && itemsPerPage <= pendingTotalItems && (
                     <div>
                       <EvaluationsPagination
                         currentPage={currentPagePending}
                         totalPages={totalPendingPages}
                         total={pendingTotalItems}
-                        perPage={perPage}
-                        onPageChange={handlePendingPageChange}
+                        perPage={itemsPerPage}
+                        onPageChange={(value) => setCurrentPagePending(value)}
                       />
                     </div>
                   )}

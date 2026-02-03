@@ -29,12 +29,10 @@ export type SidebarItem = {
 
 type DashboardShellProps = {
   title: string;
-  currentPeriod?: string;
   sidebarItems: SidebarItem[];
   activeItemId: string;
   onChangeActive: (id: string) => void;
   children: React.ReactNode;
-  profile?: UserProfile | null;
   onSaveProfile?: (updatedProfile: UserProfile) => void;
   topSummary?: React.ReactNode;
   dashboardType?: 'hr' | 'admin' | 'employee' | 'evaluator';
@@ -43,12 +41,10 @@ type DashboardShellProps = {
 export default function DashboardShell(props: DashboardShellProps) {
   const {
     title,
-    currentPeriod,
     sidebarItems,
     activeItemId,
     onChangeActive,
     children,
-    profile,
     onSaveProfile,
     topSummary,
     dashboardType: dashboardTypeProp,
@@ -949,7 +945,7 @@ export default function DashboardShell(props: DashboardShellProps) {
         </div>
 
         {/* Footer - Sticky */}
-        <footer className="fixed bottom-0  left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-sm">
+        <footer className="fixed bottom-0  left-0 right-0 bg-white border-t border-gray-200 shadow-sm">
           <div className="px-6 py-4">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
               <div className="flex items-center space-x-2">

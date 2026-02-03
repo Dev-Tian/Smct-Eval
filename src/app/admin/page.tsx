@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import clientDataService from '@/lib/apiService';
 import EvaluationsPagination from '@/components/paginationComponent';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
+import debounce from 'lodash.debounce';
 
 interface Review {
   id: number;
@@ -43,122 +44,68 @@ export default function OverviewTab() {
   const [evaluations, setEvaluations] = useState<Review[]>([]);
   const [dashboardTotals, setDashboardTotals] = useState<DashboardTotals | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(false);
   const [isViewResultsModalOpen, setIsViewResultsModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [overviewTotal, setOverviewTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [perPage, setPerPage] = useState(0);
+  const itemsPerPage = 5;
 
-  const loadEvaluations = async (searchValue: string) => {
-    try {
-      const response = await clientDataService.getSubmissions(
-        searchValue,
-        currentPage,
-        itemsPerPage
-      );
+  const loadEvaluations = useMemo(
+    () =>
+      debounce(async (searchValue: string, currentPage: number) => {
+        setRefreshing(true);
+        try {
+          const response = await clientDataService.getSubmissions(
+            searchValue,
+            currentPage,
+            itemsPerPage
+          );
 
-      // Add safety checks to prevent "Cannot read properties of undefined" error
-      if (!response) {
-        console.error('API response is undefined');
-        setEvaluations([]);
-        setOverviewTotal(0);
-        setTotalPages(1);
-        setPerPage(itemsPerPage);
-        return;
-      }
-
-      setEvaluations(response.data || []);
-      setOverviewTotal(response.total || 0);
-      setTotalPages(response.last_page || 1);
-      setPerPage(response.per_page || itemsPerPage);
-    } catch (error) {
-      console.error('Error loading evaluations:', error);
-      // Set default values on error to prevent crashes
-      setEvaluations([]);
-      setOverviewTotal(0);
-      setTotalPages(1);
-      setPerPage(itemsPerPage);
-    }
-  };
-  useEffect(() => {
-    const mount = async () => {
-      setRefreshing(true);
-      try {
-        await loadEvaluations(searchTerm);
-      } catch (error) {
-        console.log(error);
-        setRefreshing(false);
-      } finally {
-        setRefreshing(false);
-      }
-    };
-    mount();
-  }, []);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      searchTerm === '' ? currentPage : setCurrentPage(1);
-      setDebouncedSearchTerm(searchTerm);
-      // Reset to page 1 when search term changes (if there's a value)
-      if (searchTerm.trim() !== '') {
-        setCurrentPage(1);
-      }
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  // Track when page change started
-  const pageChangeStartTimeRef = useRef<number | null>(null);
-
-  // Fetch API whenever debounced search term or page changes
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await loadEvaluations(debouncedSearchTerm);
-        const getTotals = await clientDataService.adminDashboard();
-        setDashboardTotals(getTotals);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        // If this was a page change, ensure minimum display time (2 seconds)
-        if (pageChangeStartTimeRef.current !== null) {
-          const elapsed = Date.now() - pageChangeStartTimeRef.current;
-          const minDisplayTime = 2000; // 2 seconds
-          const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
-          setTimeout(() => {
-            setIsPageLoading(false);
-            pageChangeStartTimeRef.current = null;
-          }, remainingTime);
+          setEvaluations(response.data || []);
+          setOverviewTotal(response.total || 0);
+          setTotalPages(response.last_page || 1);
+          setPerPage(response.per_page || itemsPerPage);
+          setRefreshing(false);
+        } catch (error) {
+          console.error('Error loading evaluations:', error);
+          setRefreshing(false);
+          setEvaluations([]);
+          setOverviewTotal(0);
+          setTotalPages(1);
+          setPerPage(itemsPerPage);
         }
-      }
-    };
+      }, 1000),
+    []
+  );
 
-    fetchData();
-  }, [debouncedSearchTerm, currentPage]);
+  useEffect(() => {
+    loadEvaluations(searchTerm, currentPage);
+    return () => {
+      loadEvaluations.cancel();
+    };
+  }, [searchTerm, currentPage]);
+
+  useEffect(() => {
+    const totals = async () => {
+      const getTotals = await clientDataService.adminDashboard();
+      setDashboardTotals(getTotals);
+    };
+    totals();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
-      await loadEvaluations(debouncedSearchTerm);
+      await loadEvaluations(searchTerm, currentPage);
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
       setRefreshing(false);
     }
-  };
-
-  const handlePageChange = (page: number) => {
-    setIsPageLoading(true);
-    pageChangeStartTimeRef.current = Date.now();
-    setCurrentPage(page);
   };
 
   const getQuarterColor = (quarter: string): string => {
@@ -367,7 +314,7 @@ export default function OverviewTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-200">
-                  {refreshing || isPageLoading ? (
+                  {refreshing ? (
                     Array.from({ length: itemsPerPage }).map((_, index) => (
                       <TableRow key={`skeleton-${index}`}>
                         <TableCell className="px-6 py-3">
@@ -512,13 +459,21 @@ export default function OverviewTab() {
                             </Badge>
                           </TableCell>
                           <TableCell className="px-6 py-3 text-sm text-gray-600">
-                            {new Date(review.created_at).toLocaleString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            <div>
+                              {new Date(review.created_at).toLocaleString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </div>
+                            <div>
+                              <small>
+                                {new Date(review.created_at).toLocaleString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </small>
+                            </div>
                           </TableCell>
                           <TableCell className="px-6 py-3">
                             <Badge
@@ -563,7 +518,7 @@ export default function OverviewTab() {
               totalPages={totalPages}
               total={overviewTotal}
               perPage={perPage}
-              onPageChange={handlePageChange}
+              onPageChange={(value) => setCurrentPage(value)}
             />
           )}
         </div>
