@@ -136,20 +136,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }, [isRefreshing]); // Only run when isRefreshing changes
 
-  // Poll for signature reset approval status (only when there's a pending request)
-  // This runs globally once, not per component instance
-  useEffect(() => {
-    // Only poll if user is logged in and has a pending signature reset request
-    if (user && user.requestSignatureReset !== 0) {
-      // Poll every 15 seconds (reduced frequency to avoid excessive API calls)
-      const intervalId = setInterval(() => {
-        refreshUser();
-      }, 15000); // Poll every 15 seconds instead of 5
-
-      return () => clearInterval(intervalId);
-    }
-  }, [user?.requestSignatureReset, refreshUser]); // Include refreshUser in dependencies
-
   // ⬇ Login using Sanctum
   const login = async (username: string, password: string) => {
     try {

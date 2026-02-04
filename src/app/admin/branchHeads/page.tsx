@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -17,8 +11,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -26,13 +20,13 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { apiService } from "@/lib/apiService";
-import { toastMessages } from "@/lib/toastMessages";
-import { useDialogAnimation } from "@/hooks/useDialogAnimation";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { apiService } from '@/lib/apiService';
+import { toastMessages } from '@/lib/toastMessages';
+import { useDialogAnimation } from '@/hooks/useDialogAnimation';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import {
   Pagination,
   PaginationContent,
@@ -41,7 +35,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 interface Employee {
   id: number;
@@ -63,12 +57,8 @@ export default function BranchHeadsTab() {
   const [isBranchesModalOpen, setIsBranchesModalOpen] = useState(false);
   const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
-  const [selectedBranchHead, setSelectedBranchHead] = useState<Employee | null>(
-    null
-  );
-  const [selectedBranches, setSelectedBranches] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [selectedBranchHead, setSelectedBranchHead] = useState<Employee | null>(null);
+  const [selectedBranches, setSelectedBranches] = useState<{ id: string; name: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successData, setSuccessData] = useState<{
@@ -76,22 +66,18 @@ export default function BranchHeadsTab() {
     branches: { id: string; name: string }[];
   }>({ branchHead: null, branches: [] });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [branchHeadToEdit, setBranchHeadToEdit] = useState<Employee | null>(
-    null
+  const [branchHeadToEdit, setBranchHeadToEdit] = useState<Employee | null>(null);
+  const [editSelectedBranches, setEditSelectedBranches] = useState<{ id: string; name: string }[]>(
+    []
   );
-  const [editSelectedBranches, setEditSelectedBranches] = useState<
-    { id: string; name: string }[]
-  >([]);
   const [showEditSuccessDialog, setShowEditSuccessDialog] = useState(false);
   const [editSuccessData, setEditSuccessData] = useState<{
     branchHead: Employee | null;
     branches: { id: string; name: string }[];
   }>({ branchHead: null, branches: [] });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [branchHeadToDelete, setBranchHeadToDelete] = useState<Employee | null>(
-    null
-  );
-  const [searchTerm, setSearchTerm] = useState("");
+  const [branchHeadToDelete, setBranchHeadToDelete] = useState<Employee | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [branchHeadsPage, setBranchHeadsPage] = useState(1);
   const [branchHeadsData, setBranchHeadsData] = useState<Employee[]>([]);
   const [loadingBranchHeads, setLoadingBranchHeads] = useState(true);
@@ -111,43 +97,29 @@ export default function BranchHeadsTab() {
 
     return data.map((item: any) => {
       // Handle branches - API returns branches array
-      let branchValue = "";
+      let branchValue = '';
       if (item.branches && Array.isArray(item.branches)) {
         branchValue = item.branches
           .map((b: any) => b.name || b.branch_name || b.label || b.code || b)
           .filter((b: any) => b) // Remove empty values
-          .join(", ");
+          .join(', ');
       } else if (item.branch) {
         if (Array.isArray(item.branch)) {
-          branchValue = item.branch
-            .map((b: any) => b.name || b.label || b)
-            .join(", ");
-        } else if (typeof item.branch === "object") {
-          branchValue =
-            item.branch.name ||
-            item.branch.branch_name ||
-            item.branch.label ||
-            "";
+          branchValue = item.branch.map((b: any) => b.name || b.label || b).join(', ');
+        } else if (typeof item.branch === 'object') {
+          branchValue = item.branch.name || item.branch.branch_name || item.branch.label || '';
         } else {
           branchValue = String(item.branch);
         }
       }
 
       // Handle position - API returns positions object with label
-      let positionValue = "";
-      if (item.positions && typeof item.positions === "object") {
-        positionValue =
-          item.positions.label ||
-          item.positions.name ||
-          item.positions.value ||
-          "";
+      let positionValue = '';
+      if (item.positions && typeof item.positions === 'object') {
+        positionValue = item.positions.label || item.positions.name || item.positions.value || '';
       } else if (item.position) {
-        if (typeof item.position === "object") {
-          positionValue =
-            item.position.label ||
-            item.position.name ||
-            item.position.value ||
-            "";
+        if (typeof item.position === 'object') {
+          positionValue = item.position.label || item.position.name || item.position.value || '';
         } else {
           positionValue = String(item.position);
         }
@@ -156,20 +128,14 @@ export default function BranchHeadsTab() {
       }
 
       // Handle department - API returns departments object with department_name
-      let departmentValue = "";
-      if (item.departments && typeof item.departments === "object") {
+      let departmentValue = '';
+      if (item.departments && typeof item.departments === 'object') {
         departmentValue =
-          item.departments.department_name ||
-          item.departments.name ||
-          item.departments.label ||
-          "";
+          item.departments.department_name || item.departments.name || item.departments.label || '';
       } else if (item.department) {
-        if (typeof item.department === "object") {
+        if (typeof item.department === 'object') {
           departmentValue =
-            item.department.department_name ||
-            item.department.name ||
-            item.department.label ||
-            "";
+            item.department.department_name || item.department.name || item.department.label || '';
         } else {
           departmentValue = String(item.department);
         }
@@ -178,28 +144,26 @@ export default function BranchHeadsTab() {
       }
 
       // Handle role - API returns roles array with name
-      let roleValue = "";
+      let roleValue = '';
       if (item.roles && Array.isArray(item.roles)) {
         roleValue = item.roles
           .map((r: any) => r.name || r.label || r)
           .filter((r: any) => r) // Remove empty values
-          .join(", ");
+          .join(', ');
       } else if (item.role) {
         if (Array.isArray(item.role)) {
-          roleValue = item.role
-            .map((r: any) => r.name || r.label || r)
-            .join(", ");
-        } else if (typeof item.role === "object") {
-          roleValue = item.role.name || item.role.label || "";
+          roleValue = item.role.map((r: any) => r.name || r.label || r).join(', ');
+        } else if (typeof item.role === 'object') {
+          roleValue = item.role.name || item.role.label || '';
         } else {
           roleValue = String(item.role);
         }
       }
 
       // Handle name - construct from fname/lname to ensure proper spacing
-      let nameValue = "";
-      const fname = item.fname || "";
-      const lname = item.lname || "";
+      let nameValue = '';
+      const fname = item.fname || '';
+      const lname = item.lname || '';
       if (fname || lname) {
         nameValue = `${fname} ${lname}`.trim();
       } else if (item.full_name) {
@@ -208,7 +172,7 @@ export default function BranchHeadsTab() {
       } else if (item.name) {
         nameValue = item.name;
       } else {
-        nameValue = item.username || "";
+        nameValue = item.username || '';
       }
 
       // Handle isActive - API returns is_active as string "active" or boolean
@@ -216,23 +180,23 @@ export default function BranchHeadsTab() {
       if (item.isActive !== undefined) {
         isActiveValue = item.isActive;
       } else if (item.is_active !== undefined) {
-        if (typeof item.is_active === "string") {
-          isActiveValue = item.is_active.toLowerCase() === "active";
+        if (typeof item.is_active === 'string') {
+          isActiveValue = item.is_active.toLowerCase() === 'active';
         } else {
           isActiveValue = Boolean(item.is_active);
         }
       } else if (item.status !== undefined) {
-        isActiveValue = item.status !== "inactive";
+        isActiveValue = item.status !== 'inactive';
       }
 
       return {
         id: item.id || item.employeeId || item.user_id || item.emp_id,
         name: nameValue,
-        email: item.email || "",
+        email: item.email || '',
         position: positionValue,
         department: departmentValue,
         branch: branchValue,
-        contact: item.contact || item.phone || item.contact_number || "",
+        contact: item.contact || item.phone || item.contact_number || '',
         role: roleValue,
         isActive: isActiveValue,
       };
@@ -248,7 +212,7 @@ export default function BranchHeadsTab() {
       const normalizedData = normalizeBranchHeadData(data);
       setBranchHeadsData(normalizedData);
     } catch (error) {
-      console.error("Error loading branch heads:", error);
+      console.error('Error loading branch heads:', error);
       // Set empty array if API fails - no fallback needed
       setBranchHeadsData([]);
     } finally {
@@ -315,25 +279,25 @@ export default function BranchHeadsTab() {
       const branchesData = await apiService.getBranches();
       // Normalize the data format - handle both {id, name} and {value, label} formats
       const normalizedBranches = branchesData.map((branch: any) => {
-        if ("id" in branch && "name" in branch) {
+        if ('id' in branch && 'name' in branch) {
           return { id: branch.id, name: branch.name };
-        } else if ("value" in branch && "label" in branch) {
+        } else if ('value' in branch && 'label' in branch) {
           // Extract branch code from label if it contains " /"
-          const labelParts = branch.label.split(" /");
+          const labelParts = branch.label.split(' /');
           return {
             id: branch.value,
             name: labelParts[0] || branch.label,
           };
         }
         return {
-          id: String(branch.id || branch.value || ""),
-          name: String(branch.name || branch.label || ""),
+          id: String(branch.id || branch.value || ''),
+          name: String(branch.name || branch.label || ''),
         };
       });
       setBranches(normalizedBranches);
       return normalizedBranches;
     } catch (error) {
-      console.error("Error loading branches:", error);
+      console.error('Error loading branches:', error);
       setBranches([]);
       return [];
     } finally {
@@ -366,13 +330,13 @@ export default function BranchHeadsTab() {
   // Add custom CSS for success dialog content animations (checkmark, ripple, etc.)
   // Note: Container animations are now handled by useDialogAnimation hook
   useEffect(() => {
-    const styleId = "branch-heads-success-animations";
+    const styleId = 'branch-heads-success-animations';
     const existingStyle = document.getElementById(styleId);
     if (existingStyle) {
       return; // Styles already injected
     }
 
-    const style = document.createElement("style");
+    const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
       /* Success Dialog Content Animations */
@@ -437,9 +401,7 @@ export default function BranchHeadsTab() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Branch Heads</CardTitle>
-              <CardDescription>
-                List of all branch heads in the organization
-              </CardDescription>
+              <CardDescription>List of all branch heads in the organization</CardDescription>
             </div>
             <Button
               onClick={handleRefresh}
@@ -465,10 +427,7 @@ export default function BranchHeadsTab() {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative w-full md:w-1/3">
-              <Label
-                htmlFor="branch-heads-search"
-                className="text-sm font-medium mb-2 block"
-              >
+              <Label htmlFor="branch-heads-search" className="text-sm font-medium mb-2 block">
                 Search
               </Label>
               <div className="relative">
@@ -493,17 +452,13 @@ export default function BranchHeadsTab() {
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => setSearchTerm("")}
+                    onClick={() => setSearchTerm('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     title="Clear search"
                     aria-label="Clear search"
                     type="button"
                   >
-                    <svg
-                      className="h-5 w-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -554,11 +509,11 @@ export default function BranchHeadsTab() {
                           alt="No data"
                           className="w-25 h-25 object-contain"
                           style={{
-                            imageRendering: "auto",
-                            willChange: "auto",
-                            transform: "translateZ(0)",
-                            backfaceVisibility: "hidden",
-                            WebkitBackfaceVisibility: "hidden",
+                            imageRendering: 'auto',
+                            willChange: 'auto',
+                            transform: 'translateZ(0)',
+                            backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
                           }}
                         />
                         <div className="text-gray-500">
@@ -573,9 +528,7 @@ export default function BranchHeadsTab() {
                             </>
                           ) : (
                             <>
-                              <p className="text-base font-medium mb-1">
-                                No branch heads found
-                              </p>
+                              <p className="text-base font-medium mb-1">No branch heads found</p>
                               <p className="text-sm text-gray-400">
                                 Branch heads will appear here once added
                               </p>
@@ -589,27 +542,20 @@ export default function BranchHeadsTab() {
                   branchHeadsPaginated.map((head: Employee) => {
                     // Parse branches from comma-separated string
                     const branchList = head.branch
-                      ? head.branch.split(", ").filter((b: string) => b.trim())
+                      ? head.branch.split(', ').filter((b: string) => b.trim())
                       : [];
 
                     return (
                       <TableRow key={head.id}>
-                        <TableCell className="font-medium py-4">
-                          {head.name}
-                        </TableCell>
+                        <TableCell className="font-medium py-4">{head.name}</TableCell>
                         <TableCell className="py-4 text-center">
                           {branchList.length > 0 ? (
                             <div className="flex flex-wrap justify-center gap-2">
-                              {branchList.map(
-                                (branch: string, index: number) => (
-                                  <Badge
-                                    key={index}
-                                    className="bg-blue-600 text-white"
-                                  >
-                                    {branch.trim()}
-                                  </Badge>
-                                )
-                              )}
+                              {branchList.map((branch: string, index: number) => (
+                                <Badge key={index} className="bg-blue-600 text-white">
+                                  {branch.trim()}
+                                </Badge>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>
@@ -629,21 +575,15 @@ export default function BranchHeadsTab() {
                                 // Then parse existing branches after branches are loaded
                                 if (head.branch && loadedBranches) {
                                   const existingBranches = head.branch
-                                    .split(", ")
+                                    .split(', ')
                                     .map((name: string) => {
                                       // Try to find matching branch from loaded branches
                                       const branch = loadedBranches.find(
-                                        (b: { id: string; name: string }) =>
-                                          b.name === name.trim()
+                                        (b: { id: string; name: string }) => b.name === name.trim()
                                       );
-                                      return (
-                                        branch || { id: "", name: name.trim() }
-                                      );
+                                      return branch || { id: '', name: name.trim() };
                                     })
-                                    .filter(
-                                      (b: { id: string; name: string }) =>
-                                        b.id || b.name
-                                    );
+                                    .filter((b: { id: string; name: string }) => b.id || b.name);
                                   setEditSelectedBranches(existingBranches);
                                 } else {
                                   setEditSelectedBranches([]);
@@ -677,9 +617,8 @@ export default function BranchHeadsTab() {
           {branchHeadsTotal > itemsPerPage && (
             <div className="flex items-center justify-between mt-4 px-2">
               <div className="text-sm text-gray-600">
-                Showing {branchHeadsStartIndex + 1} to{" "}
-                {Math.min(branchHeadsEndIndex, branchHeadsTotal)} of{" "}
-                {branchHeadsTotal} branch heads
+                Showing {branchHeadsStartIndex + 1} to{' '}
+                {Math.min(branchHeadsEndIndex, branchHeadsTotal)} of {branchHeadsTotal} branch heads
               </div>
               <Pagination>
                 <PaginationContent>
@@ -692,13 +631,13 @@ export default function BranchHeadsTab() {
                       }}
                       className={
                         branchHeadsPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white"
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white'
                       }
                     />
                   </PaginationItem>
                   {(() => {
-                    const pages: (number | "ellipsis")[] = [];
+                    const pages: (number | 'ellipsis')[] = [];
                     if (branchHeadsTotalPages <= 7) {
                       for (let i = 1; i <= branchHeadsTotalPages; i++) {
                         pages.push(i);
@@ -708,30 +647,26 @@ export default function BranchHeadsTab() {
                         for (let i = 1; i <= 5; i++) {
                           pages.push(i);
                         }
-                        pages.push("ellipsis");
+                        pages.push('ellipsis');
                         pages.push(branchHeadsTotalPages);
                       } else if (branchHeadsPage >= branchHeadsTotalPages - 2) {
                         pages.push(1);
-                        pages.push("ellipsis");
-                        for (
-                          let i = branchHeadsTotalPages - 4;
-                          i <= branchHeadsTotalPages;
-                          i++
-                        ) {
+                        pages.push('ellipsis');
+                        for (let i = branchHeadsTotalPages - 4; i <= branchHeadsTotalPages; i++) {
                           pages.push(i);
                         }
                       } else {
                         pages.push(1);
-                        pages.push("ellipsis");
+                        pages.push('ellipsis');
                         pages.push(branchHeadsPage - 1);
                         pages.push(branchHeadsPage);
                         pages.push(branchHeadsPage + 1);
-                        pages.push("ellipsis");
+                        pages.push('ellipsis');
                         pages.push(branchHeadsTotalPages);
                       }
                     }
                     return pages.map((page, index) => {
-                      if (page === "ellipsis") {
+                      if (page === 'ellipsis') {
                         return (
                           <PaginationItem key={`ellipsis-${index}`}>
                             <PaginationEllipsis />
@@ -749,8 +684,8 @@ export default function BranchHeadsTab() {
                             isActive={branchHeadsPage === page}
                             className={
                               branchHeadsPage === page
-                                ? "cursor-pointer bg-blue-700 text-white hover:bg-blue-800 hover:text-white"
-                                : "cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white"
+                                ? 'cursor-pointer bg-blue-700 text-white hover:bg-blue-800 hover:text-white'
+                                : 'cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white'
                             }
                           >
                             {page}
@@ -764,14 +699,12 @@ export default function BranchHeadsTab() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        setBranchHeadsPage((prev) =>
-                          Math.min(branchHeadsTotalPages, prev + 1)
-                        );
+                        setBranchHeadsPage((prev) => Math.min(branchHeadsTotalPages, prev + 1));
                       }}
                       className={
                         branchHeadsPage === branchHeadsTotalPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white"
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer bg-blue-500 text-white hover:bg-blue-700 hover:text-white'
                       }
                     />
                   </PaginationItem>
@@ -825,19 +758,15 @@ export default function BranchHeadsTab() {
                   alt="No data"
                   className="w-25 h-25 object-contain mb-4"
                   style={{
-                    imageRendering: "auto",
-                    willChange: "auto",
-                    transform: "translateZ(0)",
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden",
+                    imageRendering: 'auto',
+                    willChange: 'auto',
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
                   }}
                 />
-                <p className="text-base font-medium mb-1">
-                  No branch heads found
-                </p>
-                <p className="text-sm text-gray-400">
-                  Branch heads will appear here once added
-                </p>
+                <p className="text-base font-medium mb-1">No branch heads found</p>
+                <p className="text-sm text-gray-400">Branch heads will appear here once added</p>
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden">
@@ -846,17 +775,13 @@ export default function BranchHeadsTab() {
                     <TableHeader className="bg-gray-50">
                       <TableRow>
                         <TableHead className="w-2/3 px-6">Name</TableHead>
-                        <TableHead className="w-1/3 text-center px-6">
-                          Actions
-                        </TableHead>
+                        <TableHead className="w-1/3 text-center px-6">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {branchHeads.map((head: Employee) => (
                         <TableRow key={head.id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium py-3 px-6">
-                            {head.name}
-                          </TableCell>
+                          <TableCell className="font-medium py-3 px-6">{head.name}</TableCell>
                           <TableCell className="py-3 text-center px-6">
                             <Button
                               className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
@@ -891,10 +816,7 @@ export default function BranchHeadsTab() {
       </Dialog>
 
       {/* Branches List Modal */}
-      <Dialog
-        open={isBranchesModalOpen}
-        onOpenChangeAction={setIsBranchesModalOpen}
-      >
+      <Dialog open={isBranchesModalOpen} onOpenChangeAction={setIsBranchesModalOpen}>
         <DialogContent
           className={`max-w-xl max-h-[90vh] p-4 flex flex-col ${dialogAnimationClass}`}
         >
@@ -934,146 +856,117 @@ export default function BranchHeadsTab() {
 
           <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
             {/* Confirmation Indicator */}
-            {showConfirmation &&
-              selectedBranches.length > 0 &&
-              selectedBranchHead && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      <svg
-                        className="w-5 h-5 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-blue-900">
-                        Branch Assignment Ready
-                      </p>
-                      <p className="text-sm text-blue-700 mt-1">
-                        <span className="font-semibold">
-                          {selectedBranchHead.name}
-                        </span>{" "}
-                        will be assigned to:
-                      </p>
-                      <div className="mt-2 space-y-1">
-                        {selectedBranches.map((branch) => (
-                          <div
-                            key={branch.id}
-                            className="flex items-center gap-2"
-                          >
-                            <span className="text-xs text-blue-600">•</span>
-                            <span className="text-sm text-blue-700 font-medium">
-                              {branch.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+            {showConfirmation && selectedBranches.length > 0 && selectedBranchHead && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
                   </div>
-                  <div className="flex justify-end gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedBranches([]);
-                        setShowConfirmation(false);
-                      }}
-                    >
-                      Clear
-                    </Button>
-                    <Button
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={async () => {
-                        if (
-                          !selectedBranchHead ||
-                          selectedBranches.length === 0
-                        )
-                          return;
-
-                        await withErrorHandling(
-                          async () => {
-                            // Store data for success message
-                            setSuccessData({
-                              branchHead: selectedBranchHead,
-                              branches: [...selectedBranches],
-                            });
-
-                            // Update user branch assignments using dedicated API endpoint
-                            const formData = new FormData();
-                            // Add each branch ID to the form data
-                            selectedBranches.forEach((branch) => {
-                              formData.append("branch_ids[]", branch.id);
-                            });
-
-                            // Use updateUserBranch API endpoint for branch assignments
-                            await apiService.updateUserBranch(
-                              selectedBranchHead.id,
-                              formData
-                            );
-
-                            // Close the branches modal after confirmation
-                            setIsBranchesModalOpen(false);
-                            setShowConfirmation(false);
-                            // Show success dialog
-                            setShowSuccessDialog(true);
-                            // Clear selections after a delay
-                            setTimeout(() => {
-                              setSelectedBranches([]);
-                            }, 100);
-
-                            // Show success toast
-                            toastMessages.generic.success(
-                              "Branch Assignment Successful",
-                              `${
-                                selectedBranchHead.name
-                              } has been assigned to ${
-                                selectedBranches.length
-                              } ${
-                                selectedBranches.length === 1
-                                  ? "branch"
-                                  : "branches"
-                              }.`
-                            );
-
-                            // Reload branch heads data to update the table
-                            const reloadedData =
-                              await apiService.getAllBranchHeads();
-                            const normalizedData =
-                              normalizeBranchHeadData(reloadedData);
-                            setBranchHeadsData(normalizedData);
-                          },
-                          {
-                            errorTitle: "Assignment Failed",
-                            errorMessage:
-                              "Failed to assign branches. Please try again.",
-                            showSuccessToast: false, // We show custom success toast above
-                          }
-                        );
-                      }}
-                    >
-                      Confirm ({selectedBranches.length})
-                    </Button>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">Branch Assignment Ready</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      <span className="font-semibold">{selectedBranchHead.name}</span> will be
+                      assigned to:
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {selectedBranches.map((branch) => (
+                        <div key={branch.id} className="flex items-center gap-2">
+                          <span className="text-xs text-blue-600">•</span>
+                          <span className="text-sm text-blue-700 font-medium">{branch.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )}
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    onClick={() => {
+                      setSelectedBranches([]);
+                      setShowConfirmation(false);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={async () => {
+                      if (!selectedBranchHead || selectedBranches.length === 0) return;
+
+                      await withErrorHandling(
+                        async () => {
+                          // Store data for success message
+                          setSuccessData({
+                            branchHead: selectedBranchHead,
+                            branches: [...selectedBranches],
+                          });
+
+                          // Update user branch assignments using dedicated API endpoint
+                          const formData = new FormData();
+                          // Add each branch ID to the form data
+                          selectedBranches.forEach((branch) => {
+                            formData.append('branch_ids[]', branch.id);
+                          });
+
+                          // Use updateUserBranch API endpoint for branch assignments
+                          await apiService.updateUserBranch(selectedBranchHead.id, formData);
+
+                          // Close the branches modal after confirmation
+                          setIsBranchesModalOpen(false);
+                          setShowConfirmation(false);
+                          // Show success dialog
+                          setShowSuccessDialog(true);
+                          // Clear selections after a delay
+                          setTimeout(() => {
+                            setSelectedBranches([]);
+                          }, 100);
+
+                          // Show success toast
+                          toastMessages.generic.success(
+                            'Branch Assignment Successful',
+                            `${selectedBranchHead.name} has been assigned to ${
+                              selectedBranches.length
+                            } ${selectedBranches.length === 1 ? 'branch' : 'branches'}.`
+                          );
+
+                          // Reload branch heads data to update the table
+                          const reloadedData = await apiService.getAllBranchHeads();
+                          const normalizedData = normalizeBranchHeadData(reloadedData);
+                          setBranchHeadsData(normalizedData);
+                        },
+                        {
+                          errorTitle: 'Assignment Failed',
+                          errorMessage: 'Failed to assign branches. Please try again.',
+                          showSuccessToast: false, // We show custom success toast above
+                        }
+                      );
+                    }}
+                  >
+                    Confirm ({selectedBranches.length})
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {branchesLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : branches.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No branches found
-              </div>
+              <div className="text-center py-8 text-gray-500">No branches found</div>
             ) : (
               <div className="border rounded-lg overflow-hidden">
                 <div className="max-h-[60vh] overflow-y-auto">
@@ -1081,32 +974,22 @@ export default function BranchHeadsTab() {
                     <TableHeader className="bg-gray-50">
                       <TableRow>
                         <TableHead className="w-2/5">Branch Name</TableHead>
-                        <TableHead className="w-2/5 text-center">
-                          Branch ID
-                        </TableHead>
-                        <TableHead className="w-1/5 text-center">
-                          Actions
-                        </TableHead>
+                        <TableHead className="w-2/5 text-center">Branch ID</TableHead>
+                        <TableHead className="w-1/5 text-center">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {branches.map((branch) => (
                         <TableRow key={branch.id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium py-3">
-                            {branch.name}
-                          </TableCell>
-                          <TableCell className="py-3 text-center">
-                            {branch.id}
-                          </TableCell>
+                          <TableCell className="font-medium py-3">{branch.name}</TableCell>
+                          <TableCell className="py-3 text-center">{branch.id}</TableCell>
                           <TableCell className="py-3 text-center">
                             <div className="flex justify-center">
                               <Button
                                 className={`${
-                                  selectedBranches.some(
-                                    (b) => b.id === branch.id
-                                  )
-                                    ? "bg-green-600 hover:bg-green-700 text-white"
-                                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                                  selectedBranches.some((b) => b.id === branch.id)
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
                                 }`}
                                 size="sm"
                                 onClick={() => {
@@ -1118,28 +1001,19 @@ export default function BranchHeadsTab() {
                                   if (isSelected) {
                                     // Remove from selection
                                     setSelectedBranches(
-                                      selectedBranches.filter(
-                                        (b) => b.id !== branch.id
-                                      )
+                                      selectedBranches.filter((b) => b.id !== branch.id)
                                     );
                                     if (selectedBranches.length === 1) {
                                       setShowConfirmation(false);
                                     }
                                   } else {
                                     // Add to selection
-                                    setSelectedBranches([
-                                      ...selectedBranches,
-                                      branch,
-                                    ]);
+                                    setSelectedBranches([...selectedBranches, branch]);
                                     setShowConfirmation(true);
                                   }
                                 }}
                               >
-                                {selectedBranches.some(
-                                  (b) => b.id === branch.id
-                                )
-                                  ? "Added"
-                                  : "Add"}
+                                {selectedBranches.some((b) => b.id === branch.id) ? 'Added' : 'Add'}
                               </Button>
                             </div>
                           </TableCell>
@@ -1155,10 +1029,7 @@ export default function BranchHeadsTab() {
       </Dialog>
 
       {/* Success Dialog */}
-      <Dialog
-        open={showSuccessDialog}
-        onOpenChangeAction={setShowSuccessDialog}
-      >
+      <Dialog open={showSuccessDialog} onOpenChangeAction={setShowSuccessDialog}>
         <DialogContent className={`max-w-md p-6 ${dialogAnimationClass}`}>
           <div className="flex flex-col items-center justify-center py-6 space-y-4">
             {/* Success Animation */}
@@ -1187,24 +1058,17 @@ export default function BranchHeadsTab() {
 
             {/* Success Message */}
             <div className="text-center space-y-2">
-              <DialogTitle className="text-2xl font-bold text-gray-900">
-                Success!
-              </DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-gray-900">Success!</DialogTitle>
               <DialogDescription className="text-base text-gray-600">
                 {successData.branchHead && successData.branches.length > 0 && (
                   <>
-                    <span className="font-semibold">
-                      {successData.branchHead.name}
-                    </span>{" "}
-                    has been successfully assigned to{" "}
-                    {successData.branches.length}{" "}
-                    {successData.branches.length === 1 ? "branch" : "branches"}.
+                    <span className="font-semibold">{successData.branchHead.name}</span> has been
+                    successfully assigned to {successData.branches.length}{' '}
+                    {successData.branches.length === 1 ? 'branch' : 'branches'}.
                   </>
                 )}
               </DialogDescription>
-              <p className="text-sm text-gray-500 mt-2">
-                Closing automatically...
-              </p>
+              <p className="text-sm text-gray-500 mt-2">Closing automatically...</p>
             </div>
           </div>
         </DialogContent>
@@ -1253,11 +1117,9 @@ export default function BranchHeadsTab() {
             {/* Current Assignment Display */}
             {branchHeadToEdit && (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex-shrink-0">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Current Assignment:
-                </p>
+                <p className="text-sm font-medium text-gray-700 mb-2">Current Assignment:</p>
                 <p className="text-sm text-gray-600">
-                  {branchHeadToEdit.branch || "No branches assigned"}
+                  {branchHeadToEdit.branch || 'No branches assigned'}
                 </p>
               </div>
             )}
@@ -1268,9 +1130,7 @@ export default function BranchHeadsTab() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : branches.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No branches found
-              </div>
+              <div className="text-center py-8 text-gray-500">No branches found</div>
             ) : (
               <div className="border rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto">
@@ -1278,55 +1138,37 @@ export default function BranchHeadsTab() {
                     <TableHeader className="bg-gray-50">
                       <TableRow>
                         <TableHead className="w-2/5">Branch Name</TableHead>
-                        <TableHead className="w-2/5 text-center">
-                          Branch ID
-                        </TableHead>
-                        <TableHead className="w-1/5 text-center">
-                          Actions
-                        </TableHead>
+                        <TableHead className="w-2/5 text-center">Branch ID</TableHead>
+                        <TableHead className="w-1/5 text-center">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {branches.map((branch) => {
-                        const isSelected = editSelectedBranches.some(
-                          (b) => b.id === branch.id
-                        );
+                        const isSelected = editSelectedBranches.some((b) => b.id === branch.id);
                         return (
-                          <TableRow
-                            key={branch.id}
-                            className="hover:bg-gray-50"
-                          >
-                            <TableCell className="font-medium py-3">
-                              {branch.name}
-                            </TableCell>
-                            <TableCell className="py-3 text-center">
-                              {branch.id}
-                            </TableCell>
+                          <TableRow key={branch.id} className="hover:bg-gray-50">
+                            <TableCell className="font-medium py-3">{branch.name}</TableCell>
+                            <TableCell className="py-3 text-center">{branch.id}</TableCell>
                             <TableCell className="py-3 text-center">
                               <div className="flex justify-center">
                                 <Button
                                   className={`${
                                     isSelected
-                                      ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                                      : "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                                      ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+                                      : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
                                   }`}
                                   size="sm"
                                   onClick={() => {
                                     if (isSelected) {
                                       setEditSelectedBranches(
-                                        editSelectedBranches.filter(
-                                          (b) => b.id !== branch.id
-                                        )
+                                        editSelectedBranches.filter((b) => b.id !== branch.id)
                                       );
                                     } else {
-                                      setEditSelectedBranches([
-                                        ...editSelectedBranches,
-                                        branch,
-                                      ]);
+                                      setEditSelectedBranches([...editSelectedBranches, branch]);
                                     }
                                   }}
                                 >
-                                  {isSelected ? "Selected" : "Select"}
+                                  {isSelected ? 'Selected' : 'Select'}
                                 </Button>
                               </div>
                             </TableCell>
@@ -1347,10 +1189,7 @@ export default function BranchHeadsTab() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {editSelectedBranches.map((branch) => (
-                    <Badge
-                      key={branch.id}
-                      className="bg-blue-600 text-white cursor-pointer"
-                    >
+                    <Badge key={branch.id} className="bg-blue-600 text-white cursor-pointer">
                       {branch.name}
                     </Badge>
                   ))}
@@ -1377,10 +1216,7 @@ export default function BranchHeadsTab() {
               disabled={isSavingBranchHead}
               onClick={async () => {
                 if (!branchHeadToEdit) {
-                  toastMessages.generic.error(
-                    "Validation Error",
-                    "No branch head selected."
-                  );
+                  toastMessages.generic.error('Validation Error', 'No branch head selected.');
                   return;
                 }
 
@@ -1396,26 +1232,21 @@ export default function BranchHeadsTab() {
                       if (editSelectedBranches.length > 0) {
                         const formData = new FormData();
                         editSelectedBranches.forEach((branch) => {
-                          formData.append("branch_ids[]", String(branch.id));
+                          formData.append('branch_ids[]', String(branch.id));
                         });
 
-                        await apiService.updateUserBranch(
-                          branchHeadToEdit.id,
-                          formData
-                        );
+                        await apiService.updateUserBranch(branchHeadToEdit.id, formData);
                       }
 
                       // Update UI immediately
                       const branchNames =
                         editSelectedBranches.length > 0
-                          ? editSelectedBranches.map((b) => b.name).join(", ")
-                          : "";
+                          ? editSelectedBranches.map((b) => b.name).join(', ')
+                          : '';
 
                       setBranchHeadsData((prevData) =>
                         prevData.map((head) =>
-                          head.id === branchHeadToEdit.id
-                            ? { ...head, branch: branchNames }
-                            : head
+                          head.id === branchHeadToEdit.id ? { ...head, branch: branchNames } : head
                         )
                       );
 
@@ -1423,9 +1254,7 @@ export default function BranchHeadsTab() {
                       apiService
                         .getAllBranchHeads()
                         .then((reloadedData) => {
-                          setBranchHeadsData(
-                            normalizeBranchHeadData(reloadedData)
-                          );
+                          setBranchHeadsData(normalizeBranchHeadData(reloadedData));
                         })
                         .catch(() => {});
 
@@ -1440,14 +1269,13 @@ export default function BranchHeadsTab() {
                       setShowEditSuccessDialog(true);
 
                       toastMessages.generic.success(
-                        "Branch Assignment Updated",
+                        'Branch Assignment Updated',
                         `${branchHeadToEdit.name}'s branch assignment has been updated.`
                       );
                     },
                     {
-                      errorTitle: "Update Failed",
-                      errorMessage:
-                        "Failed to update branch assignment. Please try again.",
+                      errorTitle: 'Update Failed',
+                      errorMessage: 'Failed to update branch assignment. Please try again.',
                       showSuccessToast: false,
                     }
                   );
@@ -1459,17 +1287,14 @@ export default function BranchHeadsTab() {
               {isSavingBranchHead && (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               )}
-              {isSavingBranchHead ? "Saving..." : "Save Changes"}
+              {isSavingBranchHead ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Edit Success Dialog */}
-      <Dialog
-        open={showEditSuccessDialog}
-        onOpenChangeAction={setShowEditSuccessDialog}
-      >
+      <Dialog open={showEditSuccessDialog} onOpenChangeAction={setShowEditSuccessDialog}>
         <DialogContent className={`max-w-md p-6 ${dialogAnimationClass}`}>
           <div className="flex flex-col items-center justify-center py-6 space-y-4">
             {/* Success Animation */}
@@ -1498,28 +1323,17 @@ export default function BranchHeadsTab() {
 
             {/* Success Message */}
             <div className="text-center space-y-2">
-              <DialogTitle className="text-2xl font-bold text-gray-900">
-                Updated!
-              </DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-gray-900">Updated!</DialogTitle>
               <DialogDescription className="text-base text-gray-600">
-                {editSuccessData.branchHead &&
-                  editSuccessData.branches.length > 0 && (
-                    <>
-                      <span className="font-semibold">
-                        {editSuccessData.branchHead.name}
-                      </span>
-                      's branch assignment has been updated to{" "}
-                      {editSuccessData.branches.length}{" "}
-                      {editSuccessData.branches.length === 1
-                        ? "branch"
-                        : "branches"}
-                      .
-                    </>
-                  )}
+                {editSuccessData.branchHead && editSuccessData.branches.length > 0 && (
+                  <>
+                    <span className="font-semibold">{editSuccessData.branchHead.name}</span>
+                    's branch assignment has been updated to {editSuccessData.branches.length}{' '}
+                    {editSuccessData.branches.length === 1 ? 'branch' : 'branches'}.
+                  </>
+                )}
               </DialogDescription>
-              <p className="text-sm text-gray-500 mt-2">
-                Closing automatically...
-              </p>
+              <p className="text-sm text-gray-500 mt-2">Closing automatically...</p>
             </div>
           </div>
         </DialogContent>
@@ -1542,8 +1356,8 @@ export default function BranchHeadsTab() {
               Delete Branch Assignment
             </DialogTitle>
             <DialogDescription className="text-red-700">
-              This action cannot be undone. Are you sure you want to permanently
-              remove branch assignments for {branchHeadToDelete?.name}?
+              This action cannot be undone. Are you sure you want to permanently remove branch
+              assignments for {branchHeadToDelete?.name}?
             </DialogDescription>
           </DialogHeader>
 
@@ -1571,20 +1385,16 @@ export default function BranchHeadsTab() {
                     await withErrorHandling(
                       async () => {
                         // Remove all branch assignments
-                        await apiService.removeUserBranches(
-                          branchHeadToDelete.id
-                        );
+                        await apiService.removeUserBranches(branchHeadToDelete.id);
 
                         // Reload data
-                        const reloadedData =
-                          await apiService.getAllBranchHeads();
-                        const normalizedData =
-                          normalizeBranchHeadData(reloadedData);
+                        const reloadedData = await apiService.getAllBranchHeads();
+                        const normalizedData = normalizeBranchHeadData(reloadedData);
                         setBranchHeadsData(normalizedData);
 
                         // Success toast
                         toastMessages.generic.success(
-                          "Branch Assignment Removed",
+                          'Branch Assignment Removed',
                           `${branchHeadToDelete.name}'s branch assignment has been removed.`
                         );
 
@@ -1593,9 +1403,8 @@ export default function BranchHeadsTab() {
                         setBranchHeadToDelete(null);
                       },
                       {
-                        errorTitle: "Delete Failed",
-                        errorMessage:
-                          "Failed to remove branch assignment. Please try again.",
+                        errorTitle: 'Delete Failed',
+                        errorMessage: 'Failed to remove branch assignment. Please try again.',
                         showSuccessToast: false,
                       }
                     );
@@ -1609,7 +1418,7 @@ export default function BranchHeadsTab() {
                 ) : (
                   <span>🗑️</span>
                 )}
-                {isDeletingBranchHead ? "Deleting..." : "Delete Permanently"}
+                {isDeletingBranchHead ? 'Deleting...' : 'Delete Permanently'}
               </Button>
             </div>
           </DialogFooter>

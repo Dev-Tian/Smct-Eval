@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import DashboardShell, { SidebarItem } from "@/components/DashboardShell";
-import { withAuth } from "@/hoc";
-import { useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import DashboardShell, { SidebarItem } from '@/components/DashboardShell';
+import { withAuth } from '@/hoc';
+import { useMemo } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,30 +12,29 @@ function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const sidebarItems: SidebarItem[] = useMemo(
     () => [
       {
-        id: "overview",
-        label: "Overview",
-        icon: "📊",
-        path: "/employee-dashboard",
+        id: 'overview',
+        label: 'Overview',
+        icon: '📊',
+        path: '/employee-dashboard',
       },
       {
-        id: "reviews",
-        label: "Performance Reviews",
-        icon: "📝",
-        path: "/employee-dashboard/performanceReviews",
+        id: 'reviews',
+        label: 'Performance Reviews',
+        icon: '📝',
+        path: '/employee-dashboard/performanceReviews',
       },
       {
-        id: "history",
-        label: "Evaluation History",
-        icon: "📈",
-        path: "/employee-dashboard/evaluationHistory",
+        id: 'history',
+        label: 'Evaluation History',
+        icon: '📈',
+        path: '/employee-dashboard/evaluationHistory',
       },
     ],
     []
   );
 
   // Determine active item based on current URL
-  const active =
-    sidebarItems.find((item) => item.path === pathname)?.id ?? "overview";
+  const active = sidebarItems.find((item) => item.path === pathname)?.id ?? 'overview';
 
   const setActiveWithRefresh = (id: string) => {
     const item = sidebarItems.find((item) => item.id === id);
@@ -45,7 +44,6 @@ function EmployeeLayout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardShell
       title="Employee Dashboard"
-      currentPeriod={new Date().toLocaleDateString()}
       sidebarItems={sidebarItems}
       activeItemId={active}
       onChangeActive={setActiveWithRefresh}
@@ -55,4 +53,4 @@ function EmployeeLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withAuth(EmployeeLayout, { requiredRole: "employee" });
+export default withAuth(EmployeeLayout, { requiredRole: 'employee' });

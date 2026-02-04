@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import Basic_B_View from "./Basic_B_View";
-import Basic_HO_View from "./Basic_HO_View";
-import RnF_B_View from "./RnF_B_View";
-import RnF_HO_View from "./RnF_HO_View";
-import apiService from "@/lib/apiService";
-import { toastMessages } from "@/lib/toastMessages";
+import { useEffect, useState } from 'react';
+import Basic_B_View from './Basic_B_View';
+import Basic_HO_View from './Basic_HO_View';
+import RnF_B_View from './RnF_B_View';
+import RnF_HO_View from './RnF_HO_View';
+import apiService from '@/lib/apiService';
+import { toastMessages } from '@/lib/toastMessages';
 
 interface viewRouterTypes {
   submission: any;
@@ -33,9 +33,9 @@ export default function ViewDesignator({
       try {
         const response = await apiService.approvedByEmployee(submissionId);
         setEvaluation(response.data);
-        toastMessages.generic.success("Approved!", "Approved Successfully");
+        toastMessages.generic.success('Approved!', 'Approved Successfully');
       } catch (error) {
-        toastMessages.generic.error("Approval Failed :", `${error}`);
+        toastMessages.generic.error('Approval Failed :', `${error}`);
       }
     };
     toApprove();
@@ -43,7 +43,7 @@ export default function ViewDesignator({
 
   return (
     <>
-      {submission && submission.evaluationType === "BranchRankNFile" && (
+      {submission && submission.evaluationType === 'BranchRankNFile' && (
         <RnF_B_View
           isOpen={isOpen}
           onCloseAction={onCloseAction}
@@ -53,7 +53,7 @@ export default function ViewDesignator({
         />
       )}
 
-      {submission && submission.evaluationType === "BranchBasic" && (
+      {submission && submission.evaluationType === 'BranchBasic' && (
         <Basic_B_View
           isOpen={isOpen}
           onCloseAction={onCloseAction}
@@ -63,7 +63,7 @@ export default function ViewDesignator({
         />
       )}
 
-      {submission && submission.evaluationType === "HoRankNFile" && (
+      {submission && submission.evaluationType === 'HoRankNFile' && (
         <RnF_HO_View
           isOpen={isOpen}
           onCloseAction={onCloseAction}
@@ -73,7 +73,7 @@ export default function ViewDesignator({
         />
       )}
 
-      {submission && submission.evaluationType === "HoBasic" && (
+      {submission && submission.evaluationType === 'HoBasic' && (
         <Basic_HO_View
           isOpen={isOpen}
           onCloseAction={onCloseAction}

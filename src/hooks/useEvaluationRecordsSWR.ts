@@ -2,9 +2,9 @@
 // Reverb-style architecture with SWR for automatic revalidation
 
 import useSWR, { mutate, SWRConfiguration } from 'swr';
-import { 
-  getAllEvaluationRecords, 
-  getEvaluationRecordById, 
+import {
+  getAllEvaluationRecords,
+  getEvaluationRecordById,
   searchEvaluationRecords,
   updateEvaluationRecord,
   addEmployeeSignatureApproval,
@@ -13,12 +13,12 @@ import {
   getApprovalHistoryForRecord,
   EvaluationRecord,
   EvaluationRecordSearchParams,
-  ApprovalHistoryEntry
+  ApprovalHistoryEntry,
 } from '@/lib/evaluationRecordsService';
 
 // SWR Configuration for Reverb-style behavior
 const swrConfig: SWRConfiguration = {
-  refreshInterval: 30000, // Auto-refresh every 30 seconds
+  // refreshInterval: 30000, // Auto-refresh every 30 seconds
   revalidateOnFocus: true, // Refresh when user focuses tab
   revalidateOnReconnect: true, // Refresh when connection restored
   dedupingInterval: 10000, // Dedupe requests within 10 seconds
@@ -37,11 +37,12 @@ const fetchers = {
 
 // Hook for getting all evaluation records with Reverb-style revalidation
 export const useEvaluationRecordsSWR = () => {
-  const { data, error, isLoading, mutate: mutateRecords } = useSWR(
-    'evaluation-records',
-    fetchers.allRecords,
-    swrConfig
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateRecords,
+  } = useSWR('evaluation-records', fetchers.allRecords, swrConfig);
 
   return {
     records: data || [],
@@ -54,9 +55,14 @@ export const useEvaluationRecordsSWR = () => {
 
 // Hook for getting a single evaluation record
 export const useEvaluationRecordSWR = (id: number | null) => {
-  const { data, error, isLoading, mutate: mutateRecord } = useSWR(
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateRecord,
+  } = useSWR(
     id ? `evaluation-record-${id}` : null,
-    () => id ? fetchers.recordById(id) : null,
+    () => (id ? fetchers.recordById(id) : null),
     swrConfig
   );
 
@@ -71,9 +77,14 @@ export const useEvaluationRecordSWR = (id: number | null) => {
 
 // Hook for searching evaluation records
 export const useEvaluationRecordsSearchSWR = (params: EvaluationRecordSearchParams | null) => {
-  const { data, error, isLoading, mutate: mutateSearch } = useSWR(
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateSearch,
+  } = useSWR(
     params ? `evaluation-records-search-${JSON.stringify(params)}` : null,
-    () => params ? fetchers.searchRecords(params) : null,
+    () => (params ? fetchers.searchRecords(params) : null),
     {
       ...swrConfig,
       refreshInterval: 0, // Don't auto-refresh search results
@@ -91,11 +102,12 @@ export const useEvaluationRecordsSearchSWR = (params: EvaluationRecordSearchPara
 
 // Hook for evaluation records statistics
 export const useEvaluationRecordsStatsSWR = () => {
-  const { data, error, isLoading, mutate: mutateStats } = useSWR(
-    'evaluation-records-stats',
-    fetchers.stats,
-    swrConfig
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateStats,
+  } = useSWR('evaluation-records-stats', fetchers.stats, swrConfig);
 
   return {
     stats: data || null,
@@ -108,9 +120,14 @@ export const useEvaluationRecordsStatsSWR = () => {
 
 // Hook for approval history
 export const useApprovalHistorySWR = (recordId: number | null) => {
-  const { data, error, isLoading, mutate: mutateHistory } = useSWR(
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateHistory,
+  } = useSWR(
     recordId ? `approval-history-${recordId}` : null,
-    () => recordId ? fetchers.approvalHistory(recordId) : null,
+    () => (recordId ? fetchers.approvalHistory(recordId) : null),
     swrConfig
   );
 
@@ -128,15 +145,15 @@ export const useOptimisticEvaluationUpdate = () => {
   const { mutate: mutateAll } = useEvaluationRecordsSWR();
 
   const updateRecordOptimistic = async (
-    id: number, 
+    id: number,
     updates: Partial<EvaluationRecord>,
     optimisticData?: EvaluationRecord
   ) => {
     // Optimistic update - immediately update UI
     if (optimisticData) {
       mutateAll(
-        (currentData) => 
-          currentData?.map(record => 
+        (currentData) =>
+          currentData?.map((record) =>
             record.id === id ? { ...record, ...optimisticData } : record
           ),
         false // Don't revalidate immediately
@@ -146,10 +163,10 @@ export const useOptimisticEvaluationUpdate = () => {
     try {
       // Perform actual update
       const updatedRecord = await updateEvaluationRecord(id, updates);
-      
+
       // Revalidate to get server state
       mutateAll();
-      
+
       return updatedRecord;
     } catch (error) {
       // Revert optimistic update on error
@@ -176,11 +193,11 @@ export const useOptimisticEmployeeApproval = () => {
   ) => {
     // Optimistic update
     mutateAll(
-      (currentData) => 
-        currentData?.map(record => 
-          record.id === recordId 
-            ? { 
-                ...record, 
+      (currentData) =>
+        currentData?.map((record) =>
+          record.id === recordId
+            ? {
+                ...record,
                 employeeSignature: approvalData.employeeSignature,
                 employeeSignatureDate: new Date().toISOString(),
                 employeeApprovedAt: new Date().toISOString(),
@@ -188,7 +205,7 @@ export const useOptimisticEmployeeApproval = () => {
                 employeeEmail: approvalData.employeeEmail,
                 approvalStatus: 'employee_approved' as const,
                 approvalComments: approvalData.comments || record.approvalComments,
-                lastModified: new Date().toISOString()
+                lastModified: new Date().toISOString(),
               }
             : record
         ),
@@ -222,11 +239,11 @@ export const useOptimisticEvaluatorApproval = () => {
   ) => {
     // Optimistic update
     mutateAll(
-      (currentData) => 
-        currentData?.map(record => 
-          record.id === recordId 
-            ? { 
-                ...record, 
+      (currentData) =>
+        currentData?.map((record) =>
+          record.id === recordId
+            ? {
+                ...record,
                 evaluatorSignature: approvalData.evaluatorSignature,
                 evaluatorSignatureDate: new Date().toISOString(),
                 evaluatorApprovedAt: new Date().toISOString(),
@@ -234,7 +251,7 @@ export const useOptimisticEvaluatorApproval = () => {
                 evaluatorId: approvalData.evaluatorEmail,
                 approvalStatus: 'fully_approved' as const,
                 approvalComments: approvalData.comments || record.approvalComments,
-                lastModified: new Date().toISOString()
+                lastModified: new Date().toISOString(),
               }
             : record
         ),
@@ -284,8 +301,8 @@ export const useRealtimeEvaluationUpdates = () => {
         mutateAll(
           (currentData) => {
             if (!currentData) return currentData;
-            
-            const existingIndex = currentData.findIndex(r => r.id === update.record.id);
+
+            const existingIndex = currentData.findIndex((r) => r.id === update.record.id);
             if (existingIndex >= 0) {
               // Update existing record
               const newData = [...currentData];
@@ -302,8 +319,7 @@ export const useRealtimeEvaluationUpdates = () => {
       case 'deleted':
         // Remove the record
         mutateAll(
-          (currentData) => 
-            currentData?.filter(record => record.id !== update.record.id),
+          (currentData) => currentData?.filter((record) => record.id !== update.record.id),
           false
         );
         break;

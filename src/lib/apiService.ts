@@ -1,11 +1,11 @@
-import { api, sanctum } from "./api";
-import { EvaluationPayload } from "../components/evaluation2/types";
+import { api, sanctum } from './api';
+import { EvaluationPayload } from '../components/evaluation2/types';
 // Helper function to get CSRF cookie from Sanctum
 export const sanctum_csrf = async () => {
   try {
-    await sanctum.get("/sanctum/csrf-cookie");
+    await sanctum.get('/sanctum/csrf-cookie');
   } catch (error) {
-    console.error("Failed to get CSRF cookie:", error);
+    console.error('Failed to get CSRF cookie:', error);
     throw error;
   }
 };
@@ -14,41 +14,41 @@ export const apiService = {
   // Authentication
   login: async (email: string, password: string): Promise<any> => {
     await sanctum_csrf();
-    const response = await api.post("/login", { email, password });
+    const response = await api.post('/login', { email, password });
     return response.data;
   },
 
   logout: async (): Promise<any> => {
-    const response = await api.post("/logout");
+    const response = await api.post('/logout');
     return response.data;
   },
 
   // Get current authenticated user
   authUser: async (): Promise<any> => {
-    const response = await api.get("/profile");
+    const response = await api.get('/profile');
     return response.data;
   },
 
   // Registration
   createPendingRegistration: async (formData: FormData): Promise<any> => {
-    const response = await api.post("/register", formData);
+    const response = await api.post('/register', formData);
     return response.data;
   },
 
   updateEmployee_auth: async (formData: FormData): Promise<any> => {
-    const response = await api.post("/updateProfileUserAuth", formData);
+    const response = await api.post('/updateProfileUserAuth', formData);
     return response.data;
   },
 
   requestSignatureReset: async (): Promise<any> => {
-    const response = await api.post("/requestSignatureReset");
+    const response = await api.post('/requestSignatureReset');
     return response.data;
   },
 
   getSignatureResetRequests: async (searchTerm: string): Promise<any> => {
-    const response = await api.get("/getAllSignatureReset", {
+    const response = await api.get('/getAllSignatureReset', {
       params: {
-        searchTerm: searchTerm || "",
+        search: searchTerm || '',
       },
     });
     return response.data.users;
@@ -64,10 +64,7 @@ export const apiService = {
     return response.data;
   },
 
-  updateEmployee: async (
-    formData: FormData,
-    id: string | number,
-  ): Promise<any> => {
+  updateEmployee: async (formData: FormData, id: string | number): Promise<any> => {
     const response = await api.post(`/updateUser/${id}`, formData);
     return response.data;
   },
@@ -91,12 +88,12 @@ export const apiService = {
     searchTerm: string,
     status: string | number,
     page: number,
-    perPage: number,
+    perPage: number
   ): Promise<any | null> => {
-    const response = await api.get("/getPendingRegistrations", {
+    const response = await api.get('/getPendingRegistrations', {
       params: {
-        search: searchTerm || "",
-        status: status || "",
+        search: searchTerm || '',
+        status: status || '',
         page: page,
         per_page: perPage,
       },
@@ -110,23 +107,23 @@ export const apiService = {
     page: number,
     perPage: number,
     branch?: string,
-    department?: string,
+    department?: string
   ): Promise<any | null> => {
-    const response = await api.get("/getAllActiveUsers", {
+    const response = await api.get('/getAllActiveUsers', {
       params: {
-        search: searchTerm || "",
-        role: role || "",
+        search: searchTerm || '',
+        role: role || '',
         page: page,
         per_page: perPage,
-        branch: branch || "",
-        department: department || "",
+        branch: branch || '',
+        department: department || '',
       },
     });
     return response.data.users || [];
   },
 
   getDepartments: async (): Promise<{ label: string; value: string }[]> => {
-    const response = await api.get("/departments");
+    const response = await api.get('/departments');
     return response.data.departments.map((departments: any) => ({
       value: departments.id,
       label: departments.department_name,
@@ -134,7 +131,7 @@ export const apiService = {
   },
 
   getPositions: async (): Promise<{ label: string; value: string }[]> => {
-    const response = await api.get("/positions");
+    const response = await api.get('/positions');
     return response.data.positions.map((position: any) => ({
       value: position.id,
       label: position.label,
@@ -142,10 +139,10 @@ export const apiService = {
   },
 
   getBranches: async (): Promise<{ label: string; value: string }[]> => {
-    const response = await api.get("/branches");
+    const response = await api.get('/branches');
     return response.data.branches.map((branches: any) => ({
       value: branches.id,
-      label: branches.branch_name + " /" + branches.branch_code,
+      label: branches.branch_name + ' /' + branches.branch_code,
     }));
   },
 
@@ -155,16 +152,16 @@ export const apiService = {
     perPage?: number,
     status?: string,
     quarter?: string,
-    year?: string,
+    year?: string
   ): Promise<any> => {
     const response = await api.get(`/allEvaluations`, {
       params: {
-        search: searchTerm || "",
+        search: searchTerm || '',
         page: page,
         per_page: perPage,
-        status: status || "",
-        quarter: quarter || "",
-        year: year || "",
+        status: status || '',
+        quarter: quarter || '',
+        year: year || '',
       },
     });
 
@@ -193,7 +190,7 @@ export const apiService = {
 
   createSubmission: async (
     employeeId: number | string,
-    submission: EvaluationPayload,
+    submission: EvaluationPayload
   ): Promise<any> => {
     const response = await api.post(`/submit/${employeeId}`, submission);
     return response.data;
@@ -204,9 +201,7 @@ export const apiService = {
     return response.data;
   },
 
-  deleteSubmission: async (
-    id: number,
-  ): Promise<{ success: boolean; message: string }> => {
+  deleteSubmission: async (id: number): Promise<{ success: boolean; message: string }> => {
     const delete_eval = await api.post(`/deleteEval/${id}`);
     return delete_eval.data;
   },
@@ -216,19 +211,15 @@ export const apiService = {
     return response.data;
   },
 
-  markNotificationAsRead: async (
-    notificationId: string | number,
-  ): Promise<void> => {
+  markNotificationAsRead: async (notificationId: string | number): Promise<void> => {
     await api.post(`/isReadNotification/${notificationId}`);
   },
 
   markAllNotificationsAsRead: async (): Promise<void> => {
-    await api.post("/markAllAsRead");
+    await api.post('/markAllAsRead');
   },
 
-  deleteNotification: async (
-    notificationId: string | number,
-  ): Promise<void> => {
+  deleteNotification: async (notificationId: string | number): Promise<void> => {
     await api.post(`/deleteNotification/${notificationId}`);
   },
 
@@ -238,7 +229,7 @@ export const apiService = {
 
   // Get all users (except authenticated user)
   getAllUsers: async (): Promise<any[]> => {
-    const response = await api.get("/getAllUsers");
+    const response = await api.get('/getAllUsers');
     const data = response.data;
 
     if (data.success && data.users) {
@@ -255,7 +246,7 @@ export const apiService = {
 
   // Get all branch heads/supervisors
   getAllBranchHeads: async (): Promise<any[]> => {
-    const response = await api.get("/getAllBranchHeads");
+    const response = await api.get('/getAllBranchHeads');
     const data = response.data.branch_heads;
 
     if (data.success && data.users) {
@@ -272,7 +263,7 @@ export const apiService = {
 
   // Get all area managers
   getAllAreaManager: async (): Promise<any> => {
-    const response = await api.get("/getAllAreaManager");
+    const response = await api.get('/getAllAreaManager');
     return response.data.branch_heads;
   },
 
@@ -281,18 +272,17 @@ export const apiService = {
     search?: string,
     per_page?: number,
     page?: number,
-    position_filter?: number,
+    position_filter?: number
   ): Promise<any> => {
-    const response = await api.get("/getAllEmployeeByAuth", {
+    const response = await api.get('/getAllEmployeeByAuth', {
       params: {
-        search: search || "",
+        search: search || '',
         per_page: per_page || 10,
         page: page || 1,
-        position_filter: position_filter || "",
+        position_filter: position_filter || '',
       },
     });
-    const data = response.data;
-    return data.employees;
+    return response.data;
   },
 
   // Get specific user
@@ -311,15 +301,12 @@ export const apiService = {
 
   // Add new user
   addUser: async (formData: FormData): Promise<any> => {
-    const response = await api.post("/addUser", formData);
+    const response = await api.post('/addUser', formData);
     return response.data;
   },
 
   // Update branches for specific user
-  updateUserBranch: async (
-    userId: string | number,
-    formData: FormData,
-  ): Promise<any> => {
+  updateUserBranch: async (userId: string | number, formData: FormData): Promise<any> => {
     const response = await api.post(`/updateUserBranch/${userId}`, formData);
     return response.data;
   },
@@ -334,11 +321,11 @@ export const apiService = {
   getTotalEmployeesBranch: async (
     searchValue: string,
     currentPage: number,
-    itemsPerPage: number,
+    itemsPerPage: number
   ): Promise<any> => {
-    const response = await api.get("/getTotalEmployeesBranch", {
+    const response = await api.get('/getTotalEmployeesBranch', {
       params: {
-        search: searchValue || "",
+        search: searchValue || '',
         page: currentPage,
         per_page: itemsPerPage,
       },
@@ -354,7 +341,7 @@ export const apiService = {
 
   // Add new branch
   addBranch: async (formData: {}): Promise<any> => {
-    const response = await api.post("/addBranch", formData);
+    const response = await api.post('/addBranch', formData);
     return response.data;
   },
 
@@ -362,11 +349,11 @@ export const apiService = {
   getTotalEmployeesDepartments: async (
     searchValue: string,
     currentPage: number,
-    itemsPerPage: number,
+    itemsPerPage: number
   ): Promise<any> => {
-    const response = await api.get("/getTotalEmployeesDepartments", {
+    const response = await api.get('/getTotalEmployeesDepartments', {
       params: {
-        search: searchValue || "",
+        search: searchValue || '',
         page: currentPage,
         per_page: itemsPerPage,
       },
@@ -376,7 +363,7 @@ export const apiService = {
 
   // Add new department
   addDepartment: async (name: string): Promise<any> => {
-    const response = await api.post("/addDepartment", {
+    const response = await api.post('/addDepartment', {
       department_name: name,
     });
     return response.data;
@@ -396,28 +383,25 @@ export const apiService = {
 
   // Get branch rank and file employees
   getBranchRankNFile: async (): Promise<any> => {
-    const response = await api.post("/BranchRankNFile", {});
+    const response = await api.post('/BranchRankNFile', {});
     return response.data;
   },
 
   // Get branch basic employees
   getBranchBasic: async (): Promise<any> => {
-    const response = await api.post("/BranchBasic", {});
+    const response = await api.post('/BranchBasic', {});
     return response.data;
   },
 
   // Get head office basic employees
-  postHoBasic: async (
-    employeeId: number | string,
-    submission: EvaluationPayload,
-  ): Promise<any> => {
+  postHoBasic: async (employeeId: number | string, submission: EvaluationPayload): Promise<any> => {
     const response = await api.post(`/HoBasic/${employeeId}`, submission);
     return response.data;
   },
   // Get head office rank and file employees
   postHoRankNFile: async (
     employeeId: number | string,
-    submission: EvaluationPayload,
+    submission: EvaluationPayload
   ): Promise<any> => {
     const response = await api.post(`/HoRankNFile/${employeeId}`, submission);
     return response.data;
@@ -426,7 +410,7 @@ export const apiService = {
   // Get branch basic employees
   postBranchBasic: async (
     employeeId: number | string,
-    submission: EvaluationPayload,
+    submission: EvaluationPayload
   ): Promise<any> => {
     const response = await api.post(`/BranchBasic/${employeeId}`, submission);
     return response.data;
@@ -435,12 +419,9 @@ export const apiService = {
   // Get branch rank and file employees
   postBranchRankNFile: async (
     employeeId: number | string,
-    submission: EvaluationPayload,
+    submission: EvaluationPayload
   ): Promise<any> => {
-    const response = await api.post(
-      `/BranchRankNFile/${employeeId}`,
-      submission,
-    );
+    const response = await api.post(`/BranchRankNFile/${employeeId}`, submission);
     return response.data;
   },
 
@@ -451,16 +432,16 @@ export const apiService = {
     per_page: number,
     status: string,
     quarter: string,
-    year: number,
+    year: number
   ): Promise<any> => {
-    const response = await api.get("/getEvalAuthEvaluator", {
+    const response = await api.get('/getEvalAuthEvaluator', {
       params: {
-        search: search || "",
+        search: search || '',
         page: page || 1,
         per_page: per_page || 10,
-        status: status || "",
-        quarter: quarter || "",
-        year: year || "",
+        status: status || '',
+        quarter: quarter || '',
+        year: year || '',
       },
     });
     return response.data;
@@ -472,11 +453,11 @@ export const apiService = {
     page: number,
     per_page: number,
     selectedYear?: string,
-    selectedQuarter?: string,
+    selectedQuarter?: string
   ): Promise<any> => {
-    const response = await api.get("/getMyEvalAuthEmployee", {
+    const response = await api.get('/getMyEvalAuthEmployee', {
       params: {
-        search: search || "",
+        search: search || '',
         page: page || 1,
         per_page: per_page || 10,
         year: selectedYear,
@@ -490,11 +471,11 @@ export const apiService = {
   evaluatorDashboard: async (
     searchTerm: string,
     currentPage: number,
-    itemsPerPage: number,
+    itemsPerPage: number
   ): Promise<any> => {
-    const response = await api.get("/evaluatorDashboard", {
+    const response = await api.get('/evaluatorDashboard', {
       params: {
-        search: searchTerm || "",
+        search: searchTerm || '',
         page: currentPage || 1,
         per_page: itemsPerPage || 10,
       },
@@ -504,13 +485,13 @@ export const apiService = {
 
   // HR dashboard total cards
   hrDashboard: async (): Promise<any> => {
-    const response = await api.get("/hrDashboard");
+    const response = await api.get('/hrDashboard');
     return response.data;
   },
 
   // Employee dashboard total cards
   employeeDashboard: async (): Promise<any> => {
-    const response = await api.get("/employeeDashboard");
+    const response = await api.get('/employeeDashboard');
     return response.data;
   },
 
@@ -525,14 +506,14 @@ export const apiService = {
 
   // Get all roles
   getAllRoles: async (): Promise<any[]> => {
-    const response = await api.get("/getAllRoles");
+    const response = await api.get('/getAllRoles');
     const data = response.data;
     return data.roles;
   },
 
   // Mark notification as read
   isReadNotification: async (notificationId: number): Promise<any> => {
-    const response = await api.post("/isReadNotification", {
+    const response = await api.post('/isReadNotification', {
       notificationId,
     });
     return response.data;

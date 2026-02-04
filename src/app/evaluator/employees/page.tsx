@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { X, Eye, FileText } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useMemo } from 'react';
+import { X, Eye, FileText } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -18,27 +12,25 @@ import {
   TableHeader,
   TableRow,
   TableCell,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Combobox } from "@/components/ui/combobox";
-import { User, useAuth } from "../../../contexts/UserContext";
-import apiService from "@/lib/apiService";
-import EvaluationTypeModal from "@/components/EvaluationTypeModal";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import EvaluationsPagination from "@/components/paginationComponent";
-import ViewEmployeeModal from "@/components/ViewEmployeeModal";
-import RnF_B_EvaluationForm from "@/components/evaluation2/indexes/RnF_B";
-import RnF_HO_EvaluationForm from "@/components/evaluation2/indexes/RnF_HO";
-import Basic_HO_EvaluationForm from "@/components/evaluation2/indexes/Basic_HO";
-import Basic_B_EvaluationForm from "@/components/evaluation2/indexes/Basic_B";
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Combobox } from '@/components/ui/combobox';
+import { User } from '../../../contexts/UserContext';
+import apiService from '@/lib/apiService';
+import EvaluationTypeModal from '@/components/EvaluationTypeModal';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import EvaluationsPagination from '@/components/paginationComponent';
+import ViewEmployeeModal from '@/components/ViewEmployeeModal';
+import RnF_B_EvaluationForm from '@/components/evaluation2/indexes/RnF_B';
+import RnF_HO_EvaluationForm from '@/components/evaluation2/indexes/RnF_HO';
+import Basic_HO_EvaluationForm from '@/components/evaluation2/indexes/Basic_HO';
+import Basic_B_EvaluationForm from '@/components/evaluation2/indexes/Basic_B';
+import debounce from 'lodash.debounce';
 
 export default function EmployeesTab() {
-  const { user } = useAuth();
-
   //refreshing state
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // Add refresh trigger
 
   //data employees
   const [employees, setEmployees] = useState<User[] | null>(null);
@@ -50,174 +42,64 @@ export default function EmployeesTab() {
   >([]);
 
   // filters
-  const [positionFilter, setPositionFilter] = useState("");
-  const [employeeSearch, setEmployeeSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [positionFilter, setPositionFilter] = useState('');
+  const [employeeSearch, setEmployeeSearch] = useState('');
 
   //pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(8);
+  const itemsPerPage = 8;
   const [overviewTotal, setOverviewTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(0);
 
   // modals
-  const [isEvaluationTypeModalOpen, setIsEvaluationTypeModalOpen] =
-    useState(false);
+  const [isEvaluationTypeModalOpen, setIsEvaluationTypeModalOpen] = useState(false);
   const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
-  const [evaluationType, setEvaluationType] = useState<
-    "employee" | "manager" | null
-  >(null);
+  const [evaluationType, setEvaluationType] = useState<'employee' | 'manager' | null>(null);
   const [isViewEmployeeModalOpen, setIsViewEmployeeModalOpen] = useState(false);
 
   // View Employee Modal states
-  const [selectedEmployeeForView, setSelectedEmployeeForView] =
-    useState<User | null>(null);
-  const [selectedEmployeeForEvaluation, setSelectedEmployeeForEvaluation] =
-    useState<User | null>(null);
+  const [selectedEmployeeForView, setSelectedEmployeeForView] = useState<User | null>(null);
+  const [selectedEmployeeForEvaluation, setSelectedEmployeeForEvaluation] = useState<User | null>(
+    null
+  );
 
-  // Fetch all employees to get unique positions (without pagination limit)
-  useEffect(() => {
-    const fetchPositionsFromEmployees = async () => {
-      try {
-        // Fetch all employees with a high limit to get all unique positions
-        const res = await apiService.getAllEmployeeByAuth(
-          "", // no search filter
-          1000, // high limit to get all employees
-          1, // first page
-          undefined, // no position filter
-        );
-
-        if (!res) {
-          setPositions([]);
-          return;
-        }
-
-        let employeesData: any[] = [];
-        if (res.data && Array.isArray(res.data)) {
-          employeesData = res.data;
-        } else if (Array.isArray(res)) {
-          employeesData = res;
-        }
-
-        // Extract unique positions from employees
-        const uniquePositionsMap = new Map<
-          number | string,
-          { value: number | string; label: string }
-        >();
-
-        employeesData.forEach((employee: any) => {
-          if (employee.positions) {
-            const positionId =
-              employee.positions.id ||
-              employee.positions.value ||
-              employee.position_id;
-            const positionLabel =
-              employee.positions.label ||
-              employee.positions.name ||
-              employee.position;
-
-            if (
-              positionId &&
-              positionLabel &&
-              !uniquePositionsMap.has(positionId)
-            ) {
-              uniquePositionsMap.set(positionId, {
-                value: positionId,
-                label: positionLabel,
-              });
-            }
-          }
-        });
-
-        // Convert Map to Array and sort by label
-        const uniquePositions = Array.from(uniquePositionsMap.values()).sort(
-          (a, b) => a.label.localeCompare(b.label),
-        );
-
-        setPositions(uniquePositions);
-      } catch (error) {
-        console.error("Error fetching positions from employees:", error);
-        setPositions([]);
-      }
-    };
-    fetchPositionsFromEmployees();
-  }, [refreshTrigger]); // Refetch when refresh trigger changes
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
+  const fetchEmployees = useMemo(
+    () =>
+      debounce(async (employeeSearch: string, currentPage: number, positionFilter: string) => {
         setIsRefreshing(true);
-        const res = await apiService.getAllEmployeeByAuth(
-          debouncedSearch,
-          itemsPerPage,
-          currentPage,
-          Number(positionFilter) || undefined,
-        );
-
-        // Add safety checks to prevent "Cannot read properties of undefined" error
-        if (!res) {
+        try {
+          const res = await apiService.getAllEmployeeByAuth(
+            employeeSearch,
+            itemsPerPage,
+            currentPage,
+            Number(positionFilter)
+          );
+          setEmployees(res.employees.data);
+          setOverviewTotal(res.employees.total);
+          setTotalPages(res.employees.last_page);
+          setPositions(res.positions);
+          setIsRefreshing(false);
+        } catch (error) {
+          console.error('Error fetching employees:', error);
           setEmployees([]);
           setOverviewTotal(0);
-          setTotalPages(1);
-          setPerPage(itemsPerPage);
+          setTotalPages(0);
           setIsRefreshing(false);
-          return;
         }
-
-        // getAllEmployeeByAuth returns: { data: [...], total, last_page, per_page }
-        // Follow the same pattern as HR dashboard
-        let employeesData: any[] = [];
-        let total = 0;
-        let lastPage = 1;
-        let perPageValue = itemsPerPage;
-
-        if (res.data && Array.isArray(res.data)) {
-          // Standard response structure from getAllEmployeeByAuth
-          employeesData = res.data;
-          total = res.total || 0;
-          lastPage = res.last_page || 1;
-          perPageValue = res.per_page || itemsPerPage;
-        } else if (Array.isArray(res)) {
-          // Response is directly an array (fallback)
-          employeesData = res;
-          total = res.length;
-          lastPage = 1;
-          perPageValue = itemsPerPage;
-        }
-
-        setEmployees(employeesData);
-        setOverviewTotal(total);
-        setTotalPages(lastPage);
-        setPerPage(perPageValue);
-
-        setIsRefreshing(false);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-        // Set default values on error
-        setEmployees([]);
-        setOverviewTotal(0);
-        setTotalPages(1);
-        setPerPage(itemsPerPage);
-        setIsRefreshing(false);
-      }
-    };
-    fetchEmployees();
-  }, [
-    positionFilter,
-    debouncedSearch,
-    currentPage,
-    itemsPerPage,
-    refreshTrigger,
-  ]); // Add refreshTrigger to dependencies
+      }, 1000),
+    []
+  );
 
   useEffect(() => {
-    const debounceSearch = setTimeout(() => {
-      setDebouncedSearch(employeeSearch);
-    }, 500);
-    return () => clearTimeout(debounceSearch);
-  }, [employeeSearch]);
+    fetchEmployees(employeeSearch, currentPage, positionFilter);
+    return () => {
+      fetchEmployees.cancel();
+    };
+  }, [employeeSearch, currentPage, positionFilter]);
+
+  const handleRefresh = () => {
+    fetchEmployees(employeeSearch, currentPage, positionFilter);
+  };
 
   const newHiresThisMonth = (() => {
     const now = new Date();
@@ -252,11 +134,9 @@ export default function EmployeesTab() {
               </div>
             </div>
             <Button
-              onClick={() => {
-                setRefreshTrigger((prev) => prev + 1); // Trigger refresh by incrementing counter
-              }}
+              onClick={() => handleRefresh()}
               disabled={isRefreshing}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
               title="Refresh employee data"
             >
               {isRefreshing ? (
@@ -286,34 +166,36 @@ export default function EmployeesTab() {
                 className=" pr-10"
               />
               {employeeSearch && (
-                <button
+                <Button
                   onClick={() => {
-                    setEmployeeSearch("");
+                    setEmployeeSearch('');
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-600"
                   title="Clear search"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               )}
             </div>
-            <Combobox
-              options={positions}
-              value={positionFilter}
-              onValueChangeAction={(value) => {
-                setPositionFilter(String(value));
-              }}
-              placeholder="All Positions"
-              searchPlaceholder="Search positions..."
-              emptyText="No positions found."
-              className="w-[180px] cursor-pointer "
-            />
+            <div>
+              <Combobox
+                options={positions}
+                value={positionFilter}
+                onValueChangeAction={(value) => {
+                  setPositionFilter(String(value));
+                }}
+                placeholder="All Positions"
+                searchPlaceholder="Search positions..."
+                emptyText="No positions found."
+                className=" cursor-pointer "
+              />
+            </div>
             {(employeeSearch || positionFilter) && (
               <Button
                 variant="outline"
                 onClick={() => {
-                  setEmployeeSearch("");
-                  setPositionFilter("");
+                  setEmployeeSearch('');
+                  setPositionFilter('');
                 }}
                 className="px-4 py-2 text-sm text-red-400"
                 title="Clear all filters"
@@ -326,9 +208,7 @@ export default function EmployeesTab() {
           {/* Status Indicators */}
           <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex-wrap mb-4">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
-                Status Indicators:
-              </span>
+              <span className="text-sm font-medium text-gray-700">Status Indicators:</span>
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge
                   variant="outline"
@@ -356,16 +236,10 @@ export default function EmployeesTab() {
                     <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
                     {/* Logo in center */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <img
-                        src="/smct.png"
-                        alt="SMCT Logo"
-                        className="h-10 w-10 object-contain"
-                      />
+                      <img src="/smct.png" alt="SMCT Logo" className="h-10 w-10 object-contain" />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 font-medium">
-                    Loading employees...
-                  </p>
+                  <p className="text-sm text-gray-600 font-medium">Loading employees...</p>
                 </div>
               </div>
 
@@ -470,27 +344,22 @@ export default function EmployeesTab() {
                     !Array.isArray(employees) ||
                     employees.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="text-center py-8 text-gray-500"
-                        >
+                        <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                           <div className="flex flex-col items-center justify-center gap-4">
                             <img
                               src="/not-found.gif"
                               alt="No data"
                               className="w-25 h-25 object-contain"
                               style={{
-                                imageRendering: "auto",
-                                willChange: "auto",
-                                transform: "translateZ(0)",
-                                backfaceVisibility: "hidden",
-                                WebkitBackfaceVisibility: "hidden",
+                                imageRendering: 'auto',
+                                willChange: 'auto',
+                                transform: 'translateZ(0)',
+                                backfaceVisibility: 'hidden',
+                                WebkitBackfaceVisibility: 'hidden',
                               }}
                             />
                             <div className="text-gray-500">
-                              <p className="text-base font-medium mb-1">
-                                No employees found
-                              </p>
+                              <p className="text-base font-medium mb-1">No employees found</p>
                               <p className="text-sm text-gray-400">
                                 Try adjusting your search or filter criteria
                               </p>
@@ -509,9 +378,7 @@ export default function EmployeesTab() {
 
                         if (createdDate) {
                           const now = new Date();
-                          const minutesDiff =
-                            (now.getTime() - createdDate.getTime()) /
-                            (1000 * 60);
+                          const minutesDiff = (now.getTime() - createdDate.getTime()) / (1000 * 60);
                           const hoursDiff = minutesDiff / 60;
                           isNew = minutesDiff <= 30;
                           isRecentlyAdded = minutesDiff > 30 && hoursDiff <= 48;
@@ -522,17 +389,15 @@ export default function EmployeesTab() {
                             key={employee.id}
                             className={
                               isNew
-                                ? "bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100 hover:shadow-md transition-all duration-200 "
+                                ? 'bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100 hover:shadow-md transition-all duration-200 '
                                 : isRecentlyAdded
-                                  ? "bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100 hover:shadow-md transition-all duration-200 "
-                                  : "hover:bg-blue-100 hover:shadow-md transition-all duration-200"
+                                  ? 'bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100 hover:shadow-md transition-all duration-200 '
+                                  : 'hover:bg-blue-100 hover:shadow-md transition-all duration-200'
                             }
                           >
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-2">
-                                <span>
-                                  {employee.fname + " " + employee.lname}
-                                </span>
+                                <span>{employee.fname + ' ' + employee.lname}</span>
                                 {isNew && (
                                   <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 font-semibold">
                                     ✨
@@ -545,26 +410,24 @@ export default function EmployeesTab() {
                                 )}
                               </div>
                             </TableCell>
-                            <TableCell>{employee.email || "N/A"}</TableCell>
+                            <TableCell>{employee.email || 'N/A'}</TableCell>
                             <TableCell>
-                              {employee.positions?.label ||
-                                employee.position ||
-                                "N/A"}
+                              {employee.positions?.label || employee.position || 'N/A'}
                             </TableCell>
                             <TableCell>
                               {employee.branches &&
                               Array.isArray(employee.branches) &&
                               employee.branches.length > 0
-                                ? employee.branches[0]?.branch_name || "N/A"
-                                : employee.branch || "N/A"}
+                                ? employee.branches[0]?.branch_name || 'N/A'
+                                : employee.branch || 'N/A'}
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">
                                 {employee.roles &&
                                 Array.isArray(employee.roles) &&
                                 employee.roles.length > 0
-                                  ? employee.roles[0]?.name || "N/A"
-                                  : employee.role || "N/A"}
+                                  ? employee.roles[0]?.name || 'N/A'
+                                  : employee.role || 'N/A'}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -572,7 +435,7 @@ export default function EmployeesTab() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-blue-600 hover:text-blue-700 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                  className="text-blue-600 hover:text-blue-700 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                   onClick={() => {
                                     setSelectedEmployeeForView(employee);
                                     setIsViewEmployeeModalOpen(true);
@@ -584,7 +447,7 @@ export default function EmployeesTab() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                                  className="text-green-600 hover:text-green-700 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                                   onClick={() => {
                                     setIsEvaluationTypeModalOpen(true);
                                     setSelectedEmployeeForEvaluation(employee);
@@ -611,7 +474,7 @@ export default function EmployeesTab() {
               currentPage={currentPage}
               totalPages={totalPages}
               total={overviewTotal}
-              perPage={perPage}
+              perPage={itemsPerPage}
               onPageChange={(page) => {
                 setCurrentPage(page);
               }}
@@ -636,17 +499,14 @@ export default function EmployeesTab() {
         isOpen={isEvaluationTypeModalOpen}
         onCloseAction={() => {
           setIsEvaluationTypeModalOpen(false);
-          if (!evaluationType) {
-            setSelectedEmployee(null);
-          }
         }}
         onSelectEmployeeAction={() => {
           const employee = selectedEmployeeForEvaluation;
           if (!employee) {
-            console.error("No employee selected!");
+            console.error('No employee selected!');
             return;
           }
-          setEvaluationType("employee");
+          setEvaluationType('employee');
           setIsEvaluationTypeModalOpen(false);
 
           setIsEvaluationModalOpen(true);
@@ -654,19 +514,15 @@ export default function EmployeesTab() {
         onSelectManagerAction={() => {
           const employee = selectedEmployeeForEvaluation;
           if (!employee) {
-            console.error("No employee selected!");
+            console.error('No employee selected!');
             return;
           }
-          setEvaluationType("manager");
+          setEvaluationType('manager');
           setIsEvaluationTypeModalOpen(false);
 
           setIsEvaluationModalOpen(true);
         }}
-        employeeName={
-          selectedEmployeeForEvaluation
-            ? `${selectedEmployeeForEvaluation?.fname || ""} ${selectedEmployeeForEvaluation?.lname || ""}`.trim()
-            : ""
-        }
+        employee={selectedEmployeeForEvaluation}
       />
 
       <Dialog
@@ -674,22 +530,19 @@ export default function EmployeesTab() {
         onOpenChangeAction={(open) => {
           if (!open) {
             setIsEvaluationModalOpen(false);
-            setSelectedEmployee(null);
             setEvaluationType(null);
           }
         }}
       >
         <DialogContent className="max-w-7xl max-h-[101vh] overflow-hidden p-0 evaluation-container">
-          {selectedEmployeeForEvaluation && evaluationType === "employee" && (
+          {selectedEmployeeForEvaluation && evaluationType === 'employee' && (
             <>
               {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
-              selectedEmployeeForEvaluation.branches[0]?.name ===
-                "HEAD OFFICE" ? (
+              selectedEmployeeForEvaluation.branches[0]?.name === 'HEAD OFFICE' ? (
                 <RnF_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
-                    setSelectedEmployee(null);
                     setEvaluationType(null);
                   }}
                 />
@@ -698,23 +551,20 @@ export default function EmployeesTab() {
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
-                    setSelectedEmployee(null);
                     setEvaluationType(null);
                   }}
                 />
               )}
             </>
           )}
-          {selectedEmployeeForEvaluation && evaluationType === "manager" && (
+          {selectedEmployeeForEvaluation && evaluationType === 'manager' && (
             <>
               {selectedEmployeeForEvaluation.branches[0]?.id === 126 ||
-              selectedEmployeeForEvaluation.branches[0]?.name ===
-                "HEAD OFFICE" ? (
+              selectedEmployeeForEvaluation.branches[0]?.name === 'HEAD OFFICE' ? (
                 <Basic_HO_EvaluationForm
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
-                    setSelectedEmployee(null);
                     setEvaluationType(null);
                   }}
                 />
@@ -723,7 +573,6 @@ export default function EmployeesTab() {
                   employee={selectedEmployeeForEvaluation}
                   onCloseAction={() => {
                     setIsEvaluationModalOpen(false);
-                    setSelectedEmployee(null);
                     setEvaluationType(null);
                   }}
                 />
