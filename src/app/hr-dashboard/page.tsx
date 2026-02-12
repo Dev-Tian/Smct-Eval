@@ -18,6 +18,7 @@ import apiService from '@/lib/apiService';
 import { EvaluationPayload } from '@/components/evaluation2/types';
 import EvaluationsPagination from '@/components/paginationComponent';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
+import debounce from 'lodash.debounce';
 
 export default function OverviewTab() {
   //data
@@ -28,7 +29,6 @@ export default function OverviewTab() {
   const [totalEmployees, setTotalEmployees] = useState<any | null>(null);
   //filters
   const [overviewSearchTerm, setOverviewSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(overviewSearchTerm);
 
   //pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,40 +43,53 @@ export default function OverviewTab() {
   //refresh state
   const [isRefreshing, setIsRefreshing] = useState(true);
 
-  useEffect(() => {
-    const loadSubmissions = async () => {
-      try {
-        const res = await apiService.getSubmissions(overviewSearchTerm, currentPage, itemsPerPage);
-        setSubmissions(res.data);
-        setOverviewTotal(res.total);
-        setTotalPages(res.last_page);
-        setPerPage(res.per_page);
+  const loadSubmissions = useMemo(
+    () =>
+      debounce(async (overviewSearchTerm: string, currentPage: number) => {
+        setIsRefreshing(true);
+        try {
+          const res = await apiService.getSubmissions(
+            overviewSearchTerm,
+            currentPage,
+            itemsPerPage
+          );
+          setSubmissions(res.data);
+          setOverviewTotal(res.total);
+          setTotalPages(res.last_page);
+          setPerPage(res.per_page);
+          setIsRefreshing(false);
+        } catch (error) {
+          console.log(error);
+          setIsRefreshing(false);
+        }
+      }, 1000),
+    []
+  );
 
+  useEffect(() => {
+    loadSubmissions(overviewSearchTerm, currentPage);
+    return () => {
+      loadSubmissions.cancel();
+    };
+  }, [overviewSearchTerm, currentPage]);
+
+  useEffect(() => {
+    const dashboard = async () => {
+      try {
         const dashboard = await apiService.hrDashboard();
         setNewEval(dashboard.new_eval);
         setPendingEval(dashboard.pending_eval);
         setCompletedEval(dashboard.completed_eval);
         setTotalEmployees(dashboard.total_users);
       } catch (error) {
-        console.log(error);
-        setIsRefreshing(false);
-      } finally {
-        setIsRefreshing(false);
+        setNewEval(null);
+        setPendingEval(0);
+        setCompletedEval(0);
+        setTotalEmployees(0);
       }
     };
-    loadSubmissions();
-  }, [isRefreshing, debouncedSearchTerm, currentPage]);
-
-  useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      setDebouncedSearchTerm(overviewSearchTerm);
-      // Reset to page 1 when search term changes (if there's a value)
-      if (overviewSearchTerm.trim() !== '') {
-        setCurrentPage(1);
-      }
-    }, 500);
-    return () => clearTimeout(debounceTimeout);
-  }, [overviewSearchTerm]);
+    dashboard();
+  }, []);
 
   // Helper function to get rating color
   const getRatingColor = (rating: number) => {
@@ -87,7 +100,7 @@ export default function OverviewTab() {
   };
 
   const handleRefresh = async () => {
-    // await onRefresh();
+    loadSubmissions(overviewSearchTerm, currentPage);
   };
 
   const handleViewEvaluation = async (submission: any) => {
@@ -469,7 +482,7 @@ export default function OverviewTab() {
                 perPage={perPage}
                 onPageChange={(page) => {
                   setCurrentPage(page);
-                  setIsRefreshing(true);
+                  handleRefresh();
                 }}
               />
             )}
@@ -480,7 +493,7 @@ export default function OverviewTab() {
                 isOpen={isViewResultsModalOpen}
                 showApprovalButton={false}
                 onCloseAction={() => {
-                  setIsRefreshing(true);
+                  handleRefresh();
                   setIsViewResultsModalOpen(false);
                   setSelectedSubmission(null);
                 }}

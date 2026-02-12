@@ -3,7 +3,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import clientDataService, { apiService } from '@/lib/apiService';
 import EvaluationsPagination from '@/components/paginationComponent';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +37,7 @@ import {
 import { useDialogAnimation } from '@/hooks/useDialogAnimation';
 import { toastMessages } from '@/lib/toastMessages';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
+import debounce from 'lodash.debounce';
 interface Review {
   id: number;
   employee: any;
@@ -51,136 +52,73 @@ interface Review {
 export default function OverviewTab() {
   const [evaluations, setEvaluations] = useState<Review[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(false);
   //filters
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [quarterFilter, setQuarterFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
-  //debounce filters
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState(statusFilter);
-  const [debouncedQuarterFilter, setDebouncedQuarterFilter] = useState(quarterFilter);
-  const [debouncedYearFilter, setDebouncedYearFilter] = useState(yearFilter);
 
   const [isViewResultsModalOpen, setIsViewResultsModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const itemsPerPage = 5;
   const [overviewTotal, setOverviewTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
   const dialogAnimationClass = useDialogAnimation({ duration: 0.4 });
   const [years, setYears] = useState<any[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadEvaluations = async (
-    searchValue: string,
-    status: string,
-    quarter: string,
-    year: string
-  ) => {
-    const response = await clientDataService.getSubmissions(
-      searchValue,
-      currentPage,
-      itemsPerPage,
-      status,
-      quarter,
-      year
-    );
-    setEvaluations(response.data);
-    setOverviewTotal(response.total);
-    setTotalPages(response.last_page);
-    setPerPage(response.per_page);
-  };
+  const loadEvaluations = useMemo(
+    () =>
+      debounce(async (searchValue: string, status: string, quarter: string, year: string) => {
+        try {
+          setRefreshing(true);
+          const response = await clientDataService.getSubmissions(
+            searchValue,
+            currentPage,
+            itemsPerPage,
+            status,
+            quarter,
+            year
+          );
+          setEvaluations(response.data);
+          setOverviewTotal(response.total);
+          setTotalPages(response.last_page);
+          setRefreshing(false);
+        } catch (error) {
+          setRefreshing(false);
+          console.log(error);
+          setEvaluations([]);
+          setOverviewTotal(0);
+          setTotalPages(0);
+        }
+      }, 1000),
+    []
+  );
 
   useEffect(() => {
     const mount = async () => {
-      setRefreshing(true);
       try {
         const years = await apiService.getAllYears();
         setYears(years);
-        await loadEvaluations(searchTerm, statusFilter, quarterFilter, yearFilter);
       } catch (error) {
         console.log(error);
-        setRefreshing(false);
-      } finally {
-        setRefreshing(false);
       }
     };
     mount();
   }, []);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      // Always reset to page 1 when any filter changes (search, status, quarter, or year)
-      // This ensures global search behavior - always start from page 1 when filtering
-      setCurrentPage(1);
-      setDebouncedSearchTerm(searchTerm);
-      setDebouncedStatusFilter(statusFilter);
-      setDebouncedQuarterFilter(quarterFilter);
-      setDebouncedYearFilter(yearFilter);
-    }, 500);
-
-    return () => clearTimeout(handler);
+    loadEvaluations(searchTerm, statusFilter, quarterFilter, yearFilter);
+    return () => {
+      loadEvaluations.cancel();
+    };
   }, [searchTerm, statusFilter, quarterFilter, yearFilter]);
 
-  // Track when page change started
-  const pageChangeStartTimeRef = useRef<number | null>(null);
-
-  // Fetch API whenever debounced search term changes
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await loadEvaluations(
-          debouncedSearchTerm,
-          debouncedStatusFilter,
-          debouncedQuarterFilter,
-          debouncedYearFilter
-        );
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        // If this was a page change, ensure minimum display time (2 seconds)
-        if (pageChangeStartTimeRef.current !== null) {
-          const elapsed = Date.now() - pageChangeStartTimeRef.current;
-          const minDisplayTime = 2000; // 2 seconds
-          const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
-          setTimeout(() => {
-            setIsPageLoading(false);
-            pageChangeStartTimeRef.current = null;
-          }, remainingTime);
-        }
-      }
-    };
-
-    fetchData();
-  }, [
-    debouncedSearchTerm,
-    currentPage,
-    debouncedStatusFilter,
-    debouncedQuarterFilter,
-    debouncedYearFilter,
-  ]);
-
   const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      await loadEvaluations(
-        debouncedSearchTerm,
-        debouncedStatusFilter,
-        debouncedQuarterFilter,
-        debouncedYearFilter
-      );
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-    } finally {
-      setRefreshing(false);
-    }
+    loadEvaluations(searchTerm, statusFilter, quarterFilter, yearFilter);
   };
 
   const getQuarterColor = (quarter: string): string => {
@@ -461,7 +399,7 @@ export default function OverviewTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-200">
-                  {refreshing || isPageLoading ? (
+                  {refreshing ? (
                     Array.from({ length: itemsPerPage }).map((_, index) => (
                       <TableRow key={`skeleton-${index}`}>
                         <TableCell className="px-6 py-3">
@@ -698,10 +636,9 @@ export default function OverviewTab() {
               currentPage={currentPage}
               totalPages={totalPages}
               total={overviewTotal}
-              perPage={perPage}
+              perPage={itemsPerPage}
               onPageChange={(page) => {
-                setIsPageLoading(true);
-                pageChangeStartTimeRef.current = Date.now();
+                handleRefresh();
                 setCurrentPage(page);
               }}
             />
