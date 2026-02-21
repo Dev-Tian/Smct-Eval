@@ -68,7 +68,6 @@ export default function OverviewTab() {
           setOverviewTotal(response.total || 0);
           setTotalPages(response.last_page || 1);
           setPerPage(response.per_page || itemsPerPage);
-          setRefreshing(false);
         } catch (error) {
           console.error('Error loading evaluations:', error);
           setRefreshing(false);
@@ -76,6 +75,8 @@ export default function OverviewTab() {
           setOverviewTotal(0);
           setTotalPages(1);
           setPerPage(itemsPerPage);
+        } finally {
+          setRefreshing(false);
         }
       }, 1000),
     []
@@ -96,16 +97,8 @@ export default function OverviewTab() {
     totals();
   }, []);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      await loadEvaluations(searchTerm, currentPage);
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-    } finally {
-      setRefreshing(false);
-    }
+  const handleRefresh = () => {
+    loadEvaluations(searchTerm, currentPage);
   };
 
   const getQuarterColor = (quarter: string): string => {

@@ -18,7 +18,7 @@ import {
 
 // SWR Configuration for Reverb-style behavior
 const swrConfig: SWRConfiguration = {
-  // refreshInterval: 30000, // Auto-refresh every 30 seconds
+  refreshInterval: 30000, // Auto-refresh every 30 seconds
   revalidateOnFocus: true, // Refresh when user focuses tab
   revalidateOnReconnect: true, // Refresh when connection restored
   dedupingInterval: 10000, // Dedupe requests within 10 seconds

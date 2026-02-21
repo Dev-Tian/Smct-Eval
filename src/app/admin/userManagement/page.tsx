@@ -80,7 +80,7 @@ export default function UserManagementTab() {
   //pagination
   const [currentPageActive, setCurrentPageActive] = useState(1);
   const [currentPagePending, setCurrentPagePending] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const itemsPerPage = 4;
   const [totalActivePages, setTotalActivePages] = useState(1);
   const [totalPendingPages, setTotalPendingPages] = useState(1);
 
@@ -362,7 +362,7 @@ export default function UserManagementTab() {
       // role_id is only for admin/HR adding users (not in register)
       formDataToUpload.append('role_id', String(newUser.role_id));
 
-      const addUser = await apiService.addUser(formDataToUpload);
+      await apiService.addUser(formDataToUpload);
 
       await refreshUserData();
 
