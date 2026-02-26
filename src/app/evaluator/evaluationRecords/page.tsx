@@ -696,12 +696,12 @@ export default function OverviewTab() {
                     setIsDeleteModalOpen(false);
                     setReviewToDelete(null);
                   }}
-                  className="text-white bg-blue-600 hover:text-white hover:bg-green-500 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="text-white bg-blue-600 hover:text-white hover:bg-green-500 cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="bg-red-600 hover:bg-red-700 text-white cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-red-600 hover:bg-red-700 text-white cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                   onClick={() => handleDeleteClick(reviewToDelete)}
                 >
                   ❌ Delete Permanently

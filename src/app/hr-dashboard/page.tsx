@@ -204,7 +204,7 @@ export default function OverviewTab() {
                 {overviewSearchTerm && (
                   <button
                     onClick={() => setOverviewSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 transition-colors hover:scale-120 transition-transform duration-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 hover:scale-120 transition-transform duration-200"
                     aria-label="Clear search"
                   >
                     <svg

@@ -324,7 +324,7 @@ export default function OverviewTab() {
               size="sm"
               onClick={refresh}
               disabled={isRefreshingOverview}
-              className="flex items-center space-x-2 bg-blue-500 text-white hover:bg-green-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="flex items-center space-x-2 bg-blue-500 text-white hover:bg-green-700 hover:text-white cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -403,7 +403,7 @@ export default function OverviewTab() {
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedQuarter('')}
-                className={`text-xs border transition-all duration-200 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                className={`text-xs border cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300 ${
                   selectedQuarter === ''
                     ? 'bg-blue-600 text-white border-blue-600 scale-105'
                     : 'bg-white text-black border-gray-400 hover:bg-gray-100'
@@ -419,7 +419,7 @@ export default function OverviewTab() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedQuarter(quarter)}
-                  className={`text-xs font-medium border transition-all duration-200 cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  className={`text-xs font-medium border cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300 ${
                     selectedQuarter === quarter
                       ? 'bg-blue-600 text-white border-blue-600 scale-105'
                       : 'bg-white text-black border-gray-400 hover:bg-gray-100 hover:scale-105'
@@ -625,7 +625,7 @@ export default function OverviewTab() {
                           </TableCell>
                           <TableCell className="w-1/6 text-center">
                             <Button
-                              className="bg-blue-500 text-white hover:bg-green-700 hover:text-white cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                              className="bg-blue-500 text-white hover:bg-green-700 hover:text-white cursor-pointer hover:scale-110 shadow-lg hover:shadow-xl transition-all duration-300"
                               size="sm"
                               onClick={() => handleViewEvaluation(submission)}
                             >
