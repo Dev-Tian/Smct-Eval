@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import DashboardShell, { SidebarItem } from "@/components/DashboardShell";
-import { withAuth } from "@/hoc";
-import { useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/contexts/UserContext";
+import DashboardShell, { SidebarItem } from '@/components/DashboardShell';
+import { withAuth } from '@/hoc';
+import { useMemo } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/UserContext';
 
 function EvaluatorLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,37 +13,36 @@ function EvaluatorLayout({ children }: { children: React.ReactNode }) {
 
   const sidebarItems: SidebarItem[] = useMemo(() => {
     return [
-      { id: "overview", label: "Overview", icon: "📊", path: "/evaluator" },
+      { id: 'overview', label: 'Overview', icon: '📊', path: '/evaluator' },
       {
-        id: "employees",
-        label: "Employees",
-        icon: "👥",
-        path: "/evaluator/employees",
+        id: 'employees',
+        label: 'Employees',
+        icon: '👥',
+        path: '/evaluator/employees',
       },
       {
-        id: "feedback",
-        label: "Evaluation Records",
-        icon: "🗂️",
-        path: "/evaluator/evaluationRecords",
+        id: 'feedback',
+        label: 'Evaluation Records',
+        icon: '🗂️',
+        path: '/evaluator/evaluationRecords',
       },
       {
-        id: "reviews",
-        label: "Performance Reviews",
-        icon: "📝",
-        path: "/evaluator/performanceReviews",
+        id: 'reviews',
+        label: 'Performance Reviews',
+        icon: '📝',
+        path: '/evaluator/performanceReviews',
       },
       {
-        id: "history",
-        label: "Evaluation History",
-        icon: "📈",
-        path: "/evaluator/evaluationHistory",
+        id: 'history',
+        label: 'Evaluation History',
+        icon: '📈',
+        path: '/evaluator/evaluationHistory',
       },
     ];
   }, [user?.position_id]);
 
   // Determine active item based on current URL
-  const active =
-    sidebarItems.find((item) => item.path === pathname)?.id ?? "overview";
+  const active = sidebarItems.find((item) => item.path === pathname)?.id ?? 'overview';
 
   const setActiveWithRefresh = (id: string) => {
     const item = sidebarItems.find((item) => item.id === id);
@@ -53,7 +52,6 @@ function EvaluatorLayout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardShell
       title="Evaluator Dashboard"
-      currentPeriod={new Date().toLocaleDateString()}
       sidebarItems={sidebarItems}
       activeItemId={active}
       onChangeActive={setActiveWithRefresh}
@@ -63,4 +61,4 @@ function EvaluatorLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withAuth(EvaluatorLayout, { requiredRole: "evaluator" });
+export default withAuth(EvaluatorLayout, { requiredRole: 'evaluator' });

@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -18,13 +12,9 @@ import {
   TableHeader,
   TableRow,
   TableCell,
-} from "@/components/ui/table";
-import {
-  Skeleton,
-  SkeletonButton,
-  SkeletonBadge,
-} from "@/components/ui/skeleton";
-import { Combobox } from "@/components/ui/combobox";
+} from '@/components/ui/table';
+import { Skeleton, SkeletonButton } from '@/components/ui/skeleton';
+import { Combobox } from '@/components/ui/combobox';
 import {
   Dialog,
   DialogContent,
@@ -32,11 +22,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { RefreshCw, Check, X } from "lucide-react";
-import apiService from "@/lib/apiService";
-import { useToast } from "@/hooks/useToast";
-import EvaluationsPagination from "@/components/paginationComponent";
+} from '@/components/ui/dialog';
+import { RefreshCw, Check, X } from 'lucide-react';
+import apiService from '@/lib/apiService';
+import { useToast } from '@/hooks/useToast';
+import EvaluationsPagination from '@/components/paginationComponent';
 
 interface SignatureResetRequest {
   id: number;
@@ -51,7 +41,7 @@ interface SignatureResetRequest {
     department?: string;
     branch?: string;
   };
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
   requested_at: string;
   processed_at?: string;
   processed_by?: number;
@@ -61,11 +51,10 @@ export default function SignatureResetRequestsTab() {
   const [requests, setRequests] = useState<SignatureResetRequest[]>([]);
   const [refresh, setRefresh] = useState(true);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [statusFilter, setStatusFilter] = useState("0"); // Default to "All Requests"
-  const [debouncedStatusFilter, setDebouncedStatusFilter] =
-    useState(statusFilter);
+  const [statusFilter, setStatusFilter] = useState('0'); // Default to "All Requests"
+  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState(statusFilter);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -75,8 +64,7 @@ export default function SignatureResetRequestsTab() {
   // Modal states
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] =
-    useState<SignatureResetRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<SignatureResetRequest | null>(null);
 
   const { success, error: showError } = useToast();
   const [isApproving, setIsApproving] = useState(false);
@@ -84,10 +72,10 @@ export default function SignatureResetRequestsTab() {
 
   // Date filter options for combobox
   const statusOptions = [
-    { value: "0", label: "All Requests" },
-    { value: "new", label: "New" },
-    { value: "recent", label: "Recent" },
-    { value: "old", label: "Old" },
+    { value: '0', label: 'All Requests' },
+    { value: 'new', label: 'New' },
+    { value: 'recent', label: 'Recent' },
+    { value: 'old', label: 'Old' },
   ];
 
   const loadRequests = async (
@@ -121,11 +109,11 @@ export default function SignatureResetRequestsTab() {
       if (searchValue) {
         const searchLower = searchValue.toLowerCase();
         filteredRequests = filteredRequests.filter((request) => {
-          const fullName = `${request.user?.fname || ""} ${
-            request.user?.lname || ""
+          const fullName = `${request.user?.fname || ''} ${
+            request.user?.lname || ''
           }`.toLowerCase();
-          const email = request.user?.email?.toLowerCase() || "";
-          const username = request.user?.username?.toLowerCase() || "";
+          const email = request.user?.email?.toLowerCase() || '';
+          const username = request.user?.username?.toLowerCase() || '';
           return (
             fullName.includes(searchLower) ||
             email.includes(searchLower) ||
@@ -135,15 +123,10 @@ export default function SignatureResetRequestsTab() {
       }
 
       // Filter by date (convert "0" to empty string for "All Requests")
-      const dateFilterForFiltering =
-        statusFilterValue === "0" ? "" : statusFilterValue;
+      const dateFilterForFiltering = statusFilterValue === '0' ? '' : statusFilterValue;
       if (dateFilterForFiltering) {
         const now = new Date();
-        const today = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const oneWeekAgo = new Date(today);
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -157,13 +140,13 @@ export default function SignatureResetRequestsTab() {
           );
 
           switch (dateFilterForFiltering) {
-            case "new":
+            case 'new':
               // New: Today's requests
               return requestDateOnly.getTime() === today.getTime();
-            case "recent":
+            case 'recent':
               // Recent: Last 7 days (including today)
               return requestDate >= oneWeekAgo && requestDate <= now;
-            case "old":
+            case 'old':
               // Old: Older than 7 days
               return requestDate < oneWeekAgo;
             default:
@@ -184,8 +167,8 @@ export default function SignatureResetRequestsTab() {
       setTotalPages(lastPage);
       setPerPage(itemsPerPage);
     } catch (err) {
-      console.error("Error loading signature reset requests:", err);
-      showError("Failed to load signature reset requests");
+      console.error('Error loading signature reset requests:', err);
+      showError('Failed to load signature reset requests');
     } finally {
       setRefresh(false);
       if (isPageChange) {
@@ -229,13 +212,8 @@ export default function SignatureResetRequestsTab() {
   useEffect(() => {
     const fetchData = async () => {
       const isPageChange =
-        debouncedSearchTerm === searchTerm &&
-        debouncedStatusFilter === statusFilter;
-      await loadRequests(
-        debouncedSearchTerm,
-        debouncedStatusFilter,
-        isPageChange
-      );
+        debouncedSearchTerm === searchTerm && debouncedStatusFilter === statusFilter;
+      await loadRequests(debouncedSearchTerm, debouncedStatusFilter, isPageChange);
     };
     fetchData();
   }, [debouncedSearchTerm, debouncedStatusFilter, currentPage]);
@@ -250,28 +228,26 @@ export default function SignatureResetRequestsTab() {
 
     // The API returns user objects directly, so the user ID is in the id field
     const userId =
-      (selectedRequest as any).id ||
-      selectedRequest.user_id ||
-      selectedRequest.user?.id;
+      (selectedRequest as any).id || selectedRequest.user_id || selectedRequest.user?.id;
 
     if (!userId) {
       console.error(
-        "User ID not found. Full request object:",
+        'User ID not found. Full request object:',
         JSON.stringify(selectedRequest, null, 2)
       );
-      showError("User ID not found in request data.");
+      showError('User ID not found in request data.');
       return;
     }
 
     try {
       await apiService.approveSignatureReset(userId);
-      success("Signature reset request approved successfully!");
+      success('Signature reset request approved successfully!');
       setIsApproveModalOpen(false);
       setSelectedRequest(null);
       await loadRequests(debouncedSearchTerm, debouncedStatusFilter);
     } catch (err: any) {
-      console.error("Error approving request:", err);
-      showError(err.response?.data?.message || "Failed to approve request");
+      console.error('Error approving request:', err);
+      showError(err.response?.data?.message || 'Failed to approve request');
     }
   };
 
@@ -280,28 +256,26 @@ export default function SignatureResetRequestsTab() {
 
     // The API returns user objects directly, so the user ID is in the id field
     const userId =
-      (selectedRequest as any).id ||
-      selectedRequest.user_id ||
-      selectedRequest.user?.id;
+      (selectedRequest as any).id || selectedRequest.user_id || selectedRequest.user?.id;
 
     if (!userId) {
       console.error(
-        "User ID not found. Full request object:",
+        'User ID not found. Full request object:',
         JSON.stringify(selectedRequest, null, 2)
       );
-      showError("User ID not found in request data.");
+      showError('User ID not found in request data.');
       return;
     }
 
     try {
       await apiService.rejectSignatureReset(userId);
-      success("Signature reset request rejected successfully!");
+      success('Signature reset request rejected successfully!');
       setIsRejectModalOpen(false);
       setSelectedRequest(null);
       await loadRequests(debouncedSearchTerm, debouncedStatusFilter);
     } catch (err: any) {
-      console.error("Error rejecting request:", err);
-      showError(err.response?.data?.message || "Failed to reject request");
+      console.error('Error rejecting request:', err);
+      showError(err.response?.data?.message || 'Failed to reject request');
     }
   };
 
@@ -317,11 +291,11 @@ export default function SignatureResetRequestsTab() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending":
+      case 'pending':
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case "approved":
+      case 'approved':
         return <Badge className="bg-green-100 text-green-800">Approved</Badge>;
-      case "rejected":
+      case 'rejected':
         return <Badge className="bg-red-100 text-red-800">Rejected</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -329,14 +303,14 @@ export default function SignatureResetRequestsTab() {
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -347,9 +321,7 @@ export default function SignatureResetRequestsTab() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Signature Reset Requests</CardTitle>
-              <CardDescription>
-                Manage signature reset requests from users
-              </CardDescription>
+              <CardDescription>Manage signature reset requests from users</CardDescription>
             </div>
             <Button
               variant="outline"
@@ -358,9 +330,7 @@ export default function SignatureResetRequestsTab() {
               disabled={refresh}
               className="flex items-center gap-2 bg-blue-600 hover:bg-green-700 text-white hover:text-white border-blue-600 hover:border-green-700 cursor-pointer"
             >
-              <RefreshCw
-                className={`h-4 w-4 ${refresh ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`h-4 w-4 ${refresh ? 'animate-spin' : ''}`} />
               <span className="cursor-pointer">Refresh</span>
             </Button>
           </div>
@@ -464,23 +434,22 @@ export default function SignatureResetRequestsTab() {
                           }}
                           style={
                             {
-                              imageRendering: "auto",
-                              willChange: "auto",
-                              transform: "translateZ(0)",
-                              backfaceVisibility: "hidden",
-                              WebkitBackfaceVisibility: "hidden",
+                              imageRendering: 'auto',
+                              willChange: 'auto',
+                              transform: 'translateZ(0)',
+                              backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
                             } as React.CSSProperties
                           }
                         />
                         <div className="text-gray-500">
-                          {searchTerm || statusFilter !== "0" ? (
+                          {searchTerm || statusFilter !== '0' ? (
                             <>
                               <p className="text-base font-medium mb-1">
                                 No signature reset requests found
                               </p>
                               <p className="text-sm">
-                                Try adjusting your search or date filter
-                                criteria
+                                Try adjusting your search or date filter criteria
                               </p>
                             </>
                           ) : (
@@ -489,8 +458,7 @@ export default function SignatureResetRequestsTab() {
                                 No signature reset requests
                               </p>
                               <p className="text-sm">
-                                Requests will appear here when users request
-                                signature resets
+                                Requests will appear here when users request signature resets
                               </p>
                             </>
                           )}
@@ -506,26 +474,18 @@ export default function SignatureResetRequestsTab() {
                           <div className="font-medium">
                             {request.fname} {request.lname}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            @{request.username}
-                          </div>
+                          <div className="text-sm text-gray-500">@{request.username}</div>
                         </div>
                       </TableCell>
                       <TableCell>{request.email}</TableCell>
+                      <TableCell>{request.positions?.label || request.position || 'N/A'}</TableCell>
                       <TableCell>
-                        {request.positions?.label || request.position || "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        {request.departments?.department_name ||
-                          request.department ||
-                          "N/A"}
+                        {request.departments?.department_name || request.department || 'N/A'}
                       </TableCell>
                       <TableCell>
                         {request.branches?.length > 0
-                          ? request.branches
-                              .map((b: any) => b.branch_name || b.name)
-                              .join(", ")
-                          : "N/A"}
+                          ? request.branches.map((b: any) => b.branch_name || b.name).join(', ')
+                          : 'N/A'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -574,15 +534,12 @@ export default function SignatureResetRequestsTab() {
       </Card>
 
       {/* Approve Confirmation Modal */}
-      <Dialog
-        open={isApproveModalOpen}
-        onOpenChangeAction={setIsApproveModalOpen}
-      >
+      <Dialog open={isApproveModalOpen} onOpenChangeAction={setIsApproveModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Approve Signature Reset Request</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve the signature reset request for{" "}
+              Are you sure you want to approve the signature reset request for{' '}
               <strong>
                 {selectedRequest?.user?.fname} {selectedRequest?.user?.lname}
               </strong>
@@ -615,22 +572,19 @@ export default function SignatureResetRequestsTab() {
               ) : (
                 <Check className="h-4 w-4" />
               )}
-              {isApproving ? "Approving..." : "Approve"}
+              {isApproving ? 'Approving...' : 'Approve'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Reject Confirmation Modal */}
-      <Dialog
-        open={isRejectModalOpen}
-        onOpenChangeAction={setIsRejectModalOpen}
-      >
+      <Dialog open={isRejectModalOpen} onOpenChangeAction={setIsRejectModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Signature Reset Request</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject the signature reset request for{" "}
+              Are you sure you want to reject the signature reset request for{' '}
               <strong>
                 {selectedRequest?.user?.fname} {selectedRequest?.user?.lname}
               </strong>
@@ -664,7 +618,7 @@ export default function SignatureResetRequestsTab() {
               ) : (
                 <X className="h-4 w-4" />
               )}
-              {isRejecting ? "Rejecting..." : "Reject"}
+              {isRejecting ? 'Rejecting...' : 'Reject'}
             </Button>
           </DialogFooter>
         </DialogContent>

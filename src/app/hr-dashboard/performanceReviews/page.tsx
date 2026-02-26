@@ -16,11 +16,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { useUser } from '@/contexts/UserContext';
 import { apiService } from '@/lib/apiService';
 import EvaluationsPagination from '@/components/paginationComponent';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
 import debounce from 'lodash.debounce';
+import { getTimeAgo } from '@/utils/date-diff';
+import { getQuarterColor } from '@/utils/quarter-colors';
 
 interface Review {
   id: number;
@@ -59,12 +60,13 @@ export default function performanceReviews() {
           setSubmissions(response.myEval_as_Employee.data);
           setOverviewTotal(response.myEval_as_Employee.total);
           setTotalPages(response.myEval_as_Employee.last_page);
-          setLoading(false);
         } catch (error) {
           console.error('Error loading submissions:', error);
           setSubmissions([]);
           setOverviewTotal(0);
           setTotalPages(0);
+          setLoading(false);
+        } finally {
           setLoading(false);
         }
       }, 1000),
@@ -115,22 +117,6 @@ export default function performanceReviews() {
     } catch (error) {
       console.error('Error fetching submission details:', error);
     }
-  };
-
-  // Helper functions
-  const getTimeAgo = (submittedAt: string) => {
-    const submissionDate = new Date(submittedAt);
-    const now = new Date();
-    const diffInMs = now.getTime() - submissionDate.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return new Date(submittedAt).toLocaleDateString();
   };
 
   // Chart data
@@ -206,14 +192,6 @@ export default function performanceReviews() {
       label: 'Rating',
       color: 'hsl(var(--chart-1))',
     },
-  };
-
-  const getQuarterColor = (quarter: string) => {
-    if (quarter === 'Q1') return 'bg-blue-100 text-blue-800';
-    if (quarter === 'Q2') return 'bg-green-100 text-green-800';
-    if (quarter === 'Q3') return 'bg-yellow-100 text-yellow-800';
-    if (quarter === 'Q4') return 'bg-purple-100 text-purple-800';
-    return 'bg-purple-100 text-purple-800';
   };
 
   return (

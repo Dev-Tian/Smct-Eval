@@ -13,12 +13,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { getQuarterColor } from '@/lib/quarterUtils';
 import apiService from '@/lib/apiService';
 import { EvaluationPayload } from '@/components/evaluation2/types';
 import EvaluationsPagination from '@/components/paginationComponent';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
 import debounce from 'lodash.debounce';
+import { getQuarterColor } from '@/utils/quarter-colors';
 
 export default function OverviewTab() {
   //data
@@ -46,8 +46,8 @@ export default function OverviewTab() {
   const loadSubmissions = useMemo(
     () =>
       debounce(async (overviewSearchTerm: string, currentPage: number) => {
-        setIsRefreshing(true);
         try {
+          setIsRefreshing(true);
           const res = await apiService.getSubmissions(
             overviewSearchTerm,
             currentPage,
@@ -57,9 +57,10 @@ export default function OverviewTab() {
           setOverviewTotal(res.total);
           setTotalPages(res.last_page);
           setPerPage(res.per_page);
-          setIsRefreshing(false);
         } catch (error) {
           console.log(error);
+          setIsRefreshing(false);
+        } finally {
           setIsRefreshing(false);
         }
       }, 1000),
@@ -223,7 +224,7 @@ export default function OverviewTab() {
               </div>
               {/* Refresh Button */}
               <Button
-                onClick={() => setIsRefreshing(true)}
+                onClick={() => handleRefresh()}
                 disabled={isRefreshing}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-transform duration-200"
                 title="Refresh evaluation records"

@@ -36,6 +36,8 @@ import { useDialogAnimation } from '@/hooks/useDialogAnimation';
 import { toastMessages } from '@/lib/toastMessages';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
 import debounce from 'lodash.debounce';
+import { getQuarterColor } from '@/utils/quarter-colors';
+
 interface Review {
   id: number;
   employee: any;
@@ -126,13 +128,6 @@ export default function OverviewTab() {
 
   const handleRefresh = () => {
     loadEvaluations(searchTerm, currentPage, statusFilter, quarterFilter, yearFilter);
-  };
-
-  const getQuarterColor = (quarter: string): string => {
-    if (quarter.includes('Q1')) return 'bg-blue-100 text-blue-800';
-    if (quarter.includes('Q2')) return 'bg-green-100 text-green-800';
-    if (quarter.includes('Q3')) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-purple-100 text-purple-800';
   };
 
   const handleViewEvaluation = async (review: Review) => {

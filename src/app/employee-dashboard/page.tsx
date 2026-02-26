@@ -17,9 +17,10 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiService } from '@/lib/apiService';
 import EvaluationsPagination from '@/components/paginationComponent';
-import { useAuth } from '../../contexts/UserContext';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
 import debounce from 'lodash.debounce';
+import { getTimeAgo } from '@/utils/date-diff';
+import { getQuarterColor } from '@/utils/quarter-colors';
 
 interface Review {
   id: number;
@@ -118,28 +119,6 @@ export default function OverviewTab() {
     } catch (error) {
       console.error('Error fetching submission details:', error);
     }
-  };
-
-  // Helper functions
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-
-  const getTimeAgo = (submittedAt: string) => {
-    const diffSeconds = Math.floor((Date.now() - new Date(submittedAt).getTime()) / 1000);
-
-    if (diffSeconds < 60) return rtf.format(-diffSeconds, 'second');
-    if (diffSeconds < 3600) return rtf.format(-Math.floor(diffSeconds / 60), 'minute');
-    if (diffSeconds < 86400) return rtf.format(-Math.floor(diffSeconds / 3600), 'hour');
-    if (diffSeconds < 604800) return rtf.format(-Math.floor(diffSeconds / 86400), 'day');
-
-    return;
-  };
-
-  const getQuarterColor = (quarter: string): string => {
-    if (quarter.includes('Q1')) return 'bg-blue-100 text-blue-800';
-    if (quarter.includes('Q2')) return 'bg-green-100 text-green-800';
-    if (quarter.includes('Q3')) return 'bg-yellow-100 text-yellow-800';
-    if (quarter.includes('Q4')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
   };
 
   return (

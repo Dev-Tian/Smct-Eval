@@ -101,9 +101,6 @@ export default function UserManagementTab() {
   const [isViewEmployeeModalOpen, setIsViewEmployeeModalOpen] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
-  // Track when page change started for pending users
-  const pendingPageChangeStartTimeRef = useRef<number | null>(null);
-
   const loadPendingUsers = useMemo(
     () =>
       debounce(async (searchValue: string, statusFilter: string, currentPagePending: number) => {
@@ -119,13 +116,14 @@ export default function UserManagementTab() {
           setPendingRegistrations(response.data);
           setPendingTotalItems(response.total);
           setTotalPendingPages(response.last_page);
-          setRefresh(false);
         } catch (error) {
           setRefresh(false);
           console.error('Error loading pending users:', error);
           setPendingRegistrations([]);
           setPendingTotalItems(0);
           setTotalPendingPages(0);
+        } finally {
+          setRefresh(false);
         }
       }, 1000),
     []
@@ -146,13 +144,14 @@ export default function UserManagementTab() {
           setActiveRegistrations(response.data);
           setActiveTotalItems(response.total);
           setTotalActivePages(response.last_page);
-          setRefresh(false);
         } catch (error) {
           setRefresh(false);
           console.error('Error loading active users:', error);
           setActiveRegistrations([]);
           setActiveTotalItems(0);
           setTotalActivePages(0);
+        } finally {
+          setRefresh(false);
         }
       }, 1000),
     []

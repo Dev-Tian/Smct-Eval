@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/select';
 import ViewDesignator from '@/components/evaluation2/viewResults/router';
 import debounce from 'lodash.debounce';
+import { getTimeAgo } from '@/utils/date-diff';
+import { getQuarterColor } from '@/utils/quarter-colors';
 
 interface Review {
   id: number;
@@ -140,32 +142,6 @@ export default function OverviewTab() {
     } catch (error) {
       console.error('Error fetching submission details:', error);
     }
-  };
-
-  // Helper functions
-  const getTimeAgo = (submittedAt: string) => {
-    const submissionDate = new Date(submittedAt);
-    const now = new Date();
-    const diffInMs = now.getTime() - submissionDate.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return new Date(submittedAt).toLocaleDateString();
-  };
-
-  const getQuarterColor = (quarter: string): string => {
-    if (quarter === '3' || quarter.includes('M3')) return 'bg-indigo-100 text-indigo-800';
-    if (quarter === '5' || quarter.includes('M5')) return 'bg-pink-100 text-pink-800';
-    if (quarter.includes('Q1')) return 'bg-blue-100 text-blue-800';
-    if (quarter.includes('Q2')) return 'bg-green-100 text-green-800';
-    if (quarter.includes('Q3')) return 'bg-yellow-100 text-yellow-800';
-    if (quarter.includes('Q4')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
   };
 
   return (
